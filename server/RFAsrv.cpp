@@ -25,6 +25,7 @@
 #include <cstring>
 #include <iostream>          // For cout and cerr
 #include <cstdlib>           // For atoi()
+#include <stdlib.h>
 
 const int ECHOMAX = 255;     // Longest string to echo
 
@@ -61,4 +62,39 @@ int main(int argc, char *argv[]) {
   // NOT REACHED
 
   return 0;
+}
+
+// readfile is for use by the server, reads from a given file to a standard writer and returns number of bytes read 
+// assumption made is that we either specify FULL file path or it exists in current directory where server is executing 
+// writer is from golang, interface that has write method (the connection)
+int ReadFile(string fileName, Writer writer, int startPos = 0) {
+  // file opening logic can be abstracted away for reuse
+  // first we check if file exists 
+  FILE * pFile; 
+  pFile = fopen(fileName, "r");
+  if pFile == NULL { // file requested does not exist, we return error back to client 
+      return -1; // server calling this function has to check err code 
+  }
+  // advance start pointer to requested position to begin reading; if client does not specify assume start of file 
+  fseek(pFile, startPos, SEEK_SET);
+  long lSize;
+  char * buffer;
+  size_t result;
+
+  lSize = ftell (pFile);
+  // allocate memory to contain the whole file
+  buffer = (char*) malloc (sizeof(char)*lSize); 
+  if (buffer == NULL) { // no memory to allocate buffer: return error code to client 
+    fputs ("Memory error", writer); 
+    return -2; 
+  }
+  
+  result = fread (buffer, 1, lSize, pFile); // pFile advance dto startPos 
+  if (result != lSize) {
+    fputs ("Reading error",stderr); 
+    return -3; 
+    }
+  fclose (pFile);
+  free (buffer);
+  return result; 
 }
