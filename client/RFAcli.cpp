@@ -21,7 +21,7 @@
   * 
   */
 
-#include "./../dependencies/PracticalSocket.h"      // For UDPSocket and SocketException
+#include "./../dependencies/RFAsockets.h"      // For UDPSocket and SocketException
 #include <cstring>
 #include <iostream>               // For cout and cerr
 #include <cstdlib>                // For atoi()

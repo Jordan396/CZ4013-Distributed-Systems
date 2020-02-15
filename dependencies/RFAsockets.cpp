@@ -15,49 +15,27 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *   
+ *   Modified by:
+ * - Jordan396 <https://github.com/Jordan396/>                              *
+ * - leechongyan <https://github.com/leechongyan/>                          *
+ * - seaerchin <https://github.com/seaerchin/>                              *
  */
 
-#include "PracticalSocket.h"
+#include "RFAsockets.h"
 #include <cstring>
 
-#ifdef WIN32
-  #include <winsock.h>         // For socket(), connect(), send(), and recv()
-  typedef int socklen_t;
-  typedef char raw_type;       // Type used for raw data on this platform
-#else
-  #include <sys/types.h>       // For data types
-  #include <sys/socket.h>      // For socket(), connect(), send(), and recv()
-  #include <netdb.h>           // For gethostbyname()
-  #include <arpa/inet.h>       // For inet_addr()
-  #include <unistd.h>          // For close()
-  #include <netinet/in.h>      // For sockaddr_in
-  typedef void raw_type;       // Type used for raw data on this platform
-#endif
-
-#include <errno.h>             // For errno
+// Socket implementation for Unix
+#include <sys/types.h>       
+#include <sys/socket.h>     
+#include <netdb.h>           
+#include <arpa/inet.h>       
+#include <unistd.h>          
+#include <netinet/in.h>           
+#include <errno.h>
+typedef void raw_type;       // Type used for raw data on this platform
 
 using namespace std;
-
-#ifdef WIN32
-static bool initialized = false;
-#endif
-
-// SocketException Code
-
-SocketException::SocketException(const string &message, bool inclSysMsg)
-  throw() : userMessage(message) {
-  if (inclSysMsg) {
-    userMessage.append(": ");
-    userMessage.append(strerror(errno));
-  }
-}
-
-SocketException::~SocketException() throw() {
-}
-
-const char *SocketException::what() const throw() {
-  return userMessage.c_str();
-}
 
 // Function to fill in address structure given an address and port
 static void fillAddr(const string &address, unsigned short port, 
@@ -79,19 +57,6 @@ static void fillAddr(const string &address, unsigned short port,
 // Socket Code
 
 Socket::Socket(int type, int protocol) throw(SocketException) {
-  #ifdef WIN32
-    if (!initialized) {
-      WORD wVersionRequested;
-      WSADATA wsaData;
-
-      wVersionRequested = MAKEWORD(2, 0);              // Request WinSock v2.0
-      if (WSAStartup(wVersionRequested, &wsaData) != 0) {  // Load WinSock DLL
-        throw SocketException("Unable to load WinSock DLL");
-      }
-      initialized = true;
-    }
-  #endif
-
   // Make a new socket
   if ((sockDesc = socket(PF_INET, type, protocol)) < 0) {
     throw SocketException("Socket creation failed (socket())", true);
@@ -103,11 +68,7 @@ Socket::Socket(int sockDesc) {
 }
 
 Socket::~Socket() {
-  #ifdef WIN32
-    ::closesocket(sockDesc);
-  #else
-    ::close(sockDesc);
-  #endif
+  ::close(sockDesc);
   sockDesc = -1;
 }
 
@@ -156,11 +117,6 @@ void Socket::setLocalAddressAndPort(const string &localAddress,
 }
 
 void Socket::cleanUp() throw(SocketException) {
-  #ifdef WIN32
-    if (WSACleanup() != 0) {
-      throw SocketException("WSACleanup() failed");
-    }
-  #endif
 }
 
 unsigned short Socket::resolveService(const string &service,
@@ -232,51 +188,6 @@ unsigned short CommunicatingSocket::getForeignPort() throw(SocketException) {
   return ntohs(addr.sin_port);
 }
 
-// TCPSocket Code
-
-TCPSocket::TCPSocket() 
-    throw(SocketException) : CommunicatingSocket(SOCK_STREAM, 
-    IPPROTO_TCP) {
-}
-
-TCPSocket::TCPSocket(const string &foreignAddress, unsigned short foreignPort)
-    throw(SocketException) : CommunicatingSocket(SOCK_STREAM, IPPROTO_TCP) {
-  connect(foreignAddress, foreignPort);
-}
-
-TCPSocket::TCPSocket(int newConnSD) : CommunicatingSocket(newConnSD) {
-}
-
-// TCPServerSocket Code
-
-TCPServerSocket::TCPServerSocket(unsigned short localPort, int queueLen) 
-    throw(SocketException) : Socket(SOCK_STREAM, IPPROTO_TCP) {
-  setLocalPort(localPort);
-  setListen(queueLen);
-}
-
-TCPServerSocket::TCPServerSocket(const string &localAddress, 
-    unsigned short localPort, int queueLen) 
-    throw(SocketException) : Socket(SOCK_STREAM, IPPROTO_TCP) {
-  setLocalAddressAndPort(localAddress, localPort);
-  setListen(queueLen);
-}
-
-TCPSocket *TCPServerSocket::accept() throw(SocketException) {
-  int newConnSD;
-  if ((newConnSD = ::accept(sockDesc, NULL, 0)) < 0) {
-    throw SocketException("Accept failed (accept())", true);
-  }
-
-  return new TCPSocket(newConnSD);
-}
-
-void TCPServerSocket::setListen(int queueLen) throw(SocketException) {
-  if (listen(sockDesc, queueLen) < 0) {
-    throw SocketException("Set listening socket failed (listen())", true);
-  }
-}
-
 // UDPSocket Code
 
 UDPSocket::UDPSocket() throw(SocketException) : CommunicatingSocket(SOCK_DGRAM,
@@ -311,11 +222,7 @@ void UDPSocket::disconnect() throw(SocketException) {
 
   // Try to disconnect
   if (::connect(sockDesc, (sockaddr *) &nullAddr, sizeof(nullAddr)) < 0) {
-   #ifdef WIN32
-    if (errno != WSAEAFNOSUPPORT) {
-   #else
     if (errno != EAFNOSUPPORT) {
-   #endif
       throw SocketException("Disconnect failed (connect())", true);
     }
   }
@@ -379,3 +286,21 @@ void UDPSocket::leaveGroup(const string &multicastGroup) throw(SocketException) 
     throw SocketException("Multicast group leave failed (setsockopt())", true);
   }
 }
+
+// SocketException Code
+
+SocketException::SocketException(const string &message, bool inclSysMsg)
+  throw() : userMessage(message) {
+  if (inclSysMsg) {
+    userMessage.append(": ");
+    userMessage.append(strerror(errno));
+  }
+}
+
+SocketException::~SocketException() throw() {
+}
+
+const char *SocketException::what() const throw() {
+  return userMessage.c_str();
+}
+
