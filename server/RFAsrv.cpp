@@ -24,43 +24,51 @@
   * 
   */
 
+#include "./RFAsrv.h"
+
+/* Function declarations */
+void parse_message(cJSON *jobjReceived);
+
+// TODO: Integrate the hardcoded variables below with command prompt parser 
+// Variables relating to server addressing
+char *servAddressHardcode = "172.21.148.168";
+unsigned short servPortHardcode = Socket::resolveService("echo", "udp");
 
 
-#include "./../dependencies/RFAsockets.h" // For UDPSocket and SocketException
-#include <cstring>
-#include <iostream>          // For cout and cerr
-#include <fstream>
-#include <cstdlib>           // For atoi()
-#include <stdlib.h>
+const int BUFFER_SIZE = 255;     // Longest string to echo
 
-
-const int ECHOMAX = 255;     // Longest string to echo
+/* Variables to handle transfer of data */
+  cJSON *jobjToSend;              /* JSON payload to be sent */
+  cJSON *jobjReceived;            /* JSON response received */
+  char objReceived[BUFFER_SIZE]; /* String response received */
 
 int main(int argc, char *argv[]) {
 
-  if (argc != 2) {                  // Test for correct number of parameters
-    cerr << "Usage: " << argv[0] << " <Server Port>" << endl;
-    exit(1);
-  }
+  // if (argc != 2) {                  // Test for correct number of parameters
+  //   cerr << "Usage: " << argv[0] << " <Server Port>" << endl;
+  //   exit(1);
+  // }
 
-  unsigned short echoServPort = atoi(argv[1]);     // First arg:  local port
+  // unsigned short echoServPort = atoi(argv[1]);     // First arg:  local port
 
   try {
-    UDPSocket sock(echoServPort);                
+    UDPSocket sock(servPortHardcode);                
   
-    char echoBuffer[ECHOMAX];         // Buffer for echo string
+    char serverBuffer[BUFFER_SIZE];         // Buffer for echo string
     int recvMsgSize;                  // Size of received message
     string sourceAddress;             // Address of datagram source
     unsigned short sourcePort;        // Port of datagram source
     for (;;) {  // Run forever
       // Block until receive message from a client
-      recvMsgSize = sock.recvFrom(echoBuffer, ECHOMAX, sourceAddress, 
+      recvMsgSize = sock.recvFrom(serverBuffer, BUFFER_SIZE, sourceAddress, 
                                       sourcePort);
   
-      cout << "Received packet from " << sourceAddress << ":" 
-           << sourcePort << endl;
+      cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
   
-      sock.sendTo(echoBuffer, recvMsgSize, sourceAddress, sourcePort);
+      // sock.sendTo(echoBuffer, recvMsgSize, sourceAddress, sourcePort);
+      strncpy(objReceived, serverBuffer, sizeof(serverBuffer));
+      jobjReceived = cJSON_Parse(objReceived);
+      parse_message(jobjReceived);
     }
   } catch (SocketException &e) {
     cerr << e.what() << endl;
@@ -70,6 +78,28 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+
+/** \copydoc parse_message */
+void parse_message(cJSON *jobjReceived)
+{
+  int clientCommandCode = cJSON_GetObjectItemCaseSensitive(jobjReceived, "clientCommandCode")->valueint;
+  if ((clientCommandCode == 0) || (clientCommandCode == 1)){
+    int offset = cJSON_GetObjectItemCaseSensitive(jobjReceived, "offset")->valueint;
+    int nBytes = cJSON_GetObjectItemCaseSensitive(jobjReceived, "nBytes")->valueint;
+    int checksum = cJSON_GetObjectItemCaseSensitive(jobjReceived, "checksum")->valueint;
+    char *filepath = cJSON_GetObjectItemCaseSensitive(jobjReceived, "filepath")->valuestring;
+
+    // Print message
+    cout << "clientCommandCode: " << clientCommandCode << endl;
+    cout << "checksum: " << checksum << endl;
+    cout << "true_size: " << sizeof(checksum) << endl;
+    cout << "offset: " << offset << endl;
+    cout << "nBytes: " << nBytes << endl;
+    cout << "filepath: " << filepath << endl;
+  }
+  
+}
+
 
 // readfile is for use by the server, reads from a given file to a standard writer and returns number of bytes read 
 // assumption made is that we either specify FULL file path or it exists in current directory where server is executing 
