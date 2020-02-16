@@ -37,6 +37,7 @@ unsigned short servPortHardcode = Socket::resolveService("2222", "udp");
 
 /* Function declarations */
 void format_read_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes);
+void format_write_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes);
 
 const int BUFFER_SIZE = 255;     // Longest string to echo
 
