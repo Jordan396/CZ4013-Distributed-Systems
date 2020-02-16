@@ -62,13 +62,16 @@ int main(int argc, char *argv[]) {
       // Block until receive message from a client
       recvMsgSize = sock.recvFrom(serverBuffer, BUFFER_SIZE, sourceAddress, sourcePort);
 
-      cout << "recvMsgSize: " << recvMsgSize << endl;
       cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
   
       // sock.sendTo(echoBuffer, recvMsgSize, sourceAddress, sourcePort);
       
       strncpy(objReceived, serverBuffer, sizeof(serverBuffer));
       jobjReceived = cJSON_Parse(objReceived);
+
+      // Debugging
+      cout << cJSON_Print(jobjReceived) << endl;
+
       parse_message(jobjReceived);
     }
   } catch (SocketException &e) {
@@ -87,18 +90,8 @@ void parse_message(cJSON *jobjReceived)
   if ((clientCommandCode == 0) || (clientCommandCode == 1)){
     int offset = cJSON_GetObjectItemCaseSensitive(jobjReceived, "offset")->valueint;
     int nBytes = cJSON_GetObjectItemCaseSensitive(jobjReceived, "nBytes")->valueint;
-    int checksum = cJSON_GetObjectItemCaseSensitive(jobjReceived, "checksum")->valueint;
     char *filepath = cJSON_GetObjectItemCaseSensitive(jobjReceived, "filepath")->valuestring;
-
-    // Print message
-    cout << "clientCommandCode: " << clientCommandCode << endl;
-    cout << "checksum: " << checksum << endl;
-    cout << "true_size: " << sizeof(checksum) << endl;
-    cout << "offset: " << offset << endl;
-    cout << "nBytes: " << nBytes << endl;
-    cout << "filepath: " << filepath << endl;
   }
-  
 }
 
 

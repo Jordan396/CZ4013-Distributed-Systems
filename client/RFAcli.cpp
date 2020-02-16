@@ -72,9 +72,7 @@ int main(int argc, char *argv[]) {
     format_read_message(jobjToSend, filepathHardcode, offsetHardcode, nBytesHardcode);
 
     // Debugging
-    cout << "Size:" << sizeof(*jobjToSend) << endl;
     cout << cJSON_Print(jobjToSend) << endl;
-    cout << "jobjToSend: " << jobjToSend << endl;
 
     // Send the message to the server
     char *message = cJSON_Print(jobjToSend);
