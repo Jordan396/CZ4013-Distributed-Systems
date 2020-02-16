@@ -70,6 +70,7 @@ int main(int argc, char *argv[]) {
     // Create message to send
     jobjToSend = cJSON_CreateObject();
     format_read_message(jobjToSend, filepathHardcode, offsetHardcode, nBytesHardcode);
+    // format_write_message(jobjToSend, filepathHardcode, offsetHardcode, nBytesHardcode);
 
     // Debugging
     cout << cJSON_Print(jobjToSend) << endl;
@@ -147,7 +148,7 @@ void format_read_message(cJSON *jobjToSend, char *filepath, int offset, int nByt
   cJSON_AddItemToObject(jobjToSend, "clientCommandCode", cJSON_CreateNumber(READ_CMD_CODE)); 
   cJSON_AddItemToObject(jobjToSend, "offset", cJSON_CreateNumber(offset)); 
   cJSON_AddItemToObject(jobjToSend, "nBytes", cJSON_CreateNumber(nBytes)); 
-  cJSON_AddItemToObject(jobjToSend, "filepath", cJSON_CreateString(filepath)); 
+  cJSON_AddItemToObject(jobjToSend, "rfaPath", cJSON_CreateString(filepath)); 
 }
 
 /** \copydoc format_write_message */
@@ -156,7 +157,7 @@ void format_write_message(cJSON *jobjToSend, char *filepath, int offset, int nBy
   cJSON_AddItemToObject(jobjToSend, "clientCommandCode", cJSON_CreateNumber(WRITE_CMD_CODE)); 
   cJSON_AddItemToObject(jobjToSend, "offset", cJSON_CreateNumber(offset)); 
   cJSON_AddItemToObject(jobjToSend, "nBytes", cJSON_CreateNumber(nBytes)); 
-  cJSON_AddItemToObject(jobjToSend, "filepath", cJSON_CreateString(filepath)); 
+  cJSON_AddItemToObject(jobjToSend, "rfaPath", cJSON_CreateString(filepath)); 
 }
 
 // /** \copydoc format_monitor_message */

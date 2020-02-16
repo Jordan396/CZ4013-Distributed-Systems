@@ -29,6 +29,7 @@
 /* Function declarations */
 int get_client_command_code(cJSON *jobjReceived);
 void readFile(char* filepath, int offset, int nBytes, char* responseContent);
+void writeFile(char* filepath, int offset, int nBytes, char *responseContent);
 int get_client_command_code(cJSON *jobjReceived);
 int get_offset(cJSON *jobjReceived);
 int get_nBytes(cJSON *jobjReceived);
@@ -49,7 +50,7 @@ char objReceived[BUFFER_SIZE]; /* String response received */
 char responseContent[BUFFER_SIZE];
 
 /* Variables for commands */
-char *filepath;
+char filepath[200];
 
 int main(int argc, char *argv[]) {
 
@@ -87,10 +88,16 @@ int main(int argc, char *argv[]) {
           get_filepath(jobjReceived, filepath);
           readFile(filepath, get_offset(jobjReceived), get_nBytes(jobjReceived), responseContent);
           cout << "responseContent: " << responseContent << endl;
+          break;
         case WRITE_CMD_CODE:
           cout << "Executing write command..." << endl;
+          get_filepath(jobjReceived, filepath);
+          writeFile(filepath, get_offset(jobjReceived), get_nBytes(jobjReceived), responseContent);
+          cout << "responseContent: " << responseContent << endl;
+          break;
         case MONITOR_CMD_CODE:
           cout << "Executing modify command..." << endl;
+          break;
       }
     }
   } catch (SocketException &e) {
@@ -118,7 +125,7 @@ int get_nBytes(cJSON *jobjReceived)
 
 void get_filepath(cJSON *jobjReceived, char *filepath)
 {
-  strcpy(filepath ,cJSON_GetObjectItemCaseSensitive(jobjReceived, "filepath")->valuestring);
+  strcpy(filepath ,cJSON_GetObjectItemCaseSensitive(jobjReceived, "rfaPath")->valuestring);
 }
 
 
@@ -159,6 +166,14 @@ void get_filepath(cJSON *jobjReceived, char *filepath)
 // }
 
 void readFile(char* filepath, int offset, int nBytes, char *responseContent){
+  cout << "filepath: " << filepath << endl;
+  cout << "offset: " << offset << endl;
+  cout << "nBytes: " << nBytes << endl;
+  strcpy(responseContent,"It's all yours, Jia Chin! Jiayou!");
+  cout << "responseContent: " << responseContent << endl;
+}
+
+void writeFile(char* filepath, int offset, int nBytes, char *responseContent){
   cout << "filepath: " << filepath << endl;
   cout << "offset: " << offset << endl;
   cout << "nBytes: " << nBytes << endl;
