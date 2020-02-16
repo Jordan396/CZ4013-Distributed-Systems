@@ -24,52 +24,110 @@
   * 
   */
 
+#include "./RFAsrv.h"
+
+/* Function declarations */
+int get_client_command_code(cJSON *jobjReceived);
+void readFile(char* filepath, int offset, int nBytes, char* responseContent);
+void writeFile(char* filepath, int offset, int nBytes, char *responseContent);
+int get_client_command_code(cJSON *jobjReceived);
+int get_offset(cJSON *jobjReceived);
+int get_nBytes(cJSON *jobjReceived);
+void get_filepath(cJSON *jobjReceived, char *filepath);
+
+// TODO: Integrate the hardcoded variables below with command prompt parser 
+// Variables relating to server addressing
+char *servAddressHardcode = "172.21.148.168";
+unsigned short servPortHardcode = Socket::resolveService("2222", "udp");
 
 
-#include "./../dependencies/RFAsockets.h" // For UDPSocket and SocketException
-#include <cstring>
-#include <iostream>          // For cout and cerr
-#include <fstream>
-#include <cstdlib>           // For atoi()
-#include <stdlib.h>
+const int BUFFER_SIZE = 255;     // Longest string to echo
 
+/* Variables to handle transfer of data */
+cJSON *jobjToSend;              /* JSON payload to be sent */
+cJSON *jobjReceived;            /* JSON response received */
+char objReceived[BUFFER_SIZE]; /* String response received */
+char responseContent[BUFFER_SIZE];
 
-const int ECHOMAX = 255;     // Longest string to echo
+/* Variables for commands */
+char filepath[200];
 
 int main(int argc, char *argv[]) {
 
-  if (argc != 2) {                  // Test for correct number of parameters
-    cerr << "Usage: " << argv[0] << " <Server Port>" << endl;
-    exit(1);
-  }
+  // if (argc != 2) {                  // Test for correct number of parameters
+  //   cerr << "Usage: " << argv[0] << " <Server Port>" << endl;
+  //   exit(1);
+  // }
 
-  unsigned short echoServPort = atoi(argv[1]);     // First arg:  local port
+  // unsigned short echoServPort = atoi(argv[1]);     // First arg:  local port
 
   try {
-    UDPSocket sock(echoServPort);                
+    UDPSocket sock(servPortHardcode);                
   
-    char echoBuffer[ECHOMAX];         // Buffer for echo string
+    char serverBuffer[BUFFER_SIZE];         // Buffer for echo string
     int recvMsgSize;                  // Size of received message
     string sourceAddress;             // Address of datagram source
     unsigned short sourcePort;        // Port of datagram source
     for (;;) {  // Run forever
       // Block until receive message from a client
-      recvMsgSize = sock.recvFrom(echoBuffer, ECHOMAX, sourceAddress, 
-                                      sourcePort);
+      recvMsgSize = sock.recvFrom(serverBuffer, BUFFER_SIZE, sourceAddress, sourcePort);
+
+      cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
   
-      cout << "Received packet from " << sourceAddress << ":" 
-           << sourcePort << endl;
-  
-      sock.sendTo(echoBuffer, recvMsgSize, sourceAddress, sourcePort);
+      // sock.sendTo(echoBuffer, recvMsgSize, sourceAddress, sourcePort);
+      
+      strncpy(objReceived, serverBuffer, sizeof(serverBuffer));
+      jobjReceived = cJSON_Parse(objReceived);
+
+      // Debugging
+      cout << cJSON_Print(jobjReceived) << endl;
+
+      switch (get_client_command_code(jobjReceived)){
+        case READ_CMD_CODE:
+          cout << "Executing read command..." << endl;
+          get_filepath(jobjReceived, filepath);
+          readFile(filepath, get_offset(jobjReceived), get_nBytes(jobjReceived), responseContent);
+          cout << "responseContent: " << responseContent << endl;
+          break;
+        case WRITE_CMD_CODE:
+          cout << "Executing write command..." << endl;
+          get_filepath(jobjReceived, filepath);
+          writeFile(filepath, get_offset(jobjReceived), get_nBytes(jobjReceived), responseContent);
+          cout << "responseContent: " << responseContent << endl;
+          break;
+        case MONITOR_CMD_CODE:
+          cout << "Executing modify command..." << endl;
+          break;
+      }
     }
   } catch (SocketException &e) {
     cerr << e.what() << endl;
     exit(1);
   }
-  // NOT REACHED
-
   return 0;
 }
+
+/** \copydoc get_client_command_code */
+int get_client_command_code(cJSON *jobjReceived)
+{
+  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "clientCommandCode")->valueint;
+}
+
+int get_offset(cJSON *jobjReceived)
+{
+  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "offset")->valueint;
+}
+
+int get_nBytes(cJSON *jobjReceived)
+{
+  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "nBytes")->valueint;
+}
+
+void get_filepath(cJSON *jobjReceived, char *filepath)
+{
+  strcpy(filepath ,cJSON_GetObjectItemCaseSensitive(jobjReceived, "rfaPath")->valuestring);
+}
+
 
 // readfile is for use by the server, reads from a given file to a standard writer and returns number of bytes read 
 // assumption made is that we either specify FULL file path or it exists in current directory where server is executing 
@@ -106,3 +164,19 @@ int main(int argc, char *argv[]) {
 //   free (buffer);
 //   return result; 
 // }
+
+void readFile(char* filepath, int offset, int nBytes, char *responseContent){
+  cout << "filepath: " << filepath << endl;
+  cout << "offset: " << offset << endl;
+  cout << "nBytes: " << nBytes << endl;
+  strcpy(responseContent,"It's all yours, Jia Chin! Jiayou!");
+  cout << "responseContent: " << responseContent << endl;
+}
+
+void writeFile(char* filepath, int offset, int nBytes, char *responseContent){
+  cout << "filepath: " << filepath << endl;
+  cout << "offset: " << offset << endl;
+  cout << "nBytes: " << nBytes << endl;
+  strcpy(responseContent,"It's all yours, Jia Chin! Jiayou!");
+  cout << "responseContent: " << responseContent << endl;
+}
