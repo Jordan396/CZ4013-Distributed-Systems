@@ -54,19 +54,20 @@ int main(int argc, char *argv[]) {
   try {
     UDPSocket sock(servPortHardcode);                
   
-    char serverBuffer[BUFFER_SIZE];         // Buffer for echo string
+    unsigned char serverBuffer[BUFFER_SIZE];         // Buffer for echo string
     int recvMsgSize;                  // Size of received message
     string sourceAddress;             // Address of datagram source
     unsigned short sourcePort;        // Port of datagram source
     for (;;) {  // Run forever
       // Block until receive message from a client
-      recvMsgSize = sock.recvFrom(serverBuffer, BUFFER_SIZE, sourceAddress, 
-                                      sourcePort);
-  
+      recvMsgSize = sock.recvFrom(serverBuffer, BUFFER_SIZE, sourceAddress, sourcePort);
+
+      cout << "recvMsgSize: " << recvMsgSize << endl;
       cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
   
       // sock.sendTo(echoBuffer, recvMsgSize, sourceAddress, sourcePort);
-      strncpy(objReceived, serverBuffer, sizeof(serverBuffer));
+      
+      memcpy(objReceived, serverBuffer, sizeof(serverBuffer));
       jobjReceived = cJSON_Parse(objReceived);
       parse_message(jobjReceived);
     }

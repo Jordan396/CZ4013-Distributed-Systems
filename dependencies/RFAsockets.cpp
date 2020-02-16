@@ -252,6 +252,7 @@ int UDPSocket::recvFrom(void *buffer, int bufferLen, string &sourceAddress,
   }
   sourceAddress = inet_ntoa(clntAddr.sin_addr);
   sourcePort = ntohs(clntAddr.sin_port);
+  printf("received message: \"%s\"\n", buffer);
 
   return rtn;
 }

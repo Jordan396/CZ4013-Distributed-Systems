@@ -70,9 +70,14 @@ int main(int argc, char *argv[]) {
     // Create message to send
     jobjToSend = cJSON_CreateObject();
     format_read_message(jobjToSend, filepathHardcode, offsetHardcode, nBytesHardcode);
-  
+
+    // Debugging
+    cout << "Size:" << sizeof(*jobjToSend) << endl;
+    cout << cJSON_Print(jobjToSend) << endl;
+    cout << "jobjToSend: " << jobjToSend << endl;
+
     // Send the message to the server
-    sock.sendTo(jobjToSend, sizeof(jobjToSend), servAddressHardcode, servPortHardcode);
+    sock.sendTo(jobjToSend, sizeof(*jobjToSend), servAddressHardcode, servPortHardcode);
   
     // // Receive a response
     // char echoBuffer[ECHOMAX + 1];       // Buffer for echoed string + \0
@@ -144,9 +149,6 @@ void format_read_message(cJSON *jobjToSend, char *filepath, int offset, int nByt
   cJSON_AddItemToObject(jobjToSend, "offset", cJSON_CreateNumber(offset)); 
   cJSON_AddItemToObject(jobjToSend, "nBytes", cJSON_CreateNumber(nBytes)); 
   cJSON_AddItemToObject(jobjToSend, "filepath", cJSON_CreateString(filepath)); 
-  // Checksum to check if size of message sent is equal to size of message received
-  cJSON *checksum = cJSON_CreateNumber(sizeof(jobjToSend) + sizeof(checksum));
-  cJSON_AddItemToObject(jobjToSend, "checksum", checksum); 
 }
 
 /** \copydoc format_write_message */
@@ -156,9 +158,6 @@ void format_write_message(cJSON *jobjToSend, char *filepath, int offset, int nBy
   cJSON_AddItemToObject(jobjToSend, "offset", cJSON_CreateNumber(offset)); 
   cJSON_AddItemToObject(jobjToSend, "nBytes", cJSON_CreateNumber(nBytes)); 
   cJSON_AddItemToObject(jobjToSend, "filepath", cJSON_CreateString(filepath)); 
-  // Checksum to check if size of message sent is equal to size of message received
-  cJSON *checksum = cJSON_CreateNumber(sizeof(jobjToSend) + sizeof(checksum));
-  cJSON_AddItemToObject(jobjToSend, "checksum", checksum);      /*Add username to JSON object*/
 }
 
 // /** \copydoc format_monitor_message */
