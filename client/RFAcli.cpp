@@ -77,7 +77,8 @@ int main(int argc, char *argv[]) {
     cout << "jobjToSend: " << jobjToSend << endl;
 
     // Send the message to the server
-    sock.sendTo(jobjToSend, sizeof(*jobjToSend), servAddressHardcode, servPortHardcode);
+    char *message = cJSON_Print(jobjToSend);
+    sock.sendTo(message, strlen(message), servAddressHardcode, servPortHardcode);
   
     // // Receive a response
     // char echoBuffer[ECHOMAX + 1];       // Buffer for echoed string + \0

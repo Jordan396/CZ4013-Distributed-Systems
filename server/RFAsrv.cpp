@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
   try {
     UDPSocket sock(servPortHardcode);                
   
-    unsigned char serverBuffer[BUFFER_SIZE];         // Buffer for echo string
+    char serverBuffer[BUFFER_SIZE];         // Buffer for echo string
     int recvMsgSize;                  // Size of received message
     string sourceAddress;             // Address of datagram source
     unsigned short sourcePort;        // Port of datagram source
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
   
       // sock.sendTo(echoBuffer, recvMsgSize, sourceAddress, sourcePort);
       
-      memcpy(objReceived, serverBuffer, sizeof(serverBuffer));
+      strncpy(objReceived, serverBuffer, sizeof(serverBuffer));
       jobjReceived = cJSON_Parse(objReceived);
       parse_message(jobjReceived);
     }
