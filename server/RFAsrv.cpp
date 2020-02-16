@@ -27,7 +27,12 @@
 #include "./RFAsrv.h"
 
 /* Function declarations */
-void parse_message(cJSON *jobjReceived);
+int get_client_command_code(cJSON *jobjReceived);
+void readFile(char* filepath, int offset, int nBytes, char* responseContent);
+int get_client_command_code(cJSON *jobjReceived);
+int get_offset(cJSON *jobjReceived);
+int get_nBytes(cJSON *jobjReceived);
+void get_filepath(cJSON *jobjReceived, char *filepath);
 
 // TODO: Integrate the hardcoded variables below with command prompt parser 
 // Variables relating to server addressing
@@ -38,9 +43,13 @@ unsigned short servPortHardcode = Socket::resolveService("2222", "udp");
 const int BUFFER_SIZE = 255;     // Longest string to echo
 
 /* Variables to handle transfer of data */
-  cJSON *jobjToSend;              /* JSON payload to be sent */
-  cJSON *jobjReceived;            /* JSON response received */
-  char objReceived[BUFFER_SIZE]; /* String response received */
+cJSON *jobjToSend;              /* JSON payload to be sent */
+cJSON *jobjReceived;            /* JSON response received */
+char objReceived[BUFFER_SIZE]; /* String response received */
+char responseContent[BUFFER_SIZE];
+
+/* Variables for commands */
+char *filepath;
 
 int main(int argc, char *argv[]) {
 
@@ -72,26 +81,44 @@ int main(int argc, char *argv[]) {
       // Debugging
       cout << cJSON_Print(jobjReceived) << endl;
 
-      parse_message(jobjReceived);
+      switch (get_client_command_code(jobjReceived)){
+        case READ_CMD_CODE:
+          cout << "Executing read command..." << endl;
+          get_filepath(jobjReceived, filepath);
+          readFile(filepath, get_offset(jobjReceived), get_nBytes(jobjReceived), responseContent);
+          cout << "responseContent: " << responseContent << endl;
+        case WRITE_CMD_CODE:
+          cout << "Executing write command..." << endl;
+        case MONITOR_CMD_CODE:
+          cout << "Executing modify command..." << endl;
+      }
     }
   } catch (SocketException &e) {
     cerr << e.what() << endl;
     exit(1);
   }
-  // NOT REACHED
-
   return 0;
 }
 
-/** \copydoc parse_message */
-void parse_message(cJSON *jobjReceived)
+/** \copydoc get_client_command_code */
+int get_client_command_code(cJSON *jobjReceived)
 {
-  int clientCommandCode = cJSON_GetObjectItemCaseSensitive(jobjReceived, "clientCommandCode")->valueint;
-  if ((clientCommandCode == 0) || (clientCommandCode == 1)){
-    int offset = cJSON_GetObjectItemCaseSensitive(jobjReceived, "offset")->valueint;
-    int nBytes = cJSON_GetObjectItemCaseSensitive(jobjReceived, "nBytes")->valueint;
-    char *filepath = cJSON_GetObjectItemCaseSensitive(jobjReceived, "filepath")->valuestring;
-  }
+  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "clientCommandCode")->valueint;
+}
+
+int get_offset(cJSON *jobjReceived)
+{
+  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "offset")->valueint;
+}
+
+int get_nBytes(cJSON *jobjReceived)
+{
+  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "nBytes")->valueint;
+}
+
+void get_filepath(cJSON *jobjReceived, char *filepath)
+{
+  strcpy(filepath ,cJSON_GetObjectItemCaseSensitive(jobjReceived, "filepath")->valuestring);
 }
 
 
@@ -130,3 +157,11 @@ void parse_message(cJSON *jobjReceived)
 //   free (buffer);
 //   return result; 
 // }
+
+void readFile(char* filepath, int offset, int nBytes, char *responseContent){
+  cout << "filepath: " << filepath << endl;
+  cout << "offset: " << offset << endl;
+  cout << "nBytes: " << nBytes << endl;
+  strcpy(responseContent,"It's all yours, Jia Chin! Jiayou!");
+  cout << "responseContent: " << responseContent << endl;
+}
