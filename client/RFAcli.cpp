@@ -32,7 +32,7 @@ int offsetHardcode = 0;  // offset to start R/W from
 int nBytesHardcode = 20; // number of bytes to R/W
 // Variables relating to server addressing
 char *servAddressHardcode = "172.21.148.168";
-unsigned short servPortHardcode = Socket::resolveService("echo", "udp");
+unsigned short servPortHardcode = Socket::resolveService("2222", "udp");
 
 
 /* Function declarations */

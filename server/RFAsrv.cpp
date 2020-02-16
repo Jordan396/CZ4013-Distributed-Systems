@@ -32,7 +32,7 @@ void parse_message(cJSON *jobjReceived);
 // TODO: Integrate the hardcoded variables below with command prompt parser 
 // Variables relating to server addressing
 char *servAddressHardcode = "172.21.148.168";
-unsigned short servPortHardcode = Socket::resolveService("echo", "udp");
+unsigned short servPortHardcode = Socket::resolveService("2222", "udp");
 
 
 const int BUFFER_SIZE = 255;     // Longest string to echo
