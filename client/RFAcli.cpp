@@ -27,17 +27,18 @@ using namespace std;
 
 // TODO: Integrate the hardcoded variables below with command prompt parser 
 // Variables are used to test read/write file access on server
-char *filepathHardcode = "RFA://Documents/Cinderella.txt"; // path to file on server
+char *filepathHardcode = "/home/VMuser/CZ4013/RemoteFileAccess/Documents/test.txt"; // path to file on server
 int offsetHardcode = 0;  // offset to start R/W from
-int nBytesHardcode = 20; // number of bytes to R/W
+int nBytesHardcode = 5; // number of bytes to R/W
 // Variables relating to server addressing
 char *servAddressHardcode = "172.21.148.168";
+char *toWrite = "Hello World!";
 unsigned short servPortHardcode = Socket::resolveService("2222", "udp");
 
 
 /* Function declarations */
 void format_read_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes);
-void format_write_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes);
+void format_write_message(cJSON *jobjToSend, char *filepath, int offset, char* toWrite);
 
 const int BUFFER_SIZE = 255;     // Longest string to echo
 
@@ -70,8 +71,8 @@ int main(int argc, char *argv[]) {
 
     // Create message to send
     jobjToSend = cJSON_CreateObject();
-    format_read_message(jobjToSend, filepathHardcode, offsetHardcode, nBytesHardcode);
-    // format_write_message(jobjToSend, filepathHardcode, offsetHardcode, nBytesHardcode);
+    // format_read_message(jobjToSend, filepathHardcode, offsetHardcode, nBytesHardcode);
+    format_write_message(jobjToSend, filepathHardcode, offsetHardcode, toWrite);
 
     // Debugging
     cout << cJSON_Print(jobjToSend) << endl;
@@ -153,11 +154,11 @@ void format_read_message(cJSON *jobjToSend, char *filepath, int offset, int nByt
 }
 
 /** \copydoc format_write_message */
-void format_write_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes)
+void format_write_message(cJSON *jobjToSend, char *filepath, int offset, char* toWrite)
 {
   cJSON_AddItemToObject(jobjToSend, "clientCommandCode", cJSON_CreateNumber(WRITE_CMD_CODE)); 
   cJSON_AddItemToObject(jobjToSend, "offset", cJSON_CreateNumber(offset)); 
-  cJSON_AddItemToObject(jobjToSend, "nBytes", cJSON_CreateNumber(nBytes)); 
+  cJSON_AddItemToObject(jobjToSend, "toWrite", cJSON_CreateString(toWrite)); 
   cJSON_AddItemToObject(jobjToSend, "rfaPath", cJSON_CreateString(filepath)); 
 }
 
