@@ -50,6 +50,14 @@ void SettingCLI::displayCurrentSetting()
 		cout << " ";}  cout << "\u2503" << endl;
 	cout << "\u2523";  for (int i = 0; i < 23; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 48; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
 	cout << "\u2503" << "3. Time Out            " << "\u2503" << timeOut; for (int i = 0; i < 48 - to_string(timeOut).length(); i++) {
-		cout << " ";}  cout << "\u2503" << endl;	
+		cout << " ";}  cout << "\u2503" << endl;
+	cout << "\u2523";  for (int i = 0; i < 23; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 48; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
+	cout << "\u2503" << "4. Server IP           " << "\u2503" << serverIP; for (int i = 0; i < 48 - serverIP.length(); i++) {
+		cout << " ";
+	}  cout << "\u2503" << endl;
+	cout << "\u2523";  for (int i = 0; i < 23; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 48; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
+	cout << "\u2503" << "5. Server Port No.     " << "\u2503" << portNo; for (int i = 0; i < 48 - portNo.length(); i++) {
+		cout << " ";
+	}  cout << "\u2503" << endl;
 	cout << "\u2517";  for (int i = 0; i < 23; i++) { cout << "\u2501"; }  cout << "\u253b";  for (int i = 0; i < 48; i++) { cout << "\u2501"; }  cout << "\u251b" << endl;
 }

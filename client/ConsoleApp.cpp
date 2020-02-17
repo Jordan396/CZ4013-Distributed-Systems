@@ -6,24 +6,45 @@
 #include "SettingCLI.h"
 #include "Global.h"
 #include <locale>
+#include <string>
+
 using namespace std;
-int main(int argc, char* argv[]);
 void displayClientMenu();
 
 int freshnessInterval = 100;
 int lossRate = 200;
 int timeOut = 300;
 int sel;
+string serverIP = "";
+string portNo = "";
 
 int main(int argc, char* argv[])
 {
     setlocale(LC_CTYPE, "");
-    if (argc == 2) {
-        string s1(argv[0]);
-        if (s1.compare("-f")) {
-            freshnessInterval = atoi(argv[1]);
+    // read in command line arguments 
+    // TODO to write serverno and portno input check
+    if (argc == 7) {
+        for (int i = 1; i < argc; i+=2) {
+            string s1(argv[i]);
+            if (s1=="-f") {
+                freshnessInterval = atoi(argv[i+1]);
+            }
+            else if (s1=="-s") {
+                string s2(argv[i+1]);
+                serverIP = s2;
+            }
+            else if (s1=="-p") {
+                string s2(argv[i + 1]);
+                portNo = s2;
+            }
         }
     }
+    else {
+        // if not enough arguments supplied, break program
+        cout << argc;
+        return -1;
+    }
+    // display client menu and listen
     while (true) {
         system("clear");
         displayClientMenu();
@@ -54,7 +75,7 @@ int main(int argc, char* argv[])
     }
 }
 
-
+// display client menu (main screen)
 void displayClientMenu() {
 
     cout << "\u250f";  for (int i = 0; i < 40; i++) { cout << "\u2501"; }  cout << "\u2513" << endl;

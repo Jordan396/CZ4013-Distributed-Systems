@@ -6,6 +6,8 @@
 extern int freshnessInterval;
 extern int lossRate;
 extern int timeOut;
+extern std::string serverIP;
+extern std::string portNo;
 #endif
 
 #endif
