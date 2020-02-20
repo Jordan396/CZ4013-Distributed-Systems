@@ -7,6 +7,7 @@
 #include "Global.h"
 #include <locale>
 #include <string>
+#include <CacheManager/CacheService.h>
 
 using namespace std;
 void displayClientMenu();
@@ -20,6 +21,16 @@ string portNo = "";
 
 int main(int argc, char* argv[])
 {
+    //for testing cache
+    /*CacheService cv;
+    char myword[] = { 'H', 'e', 'l', 'l', 'o', '\0' };
+    cv.cacheFile("C:\\MyDirectory\\Happy.txt", myword, chrono::system_clock::now());
+    cout << "break" << endl;
+    this_thread::sleep_for(std::chrono::milliseconds(200));
+    
+    cout << cv.getCachedFile("C:\\MyDirectory\\Happy.txt") << endl;*/
+
+
     setlocale(LC_CTYPE, "");
     // read in command line arguments 
     // TODO to write serverno and portno input check
