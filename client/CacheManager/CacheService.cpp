@@ -58,7 +58,9 @@ bool CacheService::clearFile(std::string pathName)
 bool CacheService::clearCache()
 {
 	try {
+		// remove all files in directory recursively
 		fs::remove_all("CacheManager/TempFiles");
+		// update hashing map
 		cacheMap.clear();
 		return true;
 	}
@@ -78,7 +80,7 @@ string CacheService::getCachedFile(std::string pathName)
 
 	if (it == cacheMap.end()) {
 		// does not exist in map
-		return NULL;
+		return "";
 	}
 	else {
 		// exist in map
@@ -98,6 +100,7 @@ string CacheService::getCachedFile(std::string pathName)
 
 string CacheService::extractFileName(string pathName)
 {
+	// to be configured depending on how user keys in
 	const size_t last_slash_idx = pathName.find_last_of("\\/");
 	if (std::string::npos != last_slash_idx)
 	{
