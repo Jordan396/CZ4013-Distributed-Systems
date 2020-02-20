@@ -13,7 +13,7 @@ using namespace std;
 bool CacheService::cacheFile(std::string pathName, char* text, std::chrono::system_clock::time_point time)
 {
 	// convert to current directory cache file name
-	string cachepath = "CacheManager/TempFiles/" + extractFileName(pathName);
+	string cachepath = "../Client/CacheManager/TempFiles/" + extractFileName(pathName);
 
 	// update hashing map
 	if (cacheMap.find(pathName) == cacheMap.end()) {
@@ -39,7 +39,7 @@ bool CacheService::cacheFile(std::string pathName, char* text, std::chrono::syst
 bool CacheService::clearFile(std::string pathName)
 {
 	// convert to current directory cache file name
-	string cachepath = "CacheManager/TempFiles/" + extractFileName(pathName);
+	string cachepath = "../Client/CacheManager/TempFiles/" + extractFileName(pathName);
 
 	try {
 		// first try removing, if removing fails then cacheMap will not have the key as well
@@ -58,7 +58,7 @@ bool CacheService::clearCache()
 {
 	try {
 		// remove all files in directory recursively
-		fs::remove_all("CacheManager/TempFiles");
+		fs::remove_all("../Client/CacheManager/TempFiles/");
 		// update hashing map
 		cacheMap.clear();
 		return true;
@@ -72,7 +72,7 @@ bool CacheService::clearCache()
 string CacheService::getCachedFile(std::string pathName)
 {
 	// convert to current directory cache file name
-	string cachepath = "CacheManager/TempFiles/" + extractFileName(pathName);
+	string cachepath = "../Client/CacheManager/TempFiles/" + extractFileName(pathName);
 
 	map<string, File>::iterator it;
 	it = cacheMap.find(pathName);
@@ -86,7 +86,7 @@ string CacheService::getCachedFile(std::string pathName)
 		File file = it->second;
 		if (file.computeTimeElapsed() > freshnessInterval) {
 			// check if exceed the freshness interval 
-			cout << "exceed the time limit by" << file.computeTimeElapsed() << endl;
+			cout << "exceed the time limit by " << file.computeTimeElapsed() << endl;
 			// TODO: send a msg to server to ask for the lastModified Date
 			// if received lastModified Date not the same as current createdDate then return null else set fr
 			//return NULL;
@@ -114,7 +114,7 @@ bool CacheService::writeFile(std::string pathName, char* text)
 	fp.open(pathName);
 	// Check for file object (detecting the stream state)
 	if (!fp) {
-		fs::create_directory("CacheManager/TempFiles");
+		fs::create_directory("../Client/CacheManager/TempFiles");
 		fp.open(pathName);
 	}
 
