@@ -7,13 +7,13 @@
 #include "Global.h"
 #include <locale>
 #include <string>
-#include <CacheManager/CacheService.h>
+//#include <CacheManager/CacheService.h>
 
 using namespace std;
 void displayClientMenu();
 
 int freshnessInterval = 100;
-int lossRate = 200;
+int lossRate = 0;
 int timeOut = 300;
 int sel;
 string serverIP = "";

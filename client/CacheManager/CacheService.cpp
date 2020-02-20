@@ -3,11 +3,10 @@
 #include <map>
 #include <fstream>
 #include <iostream>
-#include <filesystem>
-#include "File.h"
+#include <experimental/filesystem>
 #include "../Global.h"
 
-namespace fs = std::filesystem;
+namespace fs = std::experimental::filesystem;
 using namespace std;
 
 
@@ -120,7 +119,7 @@ bool CacheService::writeFile(std::string pathName, char* text)
 	}
 
 	// write text into file 
-	while (*text != NULL) {
+	while (*text != '\0') {
 		fp << *text;
 		text++;
 	}
