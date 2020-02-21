@@ -19,6 +19,7 @@ public:
 	// if file is outdated with server side or does not exist, return empty string
 	std::string getCachedFile(std::string pathName);
 
+	~CacheService();
 private:
 	std::map<std::string, File> cacheMap;
 	std::string extractFileName(std::string pathName);

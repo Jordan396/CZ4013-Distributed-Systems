@@ -73,3 +73,7 @@ void SettingCLI::displayCurrentSetting()
 	}  cout << "\u2503" << endl;
 	cout << "\u2517";  for (int i = 0; i < 28; i++) { cout << "\u2501"; }  cout << "\u253b";  for (int i = 0; i < 48; i++) { cout << "\u2501"; }  cout << "\u251b" << endl;
 }
+
+SettingCLI::~SettingCLI()
+{
+}

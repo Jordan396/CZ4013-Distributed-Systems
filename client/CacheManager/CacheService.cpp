@@ -97,6 +97,12 @@ string CacheService::getCachedFile(std::string pathName)
 	}
 }
 
+CacheService::~CacheService()
+{
+	for (map<int, X*>::iterator it = cacheMap.begin(); it != cacheMap.end(); ++it)
+		delete it->second;
+}
+
 string CacheService::extractFileName(string pathName)
 {
 	// to be configured depending on how user keys in

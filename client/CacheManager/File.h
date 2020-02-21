@@ -8,5 +8,6 @@ public:
 	std::string localFilePath;
 	std::chrono::system_clock::time_point createdTime;
 	int computeTimeElapsed();
+	~File();
 };
 
