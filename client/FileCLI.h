@@ -13,5 +13,6 @@ private:
 	void listFile();
 	bool checkValidity(int fileID);
 	int cacheSize;
+	CacheService cv;
 };
 

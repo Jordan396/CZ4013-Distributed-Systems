@@ -26,7 +26,6 @@ void FileCLI::readFile()
 		it = cacheReference.find(fileID);
 		string remoteFilePath = it->second;
 		
-		CacheService cv;
 		cout << cv.readFile(remoteFilePath, offSet, numBytes) << endl;
 	}
 
@@ -48,7 +47,6 @@ void FileCLI::clearFile()
 		it = cacheReference.find(fileID);
 		string remoteFilePath = it->second;
 		
-		CacheService cv;
 		if (cv.clearFile(remoteFilePath)) {
 			cout << "File is removed" << endl;
 		}
@@ -81,7 +79,6 @@ void FileCLI::writeFile()
 		it = cacheReference.find(fileID);
 		string remoteFilePath = it->second;
 		
-		CacheService cv;
 		if (cv.writeFile(remoteFilePath, textAppend, offSet)) {
 			cout << "Written into File Successfully" << endl;
 		}
@@ -97,7 +94,6 @@ void FileCLI::fetchFile()
 	string filePath;
 	cout << "Please input a file path: ";
 	cin << filePath;
-	CacheService cv;
 	if (cv.checkValidityFetch(filePath)) {
 		cout << "File is fetched and cached" << endl;
 	}
@@ -116,7 +112,6 @@ void FileCLI::listFile()
 	map<int, std::string> cacheReference;
 	vector<std::string> cacheKeys;
 
-	CacheService cv;
 	cacheKeys = cv.listCache();
 
 	for (cacheSize = 0; j < cacheKeys.size(); j++) {
