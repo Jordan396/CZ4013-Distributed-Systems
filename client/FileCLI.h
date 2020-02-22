@@ -7,6 +7,7 @@ public:
 	void readFile();
 	void clearFile();
 	void appendFile();
+	~FileCLI();
 private:
 	void listFile();
 	void getFileID();

@@ -57,3 +57,7 @@ void FileCLI::getFileID()
 		cin >> filePathName;
 	}
 }
+
+FileCLI::~FileCLI()
+{
+}
