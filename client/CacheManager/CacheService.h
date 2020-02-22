@@ -24,7 +24,9 @@ public:
 	// this method will fetch the file to the cache (checking if it is in the cache and whether it is valid first)
 	bool checkValidityFetch(std::string pathName);
 
-	
+	bool saveHashMap();
+	bool restoreHashMap();
+
 	~CacheService();
 private:
 	std::map<std::string, File> cacheMap;
@@ -44,5 +46,6 @@ private:
 	// for resolving file path
 	std::string getLocalPathToFile(std::string fileName);
 	std::string extractFileName(std::string remoteFilePath);
+
 };
 

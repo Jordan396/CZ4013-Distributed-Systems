@@ -3,6 +3,8 @@
 #include <iostream>
 using namespace std;
 
+
+
 void FileCLI::readFile()
 {
 	int fileID;
@@ -158,4 +160,11 @@ bool FileCLI::checkValidity(int fileID)
 
 FileCLI::~FileCLI()
 {
+	cv.saveHashMap();
+}
+
+FileCLI::FileCLI()
+{
+	CacheService cv();
+	cv.restoreHashMap();
 }

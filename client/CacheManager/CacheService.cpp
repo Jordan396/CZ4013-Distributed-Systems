@@ -212,6 +212,60 @@ string CacheService::extractFileName(string remoteFilePath)
 	return remoteFilePath;
 }
 
+bool CacheService::saveHashMap()
+{
+	if (cacheMap.empty())
+		return false;
+
+	FILE* fp = fopen("../client/CacheManager/TempFiles/cacheHistory.txt", "w");
+	if (!fp) {
+		fs::create_directory("../client/CacheManager/TempFiles");
+		fp = fopen("../client/CacheManager/TempFiles/cacheHistory.txt", "w");
+	}
+
+	for (map<string, File>::iterator it = cacheMap.begin(); it != cacheMap.end(); it++) {
+		fprintf(fp, "%s=%s\n", it->first.c_str(), it->second.c_str());
+	}
+
+	fclose(fp);
+	return true;
+}
+
+bool CacheService::restoreHashMap()
+{
+	FILE* fp = fopen("../client/CacheManager/TempFiles/cacheHistory.txt", "r");
+	if (!fp) return false;
+
+	cacheMap.clear();
+
+	char* buf = 0;
+	size_t buflen = 0;
+
+	while (getline(&buf, &buflen, fp) > 0) {
+		char* nl = strchr(buf, '\n');
+		if (nl == NULL)
+			continue;
+		*nl = 0;
+
+		char* sep = strchr(buf, '=');
+		if (sep == NULL)
+			continue;
+		*sep = 0;
+		sep++;
+
+		string s1 = buf;
+		string s2 = sep;
+
+		cacheMap[s1] = s2;
+	}
+
+	if (buf)
+		free(buf);
+
+	fclose(fp);
+	return true;
+}
+
 std::string CacheService::getLocalPathToFile(std::string fileName)
 {
 	return "../client/CacheManager/TempFiles/" + extractFileName(fileName);

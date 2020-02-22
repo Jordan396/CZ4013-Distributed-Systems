@@ -9,6 +9,7 @@ public:
 	void writeFile();
 	void fetchFile();
 	~FileCLI();
+	FileCLI();
 private:
 	void listFile();
 	bool checkValidity(int fileID);
