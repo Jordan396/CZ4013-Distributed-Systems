@@ -6,15 +6,12 @@ class FileCLI
 public:
 	void readFile();
 	void clearFile();
-	void appendFile();
+	void writeFile();
+	void fetchFile();
 	~FileCLI();
 private:
 	void listFile();
-	void getFileID();
-	int fileID;
-	int offSet;
-	int numBytes;
-	std::string filePathName;
-	std::string textAppend;
+	bool checkValidity(int fileID);
+	int cacheSize;
 };
 

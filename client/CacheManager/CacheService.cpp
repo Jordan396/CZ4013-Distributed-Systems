@@ -5,45 +5,17 @@
 #include <iostream>
 #include <experimental/filesystem>
 #include "../Global.h"
+#include "../RFAcli.h"
 
 namespace fs = std::experimental::filesystem;
 using namespace std;
 
 
-bool CacheService::cacheFile(std::string pathName, char* text, std::chrono::system_clock::time_point time)
-{
-	// convert to current directory cache file name
-	string cachepath = "../client/CacheManager/TempFiles/" + extractFileName(pathName);
-
-	// update hashing map
-	if (cacheMap.find(pathName) == cacheMap.end()) {
-		// does not exist in map
-		File file(cachepath, time);
-		cacheMap.insert({ pathName, file });
-	}
-	else {
-		// exist in map
-		File file(cachepath, time);
-		cacheMap.at(pathName) = file;
-	}
-
-	// writing to the file in temp folder
-	if (!writeFile(cachepath, text)) {
-		return false;
-	}
-	else {
-		return true;
-	}
-}
-
 bool CacheService::clearFile(std::string pathName)
 {
-	// convert to current directory cache file name
-	string cachepath = "../client/CacheManager/TempFiles/" + extractFileName(pathName);
-
 	try {
 		// first try removing, if removing fails then cacheMap will not have the key as well
-		fs::remove(cachepath);
+		fs::remove(getLocalPathToFile(pathName);
 		// update hashing map
 		cacheMap.erase(pathName);
 		return true;
@@ -69,80 +41,182 @@ bool CacheService::clearCache()
 	}
 }
 
-string CacheService::getCachedFile(std::string pathName)
+vector<std::string> CacheService::listCache()
 {
-	// convert to current directory cache file name
-	string cachepath = "../client/CacheManager/TempFiles/" + extractFileName(pathName);
-
-	map<string, File>::iterator it;
-	it = cacheMap.find(pathName);
-
-	if (it == cacheMap.end()) {
-		// does not exist in map
-		return "";
+	vector<string> v;
+	for (map<string, File>::iterator it = cacheMap.begin(); it != cacheMap.end(); ++it) {
+		v.push_back(it->first);
 	}
-	else {
-		// exist in map
-		File file = it->second;
-		if (file.computeTimeElapsed() > freshnessInterval) {
-			// check if exceed the freshness interval 
-			cout << "exceed the time limit by " << file.computeTimeElapsed() << endl;
-			// TODO: send a msg to server to ask for the lastModified Date
-			// if received lastModified Date not the same as current createdDate then return null else set fr
-			//return NULL;
-		}
-
-		// read file and send back from cache 
-		return readFile(cachepath);
-	}
+	return v;
 }
+
 
 CacheService::~CacheService()
 {
-	//for (map<int, X*>::iterator it = cacheMap.begin(); it != cacheMap.end(); ++it)
-	//	delete it->second;
+	for (map<String, String>::iterator it = cacheMap.begin(); it != cacheMap.end(); ++it)
+		delete it->second;
 }
 
-string CacheService::extractFileName(string pathName)
+// this method will just write to the cache file
+bool CacheService::write(std::string pathName, char* text, int offset)
 {
-	// to be configured depending on how user keys in
-	const size_t last_slash_idx = pathName.find_last_of("\\/");
-	if (std::string::npos != last_slash_idx)
-	{
-		pathName.erase(0, last_slash_idx + 1);
-	}
-	return pathName;
-}
-
-bool CacheService::writeFile(std::string pathName, char* text)
-{
-	ofstream fp;
-	fp.open(pathName);
+	FILE* pFile;
+	pFile = fopen(getLocalPathToFile(pathName))
 	// Check for file object (detecting the stream state)
 	if (!fp) {
 		fs::create_directory("../client/CacheManager/TempFiles");
 		fp.open(pathName);
 	}
 
-	// write text into file 
-	while (*text != '\0') {
-		fp << *text;
-		text++;
-	}
-	fp.flush();
-	fp.close();
+	// TODO (Chin to provide me the method)
+
+}
+
+// this method will call the server and transfer text chunk by chunk to the cache file 
+bool CacheService::writeAll(std::string pathName)
+{
+	// TODO (Chin to provide me the method)
 	return true;
 }
 
-string CacheService::readFile(std::string pathName)
+std::string CacheService::read(std::string pathName, int offset, int bytes)
 {
-	ifstream in(pathName);
+	// TODO (Chin to provide me the method) (added my previous code, pls replace if needed)
+	FILE* pFile;
+	char* buffer;
+	size_t result;
 
-	string contents((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
+	pFile = fopen(getLocalPathToFile(pathName), "rb");
+	if (pFile == NULL) { return ""; }
 
-	in.close();
+	// obtain file size:
+	fseek(pFile, offset, SEEK_SET);
+	
 
-	return contents;
+	// allocate memory to contain the whole file:
+	buffer = (char*)malloc(sizeof(char) * bytes);
+
+	// copy the file into the buffer:
+	fread(buffer, 1, bytes, pFile);
+
+	string s(buffer);
+
+	// terminate
+	fclose(pFile);
+	free(buffer);
+
+	return s;
 }
+
+bool CacheService::writeFile(std::string pathName, char* text, int offset)
+{
+	if (checkValidityFetch(pathName)) {
+		// now perform write to the cache file 
+		if (write(getLocalPathToFile(pathName), text, offset)) {
+			// inform the server about the change 
+			RFACli rc();
+			rc.write_file(pathName, text, offset);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+std::string CacheService::readFile(std::string pathName, int offset, int bytes)
+{
+	if (checkValidityFetch(pathName)) {
+		return read(pathName, offset, bytes);
+	}
+	else {
+		return "File does not exist in current directory";
+	}
+}
+
+// make sure the file requested is placed in cache
+bool CacheService::checkValidityFetch(std::string pathName)
+{
+	map<string, File>::iterator it;
+	it = cacheMap.find(pathName);
+
+	if (it == cacheMap.end()) {
+		// does not exist in map (thus need to request file from server again before proceeding)
+		return fetchFile(pathName);
+	}
+	else {
+		// exist in map (need to check freshness)
+		File file = it->second;
+		// check if exceed the freshness interval 
+		// if does not exceed, then is valid
+		if (file.computeTimeElapsed() <= freshnessInterval) {
+			return true;
+		}
+		else {
+			// check if server side last modified is the same 
+			RFACli rc();
+			//TODO (Server side to provide method)
+			if (rc.getLastModifiedTime(pathName) != file.createdTime) {
+				return fetchFile(pathName);
+			}
+			else {
+				return true;
+			}
+		}
+	}
+
+}
+
+bool CacheService::fetchFile(std::string pathName)
+{
+	// convert to current directory cache file name
+	string cachepath = getLocalPathToFile(pathName);
+
+	RFACli rc();
+	// get the modified date from server 
+	chrono::system_clock::time_point time = rc.getTime(pathName);
+
+	// write from the server to the cache 
+	if (writeAll(pathName)) {
+		// update the hashing table 
+		updateCacheMap(pathName, time);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+void CacheService::updateCacheMap(std::string pathName, chrono::system_clock::time_point time) {
+	if (cacheMap.find(pathName) == cacheMap.end()) {
+		// does not exist in map
+		File file(getLocalPathToFile(pathName), time);
+		cacheMap.insert({ pathName, file });
+	}
+	else {
+		// exist in map
+		File file(getLocalPathToFile(pathName), time);
+		cacheMap.at(pathName) = file;
+	}
+}
+
+
+// For file name parsing
+string CacheService::extractFileName(string remoteFilePath)
+{
+	// to be configured depending on how user keys in
+	const size_t last_slash_idx = remoteFilePath.find_last_of("\\/");
+	if (std::string::npos != last_slash_idx)
+	{
+		remoteFilePath.erase(0, last_slash_idx + 1);
+	}
+	return remoteFilePath;
+}
+
+std::string CacheService::getLocalPathToFile(std::string fileName)
+{
+	return "../client/CacheManager/TempFiles/" + extractFileName(fileName);
+}
+
+
 
 

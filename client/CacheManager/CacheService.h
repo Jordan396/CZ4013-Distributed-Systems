@@ -6,8 +6,11 @@
 class CacheService
 {
 public:
-	// this method will be called when client adds a new file from server or write the file and recached it 
-	bool cacheFile(std::string pathName, char* text, std::chrono::system_clock::time_point time);
+	// this method will be called when client wants to write a file 
+	bool writeFile(std::string pathName, char* text, int offset);
+
+	// this method will be called when client wants to read a file 
+	std::string readFile(std::string pathName, int offset, int bytes);
 
 	// this method will be called when client wants to delete a particular cache entry
 	bool clearFile(std::string pathName);
@@ -15,15 +18,31 @@ public:
 	// this method will be called when client wants to clear the whole cache
 	bool clearCache();
 
-	// this method will be called when client retrieves the file for writing or reading 
-	// if file is outdated with server side or does not exist, return empty string
-	std::string getCachedFile(std::string pathName);
+	// this method will list all the entries in the cache 
+	vector<std::string> listCache();
 
+	// this method will fetch the file to the cache (checking if it is in the cache and whether it is valid first)
+	bool checkValidityFetch(std::string pathName);
+
+	
 	~CacheService();
 private:
 	std::map<std::string, File> cacheMap;
-	std::string extractFileName(std::string pathName);
-	bool writeFile(std::string pathName, char* text);
-	std::string readFile(std::string pathName);
+
+	// write the file to the cache and update the server as well
+	bool write(std::string pathName, char* text, int offset);
+
+	// write the file from server to the cache whole
+	bool writeAll(std::string pathName);
+
+	// read the file from cache 
+	std::string read(std::string pathName, int offset, int bytes);
+
+	// this method will call writeAll and also update the cacheMap to include the time of creation of file
+	bool fetchFile(std::string pathName);
+
+	// for resolving file path
+	std::string getLocalPathToFile(std::string fileName);
+	std::string extractFileName(std::string remoteFilePath);
 };
 
