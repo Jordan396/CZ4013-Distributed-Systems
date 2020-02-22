@@ -42,7 +42,12 @@ int WriteFile(char* filepath, char* toWrite, char *responseContent, int offset);
 char *servAddressHardcode = "172.21.148.168";
 unsigned short servPortHardcode = Socket::resolveService("2222", "udp");
 
-
+const int ERR_FILE_NOT_EXIST = -1;
+const int ERR_MEMORY_INSUFFICIENT = -2; 
+const int ERR_READ = -3;
+const int ERR_OFFSET_OVERFLOW = -4; 
+const int ERR_NEGATIVE_OFFSET = -5; 
+const int ERR_WRITE = -6;
 const int BUFFER_SIZE = 255;     // Longest string to echo
 
 /* Variables to handle transfer of data */
@@ -66,7 +71,7 @@ int main(int argc, char *argv[]) {
   try {
     UDPSocket sock(servPortHardcode);                
   
-    char serverBuffer[BUFFER_SIZE];         // Buffer for echo string
+    char serverBuffer[BUFFER_SIZE];   // Buffer for echo string
     int recvMsgSize;                  // Size of received message
     string sourceAddress;             // Address of datagram source
     unsigned short sourcePort;        // Port of datagram source
@@ -153,7 +158,7 @@ int ReadFile(char* fileName, char echoBuffer[], int nBytes, int startPos = 0) { 
   pFile = fopen(fileName, "rb");
   if (pFile == NULL) { // file requested does not exist, we return error back to client 
       sprintf (echoBuffer, "%s", "File does not exist"); 
-      return -1; // server calling this function has to check err code 
+      return ERR_FILE_NOT_EXIST; // server calling this function has to check err code 
   }
 
   long lsize;
@@ -162,19 +167,19 @@ int ReadFile(char* fileName, char echoBuffer[], int nBytes, int startPos = 0) { 
 
   if (lsize >  BUFFER_SIZE) { // no memory to allocate buffer: return error code to client 
       sprintf (echoBuffer, "%s", "Memory error"); 
-      return -2; 
+      return ERR_MEMORY_INSUFFICIENT; 
     }
 
   // check whether >= 0
   if (startPos < 0) { 
     sprintf(echoBuffer, "%s", "The required starting position is less than 0");
-    return -5;
+    return ERR_NEGATIVE_OFFSET;
   } 
 
   // check whether startPos > maxlength 
   if (startPos > lsize) { 
     sprintf(echoBuffer, "%s", "The specified offset is greater than the length of the file");
-    return -4;
+    return ERR_OFFSET_OVERFLOW;
   }
   
   fseek(pFile, startPos, SEEK_SET);
@@ -184,7 +189,7 @@ int ReadFile(char* fileName, char echoBuffer[], int nBytes, int startPos = 0) { 
   result = fread (echoBuffer, 1, nBytes, pFile); // pFile advanced to startPos 
   if (result != lsize) {
     sprintf (echoBuffer, "%s", "Reading error");  
-    return -3; 
+    return ERR_READ; 
     }
   fclose (pFile);
   return result; 
@@ -215,7 +220,7 @@ int WriteFile(char* filepath, char* toWrite, char *responseContent, int offset =
   pFile = fopen(filepath, "r+");
   if (pFile == NULL) { // file requested does not exist, we return error back to client 
       strcpy(responseContent, "File does not exist"); 
-      return -1; // server calling this function has to check err code 
+      return ERR_FILE_NOT_EXIST; // server calling this function has to check err code 
   }
 
   long lsize;
@@ -226,7 +231,7 @@ int WriteFile(char* filepath, char* toWrite, char *responseContent, int offset =
   // check whether startPos > maxlength 
   if (offset > lsize) { 
     strcpy(responseContent, "Starting offset exceeded file size! Please use negative indexing to start writing from the end!");
-    return -2; 
+    return ERR_OFFSET_OVERFLOW; 
   }
 
   // check whether >= 0
@@ -242,15 +247,33 @@ int WriteFile(char* filepath, char* toWrite, char *responseContent, int offset =
   strcpy(originalFile, toWrite);
   char temp[lsize - offset]; // holds off set till end 
   fread(temp, 1, lsize - offset, pFile); 
-  cout << temp << endl; 
   strcat(originalFile, temp);
   fseek(pFile, offset, SEEK_SET);
   int written = fwrite(originalFile, 1, (lsize-offset)+length, pFile);
   if (written != (lsize-offset)+length) {
     strcpy(responseContent, "Writing error");
+    return ERR_WRITE;
   } else {
     strcpy(responseContent, originalFile);
   }
+
   fclose (pFile);
-  return 0; 
+  return written; 
+}
+
+// check if file exists - if yes, overwrite else return error 
+int ClearFile(char* filepath, char *responseContent) {
+  FILE * pFile; 
+
+  pFile = fopen(filepath, "r");
+  if (pFile == NULL) { // file requested does not exist, we return error back to client 
+      strcpy(responseContent, "File does not exist"); 
+      return ERR_FILE_NOT_EXIST; // server calling this function has to check err code 
+  }
+  fclose(pFile);
+
+  // file exists, write 
+  pFile = fopen(filepath, "w");
+  fclose(pFile);
+  return 1; 
 }

@@ -28,7 +28,7 @@ using namespace std;
 // TODO: Integrate the hardcoded variables below with command prompt parser 
 // Variables are used to test read/write file access on server
 char *filepathHardcode = "/home/VMuser/CZ4013/RemoteFileAccess/Documents/test.txt"; // path to file on server
-int offsetHardcode = 0;  // offset to start R/W from
+int offsetHardcode = 3;  // offset to start R/W from
 int nBytesHardcode = 5; // number of bytes to R/W
 // Variables relating to server addressing
 char *servAddressHardcode = "172.21.148.168";
