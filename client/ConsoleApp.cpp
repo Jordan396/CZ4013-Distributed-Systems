@@ -46,6 +46,9 @@ int main(int argc, char* argv[])
         cout << argc;
         return -1;
     }
+
+    FileCLI fileCLI;
+    SettingCLI settingCLI;
     // display client menu and listen
     while (true) {
         system("clear");
@@ -54,27 +57,22 @@ int main(int argc, char* argv[])
         system("clear");
         switch (sel) {
         case 1: {
-            FileCLI fileCLI;
             fileCLI.fetchFile();
             break;
         }
         case 2: {
-            FileCLI fileCLI;
             fileCLI.readFile();
             break;
         }
         case 3: {
-            FileCLI fileCLI;
             fileCLI.writeFile();
             break;
         }
         case 4: {
-            FileCLI fileCLI;
             fileCLI.clearFile();
             break;
         }
         case 5: {
-            SettingCLI settingCLI;
             settingCLI.editSetting();
             break;
         }
