@@ -7,12 +7,13 @@
 #include "Global.h"
 #include <locale>
 #include <string>
-
+#include "CacheManager/CacheService.h"
+#include <thread>
 using namespace std;
 void displayClientMenu();
 
 int freshnessInterval = 100;
-int lossRate = 200;
+int lossRate = 0;
 int timeOut = 300;
 int sel;
 string serverIP = "";
@@ -23,6 +24,7 @@ int main(int argc, char* argv[])
     setlocale(LC_CTYPE, "");
     // read in command line arguments 
     // TODO to write serverno and portno input check
+    // -f for freshness interval, -s for server IP, -p for server port number
     if (argc == 7) {
         for (int i = 1; i < argc; i+=2) {
             string s1(argv[i]);
@@ -44,6 +46,9 @@ int main(int argc, char* argv[])
         cout << argc;
         return -1;
     }
+
+    FileCLI fileCLI;
+    SettingCLI settingCLI;
     // display client menu and listen
     while (true) {
         system("clear");
@@ -52,22 +57,22 @@ int main(int argc, char* argv[])
         system("clear");
         switch (sel) {
         case 1: {
-            FileCLI fileCLI;
-            fileCLI.readFile();
+            fileCLI.fetchFile();
             break;
         }
         case 2: {
-            FileCLI fileCLI;
-            fileCLI.clearFile();
+            fileCLI.readFile();
             break;
         }
         case 3: {
-            FileCLI fileCLI;
-            fileCLI.appendFile();
+            fileCLI.writeFile();
             break;
         }
         case 4: {
-            SettingCLI settingCLI;
+            fileCLI.clearFile();
+            break;
+        }
+        case 5: {
             settingCLI.editSetting();
             break;
         }
@@ -81,13 +86,15 @@ void displayClientMenu() {
     cout << "\u250f";  for (int i = 0; i < 40; i++) { cout << "\u2501"; }  cout << "\u2513" << endl;
     cout << "\u2503" << "CZ4031 Distributed System Main Menu     " << "\u2503" << endl;
     cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u2533";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
-    cout << "\u2503" << "1.  " << "\u2503" << "Read File                          " << "\u2503" << endl;
+    cout << "\u2503" << "1.  " << "\u2503" << "Fetch File                         " << "\u2503" << endl;
     cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
-    cout << "\u2503" << "2.  " << "\u2503" << "Clear File                         " << "\u2503" << endl;
+    cout << "\u2503" << "2.  " << "\u2503" << "Read File                          " << "\u2503" << endl;
     cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
-    cout << "\u2503" << "3.  " << "\u2503" << "Append to File                     " << "\u2503" << endl;
+    cout << "\u2503" << "3.  " << "\u2503" << "Write File                         " << "\u2503" << endl;
     cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
-    cout << "\u2503" << "4.  " << "\u2503" << "Settings                           " << "\u2503" << endl;
+    cout << "\u2503" << "4.  " << "\u2503" << "Clear File                         " << "\u2503" << endl;
+    cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
+    cout << "\u2503" << "5.  " << "\u2503" << "Settings                           " << "\u2503" << endl;
     cout << "\u2517";  for (int i = 0; i < 4; i++) { cout << "\u2501"; }  cout << "\u253b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; }  cout << "\u251b" << endl;
 }
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
