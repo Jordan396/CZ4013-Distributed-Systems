@@ -33,34 +33,34 @@ char *servAddressHardcode = "172.21.148.168";
 char *toWrite = "Hello World!";
 unsigned short servPortHardcode = Socket::resolveService("2222", "udp");
 
-
-
-/* Function declarations */
-void format_read_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes);
-void format_write_message(cJSON *jobjToSend, char *filepath, int offset, char* toWrite);
-
-
 /* Variables to handle transfer of data */
 const int BUFFER_SIZE = 255;     // Longest string to echo
 char clientBuffer[BUFFER_SIZE]; /* String response received */
-std::string request;        /* String response received */
-std::string response;
 
 // Interface for Chong Yan's reference
 /**
- * @brief Fetch file from remote to cache in local.
+ * @brief Download file from remote to cache in local.
  *
  * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
  * @param local_filepath Filepath to upload file to. (e.g. ""../client/CacheManager/TempFiles/Cinderalla.txt")
+ * @return int 1 if download successful, 0 otherwise.
  */
-void fetch_file(string remote_filepath, string local_filepath);
+int download_file(string remote_filepath, string local_filepath);
 /**
- * @brief Fetch file from remote to cache in local.
+ * @brief Fetch last modified time from remote to cache in local.
  *
  * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
- * @param local_filepath Filepath to upload file to. (e.g. ""../client/CacheManager/TempFiles/Cinderalla.txt")
+ * @param last_modified_time Last modified time
+ * @return int 1 if operation successful, 0 otherwise.
  */
-void fetch_file(string remote_filepath, string local_filepath);
+int get_last_modified_time(string remote_filepath, string last_modified_time);
+/**
+ * @brief Register the client for monitoring a file over xxx time.
+ *
+ * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
+ * @param monitor_interval Time to monitor for
+ */
+int register_client(string remote_filepath, string monitor_interval);
 /**
  * @brief Writes to the remote file.
  *
@@ -75,7 +75,119 @@ void write_file(string remote_filepath, string toWrite, int nOffset);
 // void format_read_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes);
 // void format_write_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes);
 
-int receive_message(){
+
+int download_file(string remote_filepath, string local_filepath){
+  string response;
+  int offset = 0;
+
+  while(true){
+    // Send request
+    cJSON *jobjToSend;
+    jobjToSend = cJSON_CreateObject();
+    cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(READ_CMD)); 
+    cJSON_AddItemToObject(jobjToSend, "N_BYTES", cJSON_CreateNumber(BUFFER_SIZE)); 
+    cJSON_AddItemToObject(jobjToSend, "OFFSET", cJSON_CreateNumber(offset)); 
+    send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+    cJSON_Delete(jobjToSend);
+
+    // Wait for response...
+    receive_message(response);
+
+    // Parse response message
+    cJSON *jobjReceived;
+    jobjReceived = cJSON_CreateObject();
+    jobjReceived = cJSON_Parse(response);
+    if (get_response_code(response) == 1){
+      // write();
+      // Increase offset
+      offset += BUFFER_SIZE;
+      cJSON_Delete(jobjReceived);
+    }
+    else {
+      cout << "ERROR: File cannot be read." << endl;
+      cJSON_Delete(jobjReceived);
+      return 0;
+    }
+  }
+  return 1;
+}
+
+int get_last_modified_time(string remote_filepath, string last_modified_time){
+  // Send request
+  cJSON *jobjToSend;
+  jobjToSend = cJSON_CreateObject();
+  cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(GET_LAST_MODIFIED_TIME_CMD)); 
+  cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath)); 
+  send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+  cJSON_Delete(jobjToSend);
+
+  // Wait for response...
+  receive_message(response);
+
+  // Parse response message
+  cJSON *jobjReceived;
+  jobjReceived = cJSON_CreateObject();
+  jobjReceived = cJSON_Parse(response);
+  if (get_response_code(response) == 1){
+    get_last_modified_time(jobjReceived, last_modified_time);
+    cJSON_Delete(jobjReceived);
+    return 1;
+  }
+  cJSON_Delete(jobjReceived);
+  return 0;
+}
+
+int register_client(string remote_filepath, string monitor_duration){
+  // Response
+  std::string response;
+
+  // Send request
+  cJSON *jobjToSend;
+  jobjToSend = cJSON_CreateObject();
+  cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(REGISTER_CMD)); 
+  cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath));
+  cJSON_AddItemToObject(jobjToSend, "MONITOR_DURATION", cJSON_CreateString(monitor_duration));  
+  send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+  cJSON_Delete(jobjToSend);
+
+  // Wait for response...
+  receive_message(response);
+
+  // Parse response message
+  cJSON *jobjReceived;
+  jobjReceived = cJSON_CreateObject();
+  jobjReceived = cJSON_Parse(response);
+  if (get_response_code(response) == 0){
+    cJSON_Delete(jobjReceived);
+    return 0;
+  }
+  cJSON_Delete(jobjReceived);
+
+  // Enter monitoring loop...
+  while (true){
+    // Wait for response...
+    receive_message(response);
+
+    // Parse response message
+    cJSON *jobjReceived;
+    jobjReceived = cJSON_CreateObject();
+    jobjReceived = cJSON_Parse(response);
+    if (get_response_code(response) == 1000){ // monitor duration expired
+      cJSON_Delete(jobjReceived);
+      break;
+    }
+    else { // file written to, proceed to read new file
+      cJSON_Delete(jobjReceived);
+      if (download_file(remote_filepath, local_filepath) != 1){
+        cout << "ERROR: Cannot download file. Exiting...";
+        return 0;
+      }
+    }
+  }
+  return 1;
+}
+
+int receive_message(string response){
   try {
     UDPSocket sock(servPortHardcode);                
   
@@ -89,10 +201,6 @@ int receive_message(){
     recvMsgSize = sock.recvFrom(clientBuffer, BUFFER_SIZE, sourceAddress, sourcePort);
     cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
     strncpy(response, clientBuffer, sizeof(clientBuffer));
-
-
-    // Process response
-
   }
   catch (SocketException &e) {
     cerr << e.what() << endl;
@@ -113,43 +221,7 @@ int send_message(string destAddress, unsigned short destPort, string message){
   return 0;
 }
 
-// void build_get_file_reference_message(cJSON *jobjToSend, char *filepath){
-//   cJSON_AddItemToObject(jobjToSend, "clientCommandCode", cJSON_CreateNumber(READ_CMD_CODE)); 
-//   cJSON_AddItemToObject(jobjToSend, "rfaPath", cJSON_CreateString(filepath)); 
-// }
-
-// /** \copydoc format_read_message */
-// void format_read_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes)
-// {
-//   cJSON_AddItemToObject(jobjToSend, "clientCommandCode", cJSON_CreateNumber(READ_CMD_CODE)); 
-//   cJSON_AddItemToObject(jobjToSend, "offset", cJSON_CreateNumber(offset)); 
-//   cJSON_AddItemToObject(jobjToSend, "nBytes", cJSON_CreateNumber(nBytes)); 
-//   cJSON_AddItemToObject(jobjToSend, "rfaPath", cJSON_CreateString(filepath)); 
-// }
-
-
-/** \copydoc format_read_message */
-void format_read_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes)
+int get_response_code(cJSON *jobjReceived)
 {
-  cJSON_AddItemToObject(jobjToSend, "clientCommandCode", cJSON_CreateNumber(READ_CMD_CODE)); 
-  cJSON_AddItemToObject(jobjToSend, "offset", cJSON_CreateNumber(offset)); 
-  cJSON_AddItemToObject(jobjToSend, "nBytes", cJSON_CreateNumber(nBytes)); 
-  cJSON_AddItemToObject(jobjToSend, "rfaPath", cJSON_CreateString(filepath)); 
+  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "RESPONSE_CODE")->valueint;
 }
-
-/** \copydoc format_write_message */
-void format_write_message(cJSON *jobjToSend, char *filepath, int offset, char* toWrite)
-{
-  cJSON_AddItemToObject(jobjToSend, "clientCommandCode", cJSON_CreateNumber(WRITE_CMD_CODE)); 
-  cJSON_AddItemToObject(jobjToSend, "offset", cJSON_CreateNumber(offset)); 
-  cJSON_AddItemToObject(jobjToSend, "toWrite", cJSON_CreateString(toWrite)); 
-  cJSON_AddItemToObject(jobjToSend, "rfaPath", cJSON_CreateString(filepath)); 
-}
-
-
-// /** \copydoc format_monitor_message */
-// void format_monitor_message(cJSON *jobjToSend, char *filepath)
-// {
-//   cJSON_AddItemToObject(jobjToSend, "requestCode", cJSON_CreateNumber(commandCode)); /*Add command request code to JSON object*/
-//   cJSON_AddItemToObject(jobjToSend, "username", cJSON_CreateString(username));       /*Add username to JSON object*/
-// }

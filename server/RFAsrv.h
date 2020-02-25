@@ -23,9 +23,10 @@
 
 
 /* CLIENT COMMAND CODES */
-#define READ_CMD 0
-#define WRITE_CMD 1  
-#define REGISTER_CMD 2 
+#define GET_LAST_MODIFIED_TIME_CMD 0
+#define READ_CMD 1
+#define WRITE_CMD 2  
+#define REGISTER_CMD 3 
 
 /* SERVER STATUS CODES */ 
 // Check with Jia Chin
@@ -35,6 +36,9 @@
 #include <stdio.h>      /* for printf() and fprintf() */
 #include <iostream>          // For cout and cerr
 #include <fstream>
+#include <pthread.h>
+#include <chrono>
+#include <ctime>   
 #include <stdlib.h>     /* for atoi() and exit() */
 #include <string.h>     /* for memset() */
 #include <cstring>
