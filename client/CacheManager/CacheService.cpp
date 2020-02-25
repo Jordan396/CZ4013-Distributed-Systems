@@ -75,7 +75,7 @@ bool CacheService::write(std::string pathName, char* text, int offset)
 // this method will call the server and transfer text chunk by chunk to the cache file 
 bool CacheService::writeAll(std::string pathName)
 {
-	// TODO (Chin to provide me the method)
+	// TODO (include Jordan's method)
 	return true;
 }
 

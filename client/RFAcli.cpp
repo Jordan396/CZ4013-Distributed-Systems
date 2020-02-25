@@ -47,6 +47,13 @@ std::string response;
  */
 void fetch_file(string remote_filepath, string local_filepath);
 /**
+ * @brief Fetch file from remote to cache in local.
+ *
+ * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
+ * @param local_filepath Filepath to upload file to. (e.g. ""../client/CacheManager/TempFiles/Cinderalla.txt")
+ */
+void fetch_file(string remote_filepath, string local_filepath);
+/**
  * @brief Writes to the remote file.
  *
  * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
