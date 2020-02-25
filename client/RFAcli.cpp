@@ -25,12 +25,20 @@
 
 // TODO: Integrate the hardcoded variables below with command prompt parser 
 // Variables are used to test read/write file access on server
-char *filepathHardcode = "RFA://Documents/Cinderella.txt"; // path to file on server
+char *filepathHardcode = "/home/VMuser/CZ4013/RemoteFileAccess/Documents/test.txt"; // path to file on server
 int offsetHardcode = 0;  // offset to start R/W from
-int nBytesHardcode = 20; // number of bytes to R/W
+int nBytesHardcode = 5; // number of bytes to R/W
 // Variables relating to server addressing
 char *servAddressHardcode = "172.21.148.168";
+char *toWrite = "Hello World!";
 unsigned short servPortHardcode = Socket::resolveService("2222", "udp");
+
+
+
+/* Function declarations */
+void format_read_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes);
+void format_write_message(cJSON *jobjToSend, char *filepath, int offset, char* toWrite);
+
 
 /* Variables to handle transfer of data */
 const int BUFFER_SIZE = 255;     // Longest string to echo
@@ -68,11 +76,13 @@ int receive_message(){
     string sourceAddress;             // Address of datagram source
     unsigned short sourcePort;        // Port of datagram source
 
+
     // Block until receive message from a client
     cout << "Listening..." << endl;
     recvMsgSize = sock.recvFrom(clientBuffer, BUFFER_SIZE, sourceAddress, sourcePort);
     cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
     strncpy(response, clientBuffer, sizeof(clientBuffer));
+
 
     // Process response
 
@@ -110,14 +120,25 @@ int send_message(string destAddress, unsigned short destPort, string message){
 //   cJSON_AddItemToObject(jobjToSend, "rfaPath", cJSON_CreateString(filepath)); 
 // }
 
-// /** \copydoc format_write_message */
-// void format_write_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes)
-// {
-//   cJSON_AddItemToObject(jobjToSend, "clientCommandCode", cJSON_CreateNumber(WRITE_CMD_CODE)); 
-//   cJSON_AddItemToObject(jobjToSend, "offset", cJSON_CreateNumber(offset)); 
-//   cJSON_AddItemToObject(jobjToSend, "nBytes", cJSON_CreateNumber(nBytes)); 
-//   cJSON_AddItemToObject(jobjToSend, "rfaPath", cJSON_CreateString(filepath)); 
-// }
+
+/** \copydoc format_read_message */
+void format_read_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes)
+{
+  cJSON_AddItemToObject(jobjToSend, "clientCommandCode", cJSON_CreateNumber(READ_CMD_CODE)); 
+  cJSON_AddItemToObject(jobjToSend, "offset", cJSON_CreateNumber(offset)); 
+  cJSON_AddItemToObject(jobjToSend, "nBytes", cJSON_CreateNumber(nBytes)); 
+  cJSON_AddItemToObject(jobjToSend, "rfaPath", cJSON_CreateString(filepath)); 
+}
+
+/** \copydoc format_write_message */
+void format_write_message(cJSON *jobjToSend, char *filepath, int offset, char* toWrite)
+{
+  cJSON_AddItemToObject(jobjToSend, "clientCommandCode", cJSON_CreateNumber(WRITE_CMD_CODE)); 
+  cJSON_AddItemToObject(jobjToSend, "offset", cJSON_CreateNumber(offset)); 
+  cJSON_AddItemToObject(jobjToSend, "toWrite", cJSON_CreateString(toWrite)); 
+  cJSON_AddItemToObject(jobjToSend, "rfaPath", cJSON_CreateString(filepath)); 
+}
+
 
 // /** \copydoc format_monitor_message */
 // void format_monitor_message(cJSON *jobjToSend, char *filepath)
