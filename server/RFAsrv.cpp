@@ -38,7 +38,6 @@ char *servAddressHardcode = "172.21.148.168";
 unsigned short servPortHardcode = Socket::resolveService("2222", "udp");
 bool RMI_SCHEME = true; // at most once if true
 
-<<<<<<< HEAD
 const int ERR_FILE_NOT_EXIST = -1;
 const int ERR_MEMORY_INSUFFICIENT = -2; 
 const int ERR_READ = -3;
@@ -46,8 +45,6 @@ const int ERR_OFFSET_OVERFLOW = -4;
 const int ERR_NEGATIVE_OFFSET = -5; 
 const int ERR_WRITE = -6;
 const int BUFFER_SIZE = 255;     // Longest string to echo
-=======
->>>>>>> 42790c57c7b123ae9cafe6e27080c9827c97d350
 
 /* Variables to handle transfer of data */
 std::string request;        /* String response received */
@@ -117,7 +114,7 @@ int main(int argc, char *argv[]) {
 
 void *monitor_registered_clients( void *ptr )(){
   while (true){
-    cout << "Checking for expired clients..."
+    cout << "Checking for expired clients...";
     // Get current time
     auto currentTime = std::chrono::system_clock::now();
 
@@ -248,7 +245,7 @@ void execute_read_command(string sourceAddress, unsigned short sourcePort, cJSON
       // Send response
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
       cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Content read!")); 
       send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
@@ -286,7 +283,7 @@ void execute_write_command(string sourceAddress, unsigned short sourcePort, cJSO
       // Send response
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
       cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Content written!")); 
       send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
@@ -314,9 +311,9 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
 
   // Extract parameters from message
   get_filepath(jobjReceived, pseudo_filepath);
-  offset = get_offset(jobjReceived);
-  nBytes = get_nBytes(jobjReceived);
-  get_monitor_duration(jobjReceived, monitor_duration)
+  int offset = get_offset(jobjReceived);
+  int nBytes = get_nBytes(jobjReceived);
+  get_monitor_duration(jobjReceived, monitor_duration);
 
   // Assign registeredClient attributes
   registeredClient.address = sourceAddress;
@@ -328,12 +325,12 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
   if (translate_filepath(pseudo_filepath, actual_filepath)){
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
-    (monitorMap[actual_filepath]).push_back(registeredClient)
+    (monitorMap[actual_filepath]).push_back(registeredClient);
 
     // TODO: Integrate with Jia Chin
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
       cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Client registered")); 
       send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
@@ -365,7 +362,7 @@ bool is_request_exists(string sourceAddress, unsigned short sourcePort, string m
   std::hash<std::string> str_hash;
   string requestMapKey = sourceAddress + ":" + std::to_string(sourcePort);
   size_t requestMapValue = str_hash(message);
-  return (requestMapValue == requestMap[requestMapKey])
+  return (requestMapValue == requestMap[requestMapKey]);
 }
 
 void store_request(string sourceAddress, unsigned short sourcePort, string message){
@@ -548,7 +545,6 @@ int WriteFile(char* filepath, char* toWrite, char *responseContent, int offset =
   }
 
   fclose (pFile);
-<<<<<<< HEAD
   return written; 
 }
 
@@ -568,7 +564,38 @@ int ClearFile(char* filepath, char *responseContent) {
   fclose(pFile);
   return 1; 
 }
-=======
-  return 0; 
+
+// wrapper around remove provided by cpp 
+int DeleteFile(char * filename) { 
+  int a = remove(filename);
+  // file deletion unsucessful
+  if (a != 0) { 
+    return ERR_FILE_NOT_EXIST;
+  }
+  return a; // 0 
 }
->>>>>>> 42790c57c7b123ae9cafe6e27080c9827c97d350
+
+// wrapper around rename provided by cpp
+int Rename(char * oldname, char * newname) { 
+  int a = rename(oldname, newname); 
+  if (a != 0) { 
+    return ERR_FILE_NOT_EXIST;
+  }
+  return a; // 0 
+}
+
+
+// taken from stackoverflow - decorator pattern in cpp???
+// call it as decorate(int, func)(params)
+template<class T>
+auto decorator(int lossRate, T&& func) {
+    int percent = rand() % 100;
+    auto new_function = [func = std::forward<T>(func)](auto&&... args) {
+        auto result = func(std::forward<decltype(args)>(args)...);   
+        if (percent > lossRate) { 
+          return result; 
+        }
+        return;
+    };
+    return new_function;
+} 

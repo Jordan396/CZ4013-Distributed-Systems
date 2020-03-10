@@ -29,7 +29,7 @@
 #define REGISTER_CMD 3 
 
 /* SERVER STATUS CODES */ 
-// Check with Jia Chin
+// defined in server class; can shift here if needed
 
 /* Standard libraries */
 #define _GNU_SOURCE
