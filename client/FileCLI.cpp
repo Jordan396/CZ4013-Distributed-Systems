@@ -1,36 +1,109 @@
 #include "FileCLI.h"
+#include "CacheManager/CacheService.h"
 #include <iostream>
 using namespace std;
 
+
+
 void FileCLI::readFile()
 {
-	listFile();
-	getFileID();
-	cout << "Offset: ";
-	cin >> offSet;
-	cout << "Number of bytes: ";
-	cin >> numBytes;
-	// TODO: execute operation reading file 
+	int fileID;
 
+	listFile();
+	cin >> fileID;
+	
+	// check if the fileID input is within bounds
+	if (checkValidity(fileID)) {
+		int offSet;
+		int numBytes;
+
+
+		cout << "Offset: ";
+		cin >> offSet;
+		cout << "Number of bytes: ";
+		cin >> numBytes;
+
+		// translate fileID to real remote file path 
+		map<int, string>::iterator it;
+		it = cacheReference.find(fileID);
+		string remoteFilePath = it->second;
+		
+		cout << cv.readFile(remoteFilePath, offSet, numBytes) << endl;
+	}
+
+	return;
 }
 
 void FileCLI::clearFile()
 {
-	listFile();
-	getFileID();
-	// TODO: execute clearing file content
+	int fileID;
 
+	listFile();
+	cin >> fileID;
+
+	// check if the fileID input is within bounds
+	if (checkValidity(fileID)) {
+
+		// translate fileID to real remote file path 
+		map<int, string>::iterator it;
+		it = cacheReference.find(fileID);
+		string remoteFilePath = it->second;
+		
+		if (cv.clearFile(remoteFilePath)) {
+			cout << "File is removed" << endl;
+		}
+		else {
+			cout << "Failed to remove file" << endl;
+		}
+	}
+	return;
 }
 
-void FileCLI::appendFile()
+void FileCLI::writeFile()
 {
+	int fileID;
+
 	listFile();
-	getFileID();
-	cout << "Offset: ";
-	cin >> offSet;
-	cout << "Input the text to be appended: ";
-	cin >> textAppend;
-	// TODO: execute appending file
+	cin >> fileID;
+
+	// check if the fileID input is within bounds
+	if (checkValidity(fileID)) {
+		int offSet;
+		string textAppend; 
+
+		cout << "Offset: ";
+		cin >> offSet;
+		cout << "Input the text to be appended: ";
+		cin >> textAppend;
+
+		// translate fileID to real remote file path 
+		map<int, string>::iterator it;
+		it = cacheReference.find(fileID);
+		string remoteFilePath = it->second;
+		
+		if (cv.writeFile(remoteFilePath, textAppend, offSet)) {
+			cout << "Written into File Successfully" << endl;
+		}
+		else {
+			cout << "Failed to write to file" <<endl
+		}
+	}
+	return;
+}
+
+void FileCLI::fetchFile()
+{
+	string filePath;
+	cout << "Please input a file path: ";
+	cin << filePath;
+	if (cv.checkValidityFetch(filePath)) {
+		cout << "File is fetched and cached" << endl;
+	}
+	else {
+		cout << "Failed to fetch and cache file" << endl;
+	}
+
+	return;
 }
 
 
@@ -38,26 +111,60 @@ void FileCLI::appendFile()
 // table to show all the available files 
 void FileCLI::listFile()
 {
+	map<int, std::string> cacheReference;
+	vector<std::string> cacheKeys;
+
+	cacheKeys = cv.listCache();
+
+	for (cacheSize = 0; j < cacheKeys.size(); j++) {
+		cacheReference.insert({ cacheSize +1 , cacheKeys[j] });
+	}
+
 	// get all the files available
 	cout << "\u250f";  for (int i = 0; i < 40; i++) { cout << "\u2501"; }  cout << "\u2513" << endl;
 	cout << "\u2503" << "Key in the FileID or -1 for manual input" << "\u2503" << endl;
-	// sample for testing
-	cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u2533";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
-	cout << "\u2503" << "1.  " << "\u2503" << "/root/user123/sample.txt           " << "\u2503" << endl;
-	cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
-	cout << "\u2503" << "2.  " << "\u2503" << "/root/user123/sample.txt           " << "\u2503" << endl;
-	cout << "\u2517";  for (int i = 0; i < 4; i++) { cout << "\u2501"; }  cout << "\u253b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; }  cout << "\u251b" << endl;
+
+	// no entries 
+	if (cacheSize == 0) {
+		cout << "\u2517";  for (int i = 0; i < 40; i++) { cout << "\u2501"; }  cout << "\u251b" << endl;
+		return;
+	}
+	else {
+		cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u2533";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
+	}
+
+	for (int i = 0; i < cacheKeys.size(); i++) {
+		cout << "\u2503" << i + 1; for (int i = 0; i < 4 - to_string(i + 1).length(); i++) { cout << " "; } cout << "\u2503" << cacheKeys[i];  for (int i = 0; i < 35 - cacheKeys[i].length()) {
+			cout << " ";} cout << "\u2503" << endl;
+
+		if (i != cacheKeys.size() - 1) {
+			cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
+		}
+		else {
+			cout << "\u2517";  for (int i = 0; i < 4; i++) { cout << "\u2501"; }  cout << "\u253b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; }  cout << "\u251b" << endl;
+		}
+	}
+
+	return;
 }
 
-void FileCLI::getFileID()
+bool FileCLI::checkValidity(int fileID)
 {
-	cin >> fileID;
-	//	manual input if user key in -1
-	if (fileID == -1) {
-		cin >> filePathName;
+	if (fileID >= 1 && fileID <= cacheSize) {
+		return true;
+	}
+	else {
+		return false;
 	}
 }
 
 FileCLI::~FileCLI()
 {
+	cv.saveHashMap();
+}
+
+FileCLI::FileCLI()
+{
+	CacheService cv();
+	cv.restoreHashMap();
 }

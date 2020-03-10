@@ -23,9 +23,13 @@
 
 
 /* CLIENT COMMAND CODES */
-#define READ_CMD_CODE 0   
-#define WRITE_CMD_CODE 1  
-#define MONITOR_CMD_CODE 2  
+#define GET_LAST_MODIFIED_TIME_CMD 0
+#define READ_CMD 1
+#define WRITE_CMD 2  
+#define REGISTER_CMD 3 
+
+/* SERVER STATUS CODES */ 
+// Check with Jia Chin
 
 /* Standard libraries */
 #define _GNU_SOURCE

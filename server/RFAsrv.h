@@ -23,18 +23,30 @@
 
 
 /* CLIENT COMMAND CODES */
-#define READ_CMD_CODE 0   
-#define WRITE_CMD_CODE 1  
-#define MONITOR_CMD_CODE 2 
+#define GET_LAST_MODIFIED_TIME_CMD 0
+#define READ_CMD 1
+#define WRITE_CMD 2  
+#define REGISTER_CMD 3 
+
+/* SERVER STATUS CODES */ 
+// Check with Jia Chin
 
 /* Standard libraries */
 #define _GNU_SOURCE
 #include <stdio.h>      /* for printf() and fprintf() */
 #include <iostream>          // For cout and cerr
 #include <fstream>
+#include <pthread.h>
+#include <chrono>
+#include <ctime>   
 #include <stdlib.h>     /* for atoi() and exit() */
 #include <string.h>     /* for memset() */
 #include <cstring>
+#include <map>
+#include <string>
+#include <functional>
+#include <list> 
+#include <iterator> 
 #include <unistd.h>     /* for close() */
 #include <signal.h>     /* for sigaction() */
 #include <ctype.h>      /* for char validation */
