@@ -49,8 +49,8 @@
 #include <arpa/inet.h>  /* for sockaddr_in and inet_ntoa() */
 
 /* External libraries */
-#include "./../dependencies/RFAsockets.h"      // For UDPSocket and SocketException
-#include "./../dependencies/cJSON.h"      // For message formatting
+#include "RFAsockets.h"      // For UDPSocket and SocketException
+#include "cJSON.h"      // For message formatting
 
 /**
  * @brief Accepts a cJSON object and sends its string representation over a socket.
