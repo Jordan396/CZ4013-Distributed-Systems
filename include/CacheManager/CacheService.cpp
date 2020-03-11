@@ -1,15 +1,7 @@
 #include "CacheService.h"
-#include <string>
-#include <map>
-#include <fstream>
-#include <iostream>
-#include <experimental/filesystem>
-#include "./../Global.h"
-#include "./../RFAcli.h"
 
 namespace fs = std::experimental::filesystem;
 using namespace std;
-
 
 bool CacheService::clearFile(std::string pathName)
 {
@@ -57,20 +49,26 @@ CacheService::~CacheService()
 		it = cacheMap.erase(it);
 }
 
-// this method will just write to the cache file
-bool CacheService::write(std::string pathName, char* text, int offset)
-{
-	// FILE* pFile;
-	// pFile = fopen(getLocalPathToFile(pathName).c_str(), );
-	// Check for file object (detecting the stream state)
-	// fs::create_directory("../client/CacheManager/TempFiles");
-	if (!fp) {
-		fp.open(pathName);
-	}
+// // this method will just write to the cache file
+// bool CacheService::write(std::string pathName, char* text, int offset)
+// {
+// 	string fileName = getLocalPathToFile(pathName)
+	
+// 	// guarantee of existence of file pointed to by pathName 
+// 	utils::WriteFile(fileName.c_str(), text, )
+// 	// FILE* pFile;
+// 	// pFile = fopen(getLocalPathToFile(pathName).c_str(), );
+// 	// Check for file object (detecting the stream state)
 
-	// TODO (Chin to provide me the method)
+// 	// TODO: create somewhere else 
+// 	// fs::create_directory("../client/CacheManager/TempFiles");
+// 	if (!fp) {
+// 		fp.open(pathName);
+// 	}
 
-}
+// 	// TODO (Chin to provide me the method)
+
+// }
 
 // this method will call the server and transfer text chunk by chunk to the cache file 
 bool CacheService::writeAll(std::string pathName)
@@ -79,42 +77,42 @@ bool CacheService::writeAll(std::string pathName)
 	return true;
 }
 
-std::string CacheService::read(std::string pathName, int offset, int bytes)
-{
-	// TODO (Chin to provide me the method) (added my previous code, pls replace if needed)
-	FILE* pFile;
-	char* buffer;
-	size_t result;
+// std::string CacheService::read(std::string pathName, int offset, int bytes)
+// {
+// 	// TODO (Chin to provide me the method) (added my previous code, pls replace if needed)
+// 	FILE* pFile;
+// 	char* buffer;
+// 	size_t result;
 
-	pFile = fopen(getLocalPathToFile(pathName), "rb");
-	if (pFile == NULL) { return ""; }
+// 	pFile = fopen(getLocalPathToFile(pathName), "rb");
+// 	if (pFile == NULL) { return ""; }
 
-	// obtain file size:
-	fseek(pFile, offset, SEEK_SET);
+// 	// obtain file size:
+// 	fseek(pFile, offset, SEEK_SET);
 	
 
-	// allocate memory to contain the whole file:
-	buffer = (char*)malloc(sizeof(char) * bytes);
+// 	// allocate memory to contain the whole file:
+// 	buffer = (char*)malloc(sizeof(char) * bytes);
 
-	// copy the file into the buffer:
-	fread(buffer, 1, bytes, pFile);
+// 	// copy the file into the buffer:
+// 	fread(buffer, 1, bytes, pFile);
 
-	string s(buffer);
+// 	string s(buffer);
 
-	// terminate
-	fclose(pFile);
-	free(buffer);
+// 	// terminate
+// 	fclose(pFile);
+// 	free(buffer);
 
-	return s;
-}
+// 	return s;
+// }
 
 bool CacheService::writeFile(std::string pathName, std::string text, int offset)
 {
 	if (checkValidityFetch(pathName)) {
 		// now perform write to the cache file 
-		if (write(getLocalPathToFile(pathName), text, offset)) {
+		if (utils::WriteFile(getLocalPathToFile(pathName).c_str(), text.c_str(), offset)) {
 			// inform the server about the change 
-			write_file(pathName, text, offset);
+			client::write_file(pathName, text, offset);
 			return true;
 		}
 	}
@@ -152,9 +150,27 @@ bool CacheService::checkValidityFetch(std::string pathName)
 		}
 		else {
 			// check if server side last modified is the same 
-			RFACli rc();
+			// RFACli rc();
 			//TODO (Server side to provide method)
-			if (rc.getLastModifiedTime(pathName) != file.createdTime) {
+			string last_modified_time;
+			client::get_last_modified_time(pathName, last_modified_time);
+
+			// TODO: Convert last_modified_time to below format
+
+			std::tm tm = {0};
+			tm.tm_sec = 40;
+			tm.tm_min = 38;
+			tm.tm_hour = 12;
+			tm.tm_mday = 10;
+			tm.tm_mon = 9;
+			tm.tm_year = 112;
+			tm.tm_isdst = -1;
+			// Convert std::tm to std::time_t (popular extension)
+			std::time_t tt = timegm(&tm);
+			// Convert std::time_t to std::chrono::system_clock::time_point
+			std::chrono::system_clock::time_point time = std::chrono::system_clock::from_time_t(tt);
+
+			if (time != file.createdTime) {
 				return fetchFile(pathName);
 			}
 			else {
@@ -163,26 +179,6 @@ bool CacheService::checkValidityFetch(std::string pathName)
 		}
 	}
 
-}
-
-bool CacheService::fetchFile(std::string pathName)
-{
-	// convert to current directory cache file name
-	string cachepath = getLocalPathToFile(pathName);
-
-	RFACli rc();
-	// get the modified date from server 
-	chrono::system_clock::time_point time = rc.getTime(pathName);
-
-	// write from the server to the cache 
-	if (writeAll(pathName)) {
-		// update the hashing table 
-		updateCacheMap(pathName, time);
-		return true;
-	}
-	else {
-		return false;
-	}
 }
 
 void CacheService::updateCacheMap(std::string pathName, chrono::system_clock::time_point time) {
@@ -195,6 +191,41 @@ void CacheService::updateCacheMap(std::string pathName, chrono::system_clock::ti
 		// exist in map
 		File file(getLocalPathToFile(pathName), time);
 		cacheMap.at(pathName) = file;
+	}
+}
+
+bool CacheService::fetchFile(std::string pathName)
+{
+	// convert to current directory cache file name
+	string cachepath = getLocalPathToFile(pathName);
+
+	// RFACli rc();
+	string last_modified_time;
+	client::get_last_modified_time(pathName, last_modified_time);
+
+	// TODO: Convert last_modified_time to below format
+
+	std::tm tm = {0};
+    tm.tm_sec = 40;
+    tm.tm_min = 38;
+    tm.tm_hour = 12;
+    tm.tm_mday = 10;
+    tm.tm_mon = 9;
+    tm.tm_year = 112;
+    tm.tm_isdst = -1;
+    // Convert std::tm to std::time_t (popular extension)
+    std::time_t tt = timegm(&tm);
+    // Convert std::time_t to std::chrono::system_clock::time_point
+    std::chrono::system_clock::time_point time = std::chrono::system_clock::from_time_t(tt);
+
+	// write from the server to the cache 
+	if (writeAll(pathName)) {
+		// update the hashing table 
+		updateCacheMap(pathName, time);
+		return true;
+	}
+	else {
+		return false;
 	}
 }
 
@@ -223,7 +254,7 @@ bool CacheService::saveHashMap()
 	}
 
 	for (map<string, File>::iterator it = cacheMap.begin(); it != cacheMap.end(); it++) {
-		fprintf(fp, "%s=%s\n", it->first.c_str(), it->second.c_str());
+		fprintf(fp, "%s=%s\n", it->first.c_str(), it->second);
 	}
 
 	fclose(fp);

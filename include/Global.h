@@ -8,6 +8,7 @@ extern int lossRate;
 extern int timeOut;
 extern std::string serverIP;
 extern std::string portNo;
+#define BUFFER_SIZE 255;     // Longest string to echo
 #endif
 
 #endif

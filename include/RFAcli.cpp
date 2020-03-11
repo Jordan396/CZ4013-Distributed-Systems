@@ -38,37 +38,37 @@ const int BUFFER_SIZE = 255;     // Longest string to echo
 char clientBuffer[BUFFER_SIZE]; /* String response received */
 
 // Interface for Chong Yan's reference
-/**
- * @brief Download file from remote to cache in local.
- *
- * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
- * @param local_filepath Filepath to upload file to. (e.g. ""../client/CacheManager/TempFiles/Cinderalla.txt")
- * @return int 1 if download successful, 0 otherwise.
- */
-int download_file(string remote_filepath, string local_filepath);
-/**
- * @brief Fetch last modified time from remote to cache in local.
- *
- * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
- * @param last_modified_time Last modified time
- * @return int 1 if operation successful, 0 otherwise.
- */
-int get_last_modified_time(string remote_filepath, string last_modified_time);
-/**
- * @brief Register the client for monitoring a file over xxx time.
- *
- * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
- * @param monitor_interval Time to monitor for
- */
-int register_client(string remote_filepath, string monitor_interval);
-/**
- * @brief Writes to the remote file.
- *
- * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
- * @param toWrite String to be written
- * @param nOffset Offset in file to write at
- */
-void write_file(string remote_filepath, string toWrite, int nOffset);
+// /**
+//  * @brief Download file from remote to cache in local.
+//  *
+//  * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
+//  * @param local_filepath Filepath to upload file to. (e.g. ""../client/CacheManager/TempFiles/Cinderalla.txt")
+//  * @return int 1 if download successful, 0 otherwise.
+//  */
+// int download_file(string remote_filepath, string local_filepath);
+// /**
+//  * @brief Fetch last modified time from remote to cache in local.
+//  *
+//  * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
+//  * @param last_modified_time Last modified time
+//  * @return int 1 if operation successful, 0 otherwise.
+//  */
+// int get_last_modified_time(string remote_filepath, string last_modified_time);
+// /**
+//  * @brief Register the client for monitoring a file over xxx time.
+//  *
+//  * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
+//  * @param monitor_interval Time to monitor for
+//  */
+// int register_client(string remote_filepath, string monitor_interval);
+// /**
+//  * @brief Writes to the remote file.
+//  *
+//  * @param remote_filepath Filepath of file in server. (e.g. "RFA://Documents/Cinderella.txt")
+//  * @param toWrite String to be written
+//  * @param nOffset Offset in file to write at
+//  */
+// void write_file(string remote_filepath, string toWrite, int nOffset);
 
 
 /* Function declarations */
@@ -224,4 +224,30 @@ int send_message(string destAddress, unsigned short destPort, string message){
 int get_response_code(cJSON *jobjReceived)
 {
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "RESPONSE_CODE")->valueint;
+}
+
+void write_file(string remote_filepath, string toWrite, int nOffset){
+  // Response
+  std::string response;
+
+  // Send request
+  cJSON *jobjToSend;
+  jobjToSend = cJSON_CreateObject();
+  cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(WRITE_CMD)); 
+  cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath));
+  send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+  cJSON_Delete(jobjToSend);
+
+  // // Wait for response...
+  // receive_message(response);
+
+  // // Parse response message
+  // cJSON *jobjReceived;
+  // jobjReceived = cJSON_CreateObject();
+  // jobjReceived = cJSON_Parse(response);
+  // if (get_response_code(response) == 0){
+  //   cJSON_Delete(jobjReceived);
+  //   return 0;
+  // }
+  // cJSON_Delete(jobjReceived);
 }

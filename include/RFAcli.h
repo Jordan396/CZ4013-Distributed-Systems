@@ -52,42 +52,12 @@
 #include "RFAsockets.h"      // For UDPSocket and SocketException
 #include "cJSON.h"      // For message formatting
 
-/**
- * @brief Accepts a cJSON object and sends its string representation over a socket.
- *
- * This function converts a cJSON object to its string representation.
- * It then sends this string to the other party on the network.
- * 
- * This payload adopts the following structure:
- * The first RCV_BUF_SIZE bytes indicates the size of the actual payload.
- * The remaining bytes contain the actual cJSON string representation payload.
- *
- * @param sock Client socket assigned to the connection.
- * @param jobjToSend cJSON object to be sent.
- * @return int 0 if error occurred, 1 otherwise.
- */
-int send_message(int sock, cJSON *jobjToSend);
-
-/**
- * @brief Receives a send_payload formatted response and saves it to objReceived.
- *
- * The socket listens for a send_payload formatted response.
- * It then saves the response to an objReceived string.
- * 
- * This reponse adopts the following structure:
- * The first RCV_BUF_SIZE bytes indicates the size of the actual payload.
- * The remaining bytes contain the actual cJSON string representation payload.
- *
- * @param sock Client socket assigned to the connection.
- * @param objReceived String to save the response recieved.
- * @return void
- */
-void receive_message(int sock, char *objReceived);
-
-/**
- * @brief Waits for secs amount of seconds.
- *
- * @param secs Number of seconds to wait for.
- * @return void
- */
-void wait_for(unsigned int secs);
+namespace client {
+  int download_file(string remote_filepath, string local_filepath);
+  int get_last_modified_time(string remote_filepath, string last_modified_time);
+  int register_client(string remote_filepath, string monitor_duration);
+  int receive_message(string response);
+  int send_message(string destAddress, unsigned short destPort, string message);
+  int get_response_code(cJSON *jobjReceived);
+  void write_file(string remote_filepath, string toWrite, int nOffset);
+}

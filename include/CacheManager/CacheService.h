@@ -3,7 +3,14 @@
 #include <map>
 #include <chrono>
 #include <vector>
+#include <fstream>
+#include <iostream>
+#include <experimental/filesystem>
 #include "File.h"
+#include "../utils.h"
+#include "./../Global.h"
+#include "./../RFAcli.h"
+
 class CacheService
 {
 public:
@@ -47,6 +54,9 @@ private:
 	// for resolving file path
 	std::string getLocalPathToFile(std::string fileName);
 	std::string extractFileName(std::string remoteFilePath);
+
+	// Chong Yan comment
+	void updateCacheMap(std::string pathName, chrono::system_clock::time_point time);
 
 };
 
