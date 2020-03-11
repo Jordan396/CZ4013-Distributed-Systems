@@ -4,8 +4,8 @@
 #include <fstream>
 #include <iostream>
 #include <experimental/filesystem>
-#include "../Global.h"
-#include "../RFAcli.h"
+#include "./../Global.h"
+#include "./../RFAcli.h"
 
 namespace fs = std::experimental::filesystem;
 using namespace std;
