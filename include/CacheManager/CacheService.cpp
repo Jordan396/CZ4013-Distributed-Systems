@@ -15,7 +15,7 @@ bool CacheService::clearFile(std::string pathName)
 {
 	try {
 		// first try removing, if removing fails then cacheMap will not have the key as well
-		fs::remove(getLocalPathToFile(pathName);
+		fs::remove(getLocalPathToFile(pathName));
 		// update hashing map
 		cacheMap.erase(pathName);
 		return true;
@@ -53,18 +53,18 @@ vector<std::string> CacheService::listCache()
 
 CacheService::~CacheService()
 {
-	for (map<String, String>::iterator it = cacheMap.begin(); it != cacheMap.end(); ++it)
-		delete it->second;
+	for (map<string, File>::iterator it = cacheMap.begin(); it != cacheMap.end(); ++it)
+		it = cacheMap.erase(it);
 }
 
 // this method will just write to the cache file
 bool CacheService::write(std::string pathName, char* text, int offset)
 {
-	FILE* pFile;
-	pFile = fopen(getLocalPathToFile(pathName))
+	// FILE* pFile;
+	// pFile = fopen(getLocalPathToFile(pathName).c_str(), );
 	// Check for file object (detecting the stream state)
+	// fs::create_directory("../client/CacheManager/TempFiles");
 	if (!fp) {
-		fs::create_directory("../client/CacheManager/TempFiles");
 		fp.open(pathName);
 	}
 
@@ -108,14 +108,13 @@ std::string CacheService::read(std::string pathName, int offset, int bytes)
 	return s;
 }
 
-bool CacheService::writeFile(std::string pathName, char* text, int offset)
+bool CacheService::writeFile(std::string pathName, std::string text, int offset)
 {
 	if (checkValidityFetch(pathName)) {
 		// now perform write to the cache file 
 		if (write(getLocalPathToFile(pathName), text, offset)) {
 			// inform the server about the change 
-			RFACli rc();
-			rc.write_file(pathName, text, offset);
+			write_file(pathName, text, offset);
 			return true;
 		}
 	}

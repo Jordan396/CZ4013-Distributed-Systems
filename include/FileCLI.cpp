@@ -85,7 +85,7 @@ void FileCLI::writeFile()
 			cout << "Written into File Successfully" << endl;
 		}
 		else {
-			cout << "Failed to write to file" <<endl
+			cout << "Failed to write to file" <<endl;
 		}
 	}
 	return;
@@ -95,7 +95,7 @@ void FileCLI::fetchFile()
 {
 	string filePath;
 	cout << "Please input a file path: ";
-	cin << filePath;
+	cin >> filePath;
 	if (cv.checkValidityFetch(filePath)) {
 		cout << "File is fetched and cached" << endl;
 	}
@@ -111,10 +111,10 @@ void FileCLI::fetchFile()
 // table to show all the available files 
 void FileCLI::listFile()
 {
-
+	int j;
 	cacheKeys = cv.listCache();
 	cacheSize = cacheKeys.size();
-	for (int j = 0; j < cacheKeys.size(); j++) {
+	for (j = 0; j < cacheKeys.size(); j++) {
 		cacheReference.insert({ j +1 , cacheKeys[j] });
 	}
 
@@ -132,7 +132,7 @@ void FileCLI::listFile()
 	}
 
 	for (int i = 0; i < cacheKeys.size(); i++) {
-		cout << "\u2503" << i + 1; for (int i = 0; i < 4 - to_string(i + 1).length(); i++) { cout << " "; } cout << "\u2503" << cacheKeys[i];  for (int i = 0; i < 35 - cacheKeys[i].length()) {
+		cout << "\u2503" << i + 1; for (int i = 0; i < 4 - to_string(i + 1).length(); i++) { cout << " "; } cout << "\u2503" << cacheKeys[i];  for (int i = 0; i < 35 - cacheKeys[i].length(); i++) {
 			cout << " ";} cout << "\u2503" << endl;
 
 		if (i != cacheKeys.size() - 1) {
@@ -163,6 +163,6 @@ FileCLI::~FileCLI()
 
 FileCLI::FileCLI()
 {
-	CacheService cv();
+	CacheService cv;
 	cv.restoreHashMap();
 }

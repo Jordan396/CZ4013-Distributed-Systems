@@ -1,5 +1,8 @@
 #pragma once
 #include <string>
+#include <vector>
+#include <map>
+#include "CacheManager/CacheService.h"
 
 class FileCLI
 {
@@ -15,7 +18,7 @@ private:
 	bool checkValidity(int fileID);
 	int cacheSize;
 	CacheService cv;
-	map<int, std::string> cacheReference;
-	vector<std::string> cacheKeys;
+	std::map<int, std::string> cacheReference;
+	std::vector<std::string> cacheKeys;
 };
 

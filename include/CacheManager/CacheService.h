@@ -2,12 +2,13 @@
 #include <string>
 #include <map>
 #include <chrono>
+#include <vector>
 #include "File.h"
 class CacheService
 {
 public:
 	// this method will be called when client wants to write a file 
-	bool writeFile(std::string pathName, char* text, int offset);
+	bool writeFile(std::string pathName, std::string text, int offset);
 
 	// this method will be called when client wants to read a file 
 	std::string readFile(std::string pathName, int offset, int bytes);
@@ -19,7 +20,7 @@ public:
 	bool clearCache();
 
 	// this method will list all the entries in the cache 
-	vector<std::string> listCache();
+	std::vector<std::string> listCache();
 
 	// this method will fetch the file to the cache (checking if it is in the cache and whether it is valid first)
 	bool checkValidityFetch(std::string pathName);
