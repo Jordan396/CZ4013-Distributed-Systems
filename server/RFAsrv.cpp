@@ -38,6 +38,13 @@ char *servAddressHardcode = "172.21.148.168";
 unsigned short servPortHardcode = Socket::resolveService("2222", "udp");
 bool RMI_SCHEME = true; // at most once if true
 
+const int ERR_FILE_NOT_EXIST = -1;
+const int ERR_MEMORY_INSUFFICIENT = -2; 
+const int ERR_READ = -3;
+const int ERR_OFFSET_OVERFLOW = -4; 
+const int ERR_NEGATIVE_OFFSET = -5; 
+const int ERR_WRITE = -6;
+const int BUFFER_SIZE = 255;     // Longest string to echo
 
 /* Variables to handle transfer of data */
 std::string request;        /* String response received */
@@ -66,7 +73,7 @@ int main(int argc, char *argv[]) {
   try {
     UDPSocket sock(servPortHardcode);                
   
-    char serverBuffer[BUFFER_SIZE];         // Buffer for echo string
+    char serverBuffer[BUFFER_SIZE];   // Buffer for echo string
     int recvMsgSize;                  // Size of received message
     string sourceAddress;             // Address of datagram source
     unsigned short sourcePort;        // Port of datagram source
@@ -107,7 +114,7 @@ int main(int argc, char *argv[]) {
 
 void *monitor_registered_clients( void *ptr )(){
   while (true){
-    cout << "Checking for expired clients..."
+    cout << "Checking for expired clients...";
     // Get current time
     auto currentTime = std::chrono::system_clock::now();
 
@@ -238,7 +245,7 @@ void execute_read_command(string sourceAddress, unsigned short sourcePort, cJSON
       // Send response
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
       cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Content read!")); 
       send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
@@ -276,7 +283,7 @@ void execute_write_command(string sourceAddress, unsigned short sourcePort, cJSO
       // Send response
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
       cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Content written!")); 
       send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
@@ -304,9 +311,9 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
 
   // Extract parameters from message
   get_filepath(jobjReceived, pseudo_filepath);
-  offset = get_offset(jobjReceived);
-  nBytes = get_nBytes(jobjReceived);
-  get_monitor_duration(jobjReceived, monitor_duration)
+  int offset = get_offset(jobjReceived);
+  int nBytes = get_nBytes(jobjReceived);
+  get_monitor_duration(jobjReceived, monitor_duration);
 
   // Assign registeredClient attributes
   registeredClient.address = sourceAddress;
@@ -318,12 +325,12 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
   if (translate_filepath(pseudo_filepath, actual_filepath)){
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
-    (monitorMap[actual_filepath]).push_back(registeredClient)
+    (monitorMap[actual_filepath]).push_back(registeredClient);
 
     // TODO: Integrate with Jia Chin
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
       cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Client registered")); 
       send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
@@ -355,7 +362,7 @@ bool is_request_exists(string sourceAddress, unsigned short sourcePort, string m
   std::hash<std::string> str_hash;
   string requestMapKey = sourceAddress + ":" + std::to_string(sourcePort);
   size_t requestMapValue = str_hash(message);
-  return (requestMapValue == requestMap[requestMapKey])
+  return (requestMapValue == requestMap[requestMapKey]);
 }
 
 void store_request(string sourceAddress, unsigned short sourcePort, string message){
@@ -455,7 +462,7 @@ int ReadFile(char* fileName, char echoBuffer[], int nBytes, int startPos = 0) { 
   pFile = fopen(fileName, "rb");
   if (pFile == NULL) { // file requested does not exist, we return error back to client 
       sprintf (echoBuffer, "%s", "File does not exist"); 
-      return -1; // server calling this function has to check err code 
+      return ERR_FILE_NOT_EXIST; // server calling this function has to check err code 
   }
 
   long lsize;
@@ -464,19 +471,19 @@ int ReadFile(char* fileName, char echoBuffer[], int nBytes, int startPos = 0) { 
 
   if (lsize >  BUFFER_SIZE) { // no memory to allocate buffer: return error code to client 
       sprintf (echoBuffer, "%s", "Memory error"); 
-      return -2; 
+      return ERR_MEMORY_INSUFFICIENT; 
     }
 
   // check whether >= 0
   if (startPos < 0) { 
     sprintf(echoBuffer, "%s", "The required starting position is less than 0");
-    return -5;
+    return ERR_NEGATIVE_OFFSET;
   } 
 
   // check whether startPos > maxlength 
   if (startPos > lsize) { 
     sprintf(echoBuffer, "%s", "The specified offset is greater than the length of the file");
-    return -4;
+    return ERR_OFFSET_OVERFLOW;
   }
   
   fseek(pFile, startPos, SEEK_SET);
@@ -486,7 +493,7 @@ int ReadFile(char* fileName, char echoBuffer[], int nBytes, int startPos = 0) { 
   result = fread (echoBuffer, 1, nBytes, pFile); // pFile advanced to startPos 
   if (result != lsize) {
     sprintf (echoBuffer, "%s", "Reading error");  
-    return -3; 
+    return ERR_READ; 
     }
   fclose (pFile);
   return result; 
@@ -500,7 +507,7 @@ int WriteFile(char* filepath, char* toWrite, char *responseContent, int offset =
   pFile = fopen(filepath, "r+");
   if (pFile == NULL) { // file requested does not exist, we return error back to client 
       strcpy(responseContent, "File does not exist"); 
-      return -1; // server calling this function has to check err code 
+      return ERR_FILE_NOT_EXIST; // server calling this function has to check err code 
   }
 
   long lsize;
@@ -511,7 +518,7 @@ int WriteFile(char* filepath, char* toWrite, char *responseContent, int offset =
   // check whether startPos > maxlength 
   if (offset > lsize) { 
     strcpy(responseContent, "Starting offset exceeded file size! Please use negative indexing to start writing from the end!");
-    return -2; 
+    return ERR_OFFSET_OVERFLOW; 
   }
 
   // check whether >= 0
@@ -527,15 +534,68 @@ int WriteFile(char* filepath, char* toWrite, char *responseContent, int offset =
   strcpy(originalFile, toWrite);
   char temp[lsize - offset]; // holds off set till end 
   fread(temp, 1, lsize - offset, pFile); 
-  cout << temp << endl; 
   strcat(originalFile, temp);
   fseek(pFile, offset, SEEK_SET);
   int written = fwrite(originalFile, 1, (lsize-offset)+length, pFile);
   if (written != (lsize-offset)+length) {
     strcpy(responseContent, "Writing error");
+    return ERR_WRITE;
   } else {
     strcpy(responseContent, originalFile);
   }
+
   fclose (pFile);
-  return 0; 
+  return written; 
 }
+
+// check if file exists - if yes, overwrite else return error 
+int ClearFile(char* filepath, char *responseContent) {
+  FILE * pFile; 
+
+  pFile = fopen(filepath, "r");
+  if (pFile == NULL) { // file requested does not exist, we return error back to client 
+      strcpy(responseContent, "File does not exist"); 
+      return ERR_FILE_NOT_EXIST; // server calling this function has to check err code 
+  }
+  fclose(pFile);
+
+  // file exists, write 
+  pFile = fopen(filepath, "w");
+  fclose(pFile);
+  return 1; 
+}
+
+// wrapper around remove provided by cpp 
+int DeleteFile(char * filename) { 
+  int a = remove(filename);
+  // file deletion unsucessful
+  if (a != 0) { 
+    return ERR_FILE_NOT_EXIST;
+  }
+  return a; // 0 
+}
+
+// wrapper around rename provided by cpp
+int Rename(char * oldname, char * newname) { 
+  int a = rename(oldname, newname); 
+  if (a != 0) { 
+    return ERR_FILE_NOT_EXIST;
+  }
+  return a; // 0 
+}
+
+
+// taken from stackoverflow - decorator pattern in cpp???
+// call it as decorate(int, func)(params)
+template<class T>
+auto decorator(int lossRate, T&& func) {
+    int percent = rand() % 100;
+    auto new_function = [func = std::forward<T>(func)](auto&&... args) {
+        auto result = func(std::forward<decltype(args)>(args)...);   
+        if (percent > lossRate) { 
+          return result; 
+        }
+        return;
+    };
+    return new_function;
+} 
