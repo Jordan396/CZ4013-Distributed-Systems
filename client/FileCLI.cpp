@@ -116,8 +116,8 @@ void FileCLI::listFile()
 
 	cacheKeys = cv.listCache();
 
-	for (cacheSize = 0; j < cacheKeys.size(); j++) {
-		cacheReference.insert({ cacheSize +1 , cacheKeys[j] });
+	for (int j = 0; j < cacheKeys.size(); j++) {
+		cacheReference.insert({ j +1 , cacheKeys[j] });
 	}
 
 	// get all the files available
@@ -125,7 +125,7 @@ void FileCLI::listFile()
 	cout << "\u2503" << "Key in the FileID or -1 for manual input" << "\u2503" << endl;
 
 	// no entries 
-	if (cacheSize == 0) {
+	if (j == 0) {
 		cout << "\u2517";  for (int i = 0; i < 40; i++) { cout << "\u2501"; }  cout << "\u251b" << endl;
 		return;
 	}

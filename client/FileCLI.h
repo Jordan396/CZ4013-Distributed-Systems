@@ -15,5 +15,7 @@ private:
 	bool checkValidity(int fileID);
 	int cacheSize;
 	CacheService cv;
+	map<int, std::string> cacheReference;
+	vector<std::string> cacheKeys;
 };
 
