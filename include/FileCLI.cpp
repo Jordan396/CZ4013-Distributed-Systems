@@ -111,11 +111,9 @@ void FileCLI::fetchFile()
 // table to show all the available files 
 void FileCLI::listFile()
 {
-	map<int, std::string> cacheReference;
-	vector<std::string> cacheKeys;
 
 	cacheKeys = cv.listCache();
-
+	cacheSize = cacheKeys.size();
 	for (int j = 0; j < cacheKeys.size(); j++) {
 		cacheReference.insert({ j +1 , cacheKeys[j] });
 	}
