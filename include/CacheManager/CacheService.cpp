@@ -55,7 +55,7 @@ CacheService::~CacheService()
 // 	string fileName = getLocalPathToFile(pathName)
 	
 // 	// guarantee of existence of file pointed to by pathName 
-// 	utils::WriteFile(fileName.c_str(), text, )
+// 	fh.WriteFile(fileName.c_str(), text, )
 // 	// FILE* pFile;
 // 	// pFile = fopen(getLocalPathToFile(pathName).c_str(), );
 // 	// Check for file object (detecting the stream state)
@@ -110,9 +110,9 @@ bool CacheService::writeFile(std::string pathName, std::string text, int offset)
 {
 	if (checkValidityFetch(pathName)) {
 		// now perform write to the cache file 
-		if (utils::WriteFile(getLocalPathToFile(pathName).c_str(), text.c_str(), offset)) {
+		if (fh.WriteFile(getLocalPathToFile(pathName).c_str(), text.c_str(), offset)) {
 			// inform the server about the change 
-			client::write_file(pathName, text, offset);
+			client.write_file(pathName, text, offset);
 			return true;
 		}
 	}
@@ -153,7 +153,7 @@ bool CacheService::checkValidityFetch(std::string pathName)
 			// RFACli rc();
 			//TODO (Server side to provide method)
 			string last_modified_time;
-			client::get_last_modified_time(pathName, last_modified_time);
+			client.get_last_modified_time(pathName, last_modified_time);
 
 			// TODO: Convert last_modified_time to below format
 
@@ -201,7 +201,7 @@ bool CacheService::fetchFile(std::string pathName)
 
 	// RFACli rc();
 	string last_modified_time;
-	client::get_last_modified_time(pathName, last_modified_time);
+	client.get_last_modified_time(pathName, last_modified_time);
 
 	// TODO: Convert last_modified_time to below format
 
@@ -286,7 +286,7 @@ bool CacheService::restoreHashMap()
 		string s1 = buf;
 		string s2 = sep;
 
-		cacheMap[s1] = s2;
+		// cacheMap[s1] = s2;
 	}
 
 	if (buf)

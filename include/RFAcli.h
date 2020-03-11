@@ -21,18 +21,11 @@
   * <http://www.doxygen.nl/manual/docblocks.html>
   */
 
-
-/* CLIENT COMMAND CODES */
-#define GET_LAST_MODIFIED_TIME_CMD 0
-#define READ_CMD 1
-#define WRITE_CMD 2  
-#define REGISTER_CMD 3 
-
+#pragma once
 /* SERVER STATUS CODES */ 
 // Check with Jia Chin
 
 /* Standard libraries */
-#define _GNU_SOURCE
 #include <stdio.h>      /* for printf() and fprintf() */
 #include <iostream>          // For cout and cerr
 #include <fstream>
@@ -51,13 +44,26 @@
 /* External libraries */
 #include "RFAsockets.h"      // For UDPSocket and SocketException
 #include "cJSON.h"      // For message formatting
+#include "Global.h"
 
-namespace client {
+/* CLIENT COMMAND CODES */
+#define GET_LAST_MODIFIED_TIME_CMD 0
+#define READ_CMD 1
+#define WRITE_CMD 2  
+#define REGISTER_CMD 3 
+
+#define BUFFER_SIZE 255
+
+class RFAcli 
+{
+public:
   int download_file(string remote_filepath, string local_filepath);
   int get_last_modified_time(string remote_filepath, string last_modified_time);
   int register_client(string remote_filepath, string monitor_duration);
   int receive_message(string response);
-  int send_message(string destAddress, unsigned short destPort, string message);
+  int send_message(string destAddress, string destPort, string message);
   int get_response_code(cJSON *jobjReceived);
   void write_file(string remote_filepath, string toWrite, int nOffset);
-}
+  void extract_last_modified_time(cJSON *jobjReceived, string last_modified);
+  ~RFAcli();
+};

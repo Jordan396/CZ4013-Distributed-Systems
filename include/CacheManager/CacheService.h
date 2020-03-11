@@ -7,7 +7,8 @@
 #include <iostream>
 #include <experimental/filesystem>
 #include "File.h"
-#include "../utils.h"
+#include "./../FileHandler.h"
+#include "./../RFAcli.h"
 #include "./../Global.h"
 #include "./../RFAcli.h"
 
@@ -37,6 +38,8 @@ public:
 
 	~CacheService();
 private:
+	FileHandler fh;
+	RFAcli client;
 	std::map<std::string, File> cacheMap;
 
 	// write the file to the cache and update the server as well

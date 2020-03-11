@@ -1,11 +1,8 @@
-#pragma once 
-#include "./utils.h"
-
-// namespace utils {
+#include "FileHandler.h"
 
 // readfile is for use by the server, reads from a given file to a standard writer and returns number of bytes read 
 // assumption made is that we either specify FULL file path or it exists in current directory where server is executing 
-int ReadFile(char* fileName, char echoBuffer[], int nBytes, int startPos = 0) { // we write to a buffer 
+int FileHandler::ReadFile(char* fileName, char echoBuffer[], int nBytes, int startPos = 0) { // we write to a buffer 
   // file opening logic can be abstracted away for reuse
   // first we check if file exists 
   FILE * pFile; 
@@ -58,7 +55,7 @@ int ReadFile(char* fileName, char echoBuffer[], int nBytes, int startPos = 0) { 
 }
 
 // writefile will write to a file pointed at by filepath at offset 0 
-int WriteFile(const char* filepath, const char* toWrite, int offset = 0) {
+int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset = 0) {
   // first we check if file exists 
   FILE * pFile; 
 
@@ -102,7 +99,7 @@ int WriteFile(const char* filepath, const char* toWrite, int offset = 0) {
 }
 
 // check if file exists - if yes, overwrite else return error 
-int ClearFile(char* filepath, char *responseContent) {
+int FileHandler::ClearFile(char* filepath, char *responseContent) {
   FILE * pFile; 
 
   pFile = fopen(filepath, "r");
@@ -119,7 +116,7 @@ int ClearFile(char* filepath, char *responseContent) {
 }
 
 // wrapper around remove provided by cpp 
-int DeleteFile(char * filename) { 
+int FileHandler::DeleteFile(char * filename) { 
   int a = remove(filename);
   // file deletion unsucessful
   if (a != 0) { 
@@ -129,7 +126,7 @@ int DeleteFile(char * filename) {
 }
 
 // wrapper around rename provided by cpp
-int Rename(char * oldname, char * newname) { 
+int FileHandler::Rename(char * oldname, char * newname) { 
   int a = rename(oldname, newname); 
   if (a != 0) { 
     return ERR_FILE_NOT_EXIST;
@@ -140,17 +137,21 @@ int Rename(char * oldname, char * newname) {
 
 // taken from stackoverflow - decorator pattern in cpp???
 // call it as decorate(int, func)(params)
-template<class T>
-auto decorator(int lossRate, T&& func) {
-    int percent = rand() % 100;
-    auto new_function = [func = std::forward<T>(func)](auto&&... args) {
-        auto result = func(std::forward<decltype(args)>(args)...);   
-        if (percent > lossRate) { 
-          return result; 
-        }
-        return;
-    };
-    return new_function;
-} 
+// template<class T>
+// auto decorator(int lossRate, T&& func) {
+//     int percent = rand() % 100;
+//     auto new_function = [func = std::forward<T>(func)](auto&&... args) {
+//         auto result = func(std::forward<decltype(args)>(args)...);   
+//         if (percent > lossRate) { 
+//           return result; 
+//         }
+//         return;
+//     };
+//     return new_function;
+// } 
 
 // }
+
+FileHandler::~FileHandler()
+{
+}
