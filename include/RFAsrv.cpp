@@ -88,6 +88,7 @@ int main(int argc, char *argv[]) {
       cout << "Listening..." << endl;
       recvMsgSize = sock.recvFrom(serverBuffer, bufferSize, sourceAddress, sourcePort);
       cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
+      cout << "request: " + request << endl; 
       request = serverBuffer;
 
       // Check RMI scheme

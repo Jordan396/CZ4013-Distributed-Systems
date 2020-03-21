@@ -197,9 +197,14 @@ string RFAcli::receive_message(string serverIP, string portNo){
     cout << "Listening..." << endl; 
     // blocks until you get a resp back 
     // hard-coded for testing below 
+<<<<<<< HEAD
+    // serverip not bound - is empty 
+    recvMsgSize = sock.recvFrom(clientBuffer, bufferSize, serverIP, portNo);
+=======
     unsigned short portNum = (unsigned short) strtoul(portNo.c_str(), NULL, 0);
     recvMsgSize = sock.recvFrom(clientBuffer, bufferSize, serverIP, portNum);
     cout << recvMsgSize << endl; 
+>>>>>>> ddbf3dcf0171a2ce46b97a383db2b110c8e662c9
     cout << "Received packet from " << serverIP << ":" << portNo << endl;
     return string(clientBuffer);
   }
