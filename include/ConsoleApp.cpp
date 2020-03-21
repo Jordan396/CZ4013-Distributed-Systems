@@ -15,9 +15,11 @@ void displayClientMenu();
 int freshnessInterval = 100;
 int lossRate = 0;
 int timeOut = 300;
+int bufferSize = 255;
 int sel;
 string serverIP = "";
-string portNo = "";
+string serverPortNo = "";
+string clientPortNo = "";
 
 int main(int argc, char* argv[])
 {
@@ -37,7 +39,8 @@ int main(int argc, char* argv[])
             }
             else if (s1=="-p") {
                 string s2(argv[i + 1]);
-                portNo = s2;
+                serverPortNo = s2;
+                clientPortNo = s2;
             }
         }
     }

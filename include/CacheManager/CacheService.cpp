@@ -122,8 +122,11 @@ bool CacheService::writeFile(std::string pathName, std::string text, int offset)
 
 std::string CacheService::readFile(std::string pathName, int offset, int bytes)
 {
+	char echoBuffer[bufferSize];
 	if (checkValidityFetch(pathName)) {
-		return read(pathName, offset, bytes);
+		fh.ReadFile(pathName.c_str(), echoBuffer, offset, bytes);
+		string s(echoBuffer);
+		return s;
 	}
 	else {
 		return "File does not exist in current directory";

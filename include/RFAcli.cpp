@@ -71,9 +71,9 @@ int RFAcli::download_file(string remote_filepath, string local_filepath){
     cJSON *jobjToSend;
     jobjToSend = cJSON_CreateObject();
     cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(READ_CMD)); 
-    cJSON_AddItemToObject(jobjToSend, "N_BYTES", cJSON_CreateNumber(BUFFER_SIZE)); 
+    cJSON_AddItemToObject(jobjToSend, "N_BYTES", cJSON_CreateNumber(bufferSize)); 
     cJSON_AddItemToObject(jobjToSend, "OFFSET", cJSON_CreateNumber(offset)); 
-    send_message(serverIP, portNo, cJSON_Print(jobjToSend));
+    send_message(serverIP, serverPortNo, cJSON_Print(jobjToSend));
     cJSON_Delete(jobjToSend);
 
     // Wait for response...
@@ -86,7 +86,7 @@ int RFAcli::download_file(string remote_filepath, string local_filepath){
     if (get_response_code(jobjReceived) == 1){
       // write();
       // Increase offset
-      offset += BUFFER_SIZE;
+      offset += bufferSize;
       cJSON_Delete(jobjReceived);
     }
     else {
@@ -104,7 +104,7 @@ int RFAcli::get_last_modified_time(string remote_filepath, string last_modified_
   jobjToSend = cJSON_CreateObject();
   cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(GET_LAST_MODIFIED_TIME_CMD)); 
   cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath.c_str())); 
-  send_message(serverIP, portNo, cJSON_Print(jobjToSend));
+  send_message(serverIP, serverPortNo, cJSON_Print(jobjToSend));
   cJSON_Delete(jobjToSend);
 
   // Wait for response...
@@ -124,7 +124,7 @@ int RFAcli::get_last_modified_time(string remote_filepath, string last_modified_
   return 0;
 }
 
-int RFAcli::register_client(string remote_filepath, string monitor_duration){
+int RFAcli::register_client(string remote_filepath, string local_filepath, string monitor_duration){
   // Response
   std::string response;
 
@@ -134,7 +134,7 @@ int RFAcli::register_client(string remote_filepath, string monitor_duration){
   cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(REGISTER_CMD)); 
   cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath.c_str()));
   cJSON_AddItemToObject(jobjToSend, "MONITOR_DURATION", cJSON_CreateString(monitor_duration.c_str()));  
-  send_message(serverIP, portNo, cJSON_Print(jobjToSend));
+  send_message(serverIP, serverPortNo, cJSON_Print(jobjToSend));
   cJSON_Delete(jobjToSend);
 
   // Wait for response...
@@ -176,18 +176,19 @@ int RFAcli::register_client(string remote_filepath, string monitor_duration){
 
 int RFAcli::receive_message(string response){
   try {
-    UDPSocket sock(portNo);                
-  
+    unsigned short sourcePort = (unsigned short) strtoul(clientPortNo.c_str(), NULL, 0);
+    UDPSocket sock(sourcePort);                
+
+    char clientBuffer[bufferSize]; /* String response received */
     int recvMsgSize;                  // Size of received message
     string serverIP;             // Address of datagram source
     unsigned short portNo;        // Port of datagram source
 
-
     // Block until receive message from a client
     cout << "Listening..." << endl;
-    recvMsgSize = sock.recvFrom(clientBuffer, BUFFER_SIZE, serverIP, portNo);
+    recvMsgSize = sock.recvFrom(clientBuffer, bufferSize, serverIP, portNo);
     cout << "Received packet from " << serverIP << ":" << portNo << endl;
-    strncpy(response, clientBuffer, sizeof(clientBuffer));
+    response.assign(clientBuffer);
   }
   catch (SocketException &e) {
     cerr << e.what() << endl;
@@ -196,12 +197,11 @@ int RFAcli::receive_message(string response){
   return 0;
 }
 
-int RFAcli::send_message(string destAddress, string destPort, string message){
+int RFAcli::send_message(string destIP, string destPort, string message){
   try {
     UDPSocket sock;
-    unsigned short destPort = (unsigned short) strtoul(destPort, NULL, 0);
-    sock.sendTo(message, strlen(message), destAddress, destPort);
-
+    unsigned short destPortNo = (unsigned short) strtoul(destPort.c_str(), NULL, 0);
+    sock.sendTo(message.c_str(), strlen(message.c_str()), destIP, destPortNo);
   } catch (SocketException &e) {
     cerr << e.what() << endl;
     exit(1);
@@ -216,7 +216,7 @@ int RFAcli::get_response_code(cJSON *jobjReceived)
 
 void RFAcli::extract_last_modified_time(cJSON *jobjReceived, string last_modified)
 {
-  strcpy(cJSON_GetObjectItemCaseSensitive(jobjReceived, "LAST_MODIFIED")->valuestring, last_modified);
+  last_modified.assign(cJSON_GetObjectItemCaseSensitive(jobjReceived, "LAST_MODIFIED")->valuestring);
 }
 
 void RFAcli::write_file(string remote_filepath, string toWrite, int nOffset){
@@ -227,8 +227,8 @@ void RFAcli::write_file(string remote_filepath, string toWrite, int nOffset){
   cJSON *jobjToSend;
   jobjToSend = cJSON_CreateObject();
   cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(WRITE_CMD)); 
-  cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath));
-  send_message(serverIP, portNo, cJSON_Print(jobjToSend));
+  cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath.c_str()));
+  send_message(serverIP, serverPortNo, cJSON_Print(jobjToSend));
   cJSON_Delete(jobjToSend);
 
   // // Wait for response...

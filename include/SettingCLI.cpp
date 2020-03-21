@@ -1,7 +1,5 @@
 #include "SettingCLI.h"
-#include "Global.h"
-#include <string>
-#include <iostream>
+
 using namespace std;
 
 void SettingCLI::editSetting()
@@ -38,7 +36,7 @@ void SettingCLI::editSetting()
 	}
 	case 5: {
 		cout << "Input a new server port number: ";
-		cin >> portNo;
+		cin >> serverPortNo;
 		system("clear");
 		editSetting();
 	}
@@ -68,7 +66,7 @@ void SettingCLI::displayCurrentSetting()
 		cout << " ";
 	}  cout << "\u2503" << endl;
 	cout << "\u2523";  for (int i = 0; i < 28; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 48; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
-	cout << "\u2503" << "5. Server Port No.          " << "\u2503" << portNo; for (int i = 0; i < 48 - portNo.length(); i++) {
+	cout << "\u2503" << "5. Server Port No.          " << "\u2503" << serverPortNo; for (int i = 0; i < 48 - serverPortNo.length(); i++) {
 		cout << " ";
 	}  cout << "\u2503" << endl;
 	cout << "\u2517";  for (int i = 0; i < 28; i++) { cout << "\u2501"; }  cout << "\u253b";  for (int i = 0; i < 48; i++) { cout << "\u2501"; }  cout << "\u251b" << endl;

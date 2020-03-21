@@ -44,7 +44,7 @@ std::string response;
 
 /* Variables for commands */
 char filepath[200];
-const int BUFFER_SIZE = 255;     // Longest string to echo
+const int bufferSize = 255;     // Longest string to echo
 
 
 /* Variables to store request and response messages */
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
   try {
     UDPSocket sock(servPortHardcode);                
   
-    char serverBuffer[BUFFER_SIZE];   // Buffer for echo string
+    char serverBuffer[bufferSize];   // Buffer for echo string
     int recvMsgSize;                  // Size of received message
     string sourceAddress;             // Address of datagram source
     unsigned short sourcePort;        // Port of datagram source
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
     for (;;) {  // Run forever
       // Block until receive message from a client
       cout << "Listening..." << endl;
-      recvMsgSize = sock.recvFrom(serverBuffer, BUFFER_SIZE, sourceAddress, sourcePort);
+      recvMsgSize = sock.recvFrom(serverBuffer, bufferSize, sourceAddress, sourcePort);
       cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
       strncpy(request, serverBuffer, sizeof(serverBuffer));
 

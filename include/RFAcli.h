@@ -52,14 +52,12 @@
 #define WRITE_CMD 2  
 #define REGISTER_CMD 3 
 
-#define BUFFER_SIZE 255
-
 class RFAcli 
 {
 public:
   int download_file(string remote_filepath, string local_filepath);
   int get_last_modified_time(string remote_filepath, string last_modified_time);
-  int register_client(string remote_filepath, string monitor_duration);
+  int register_client(string remote_filepath, string local_filepath, string monitor_duration);
   int receive_message(string response);
   int send_message(string destAddress, string destPort, string message);
   int get_response_code(cJSON *jobjReceived);

@@ -1,5 +1,7 @@
 #pragma once
+#include "Global.h"
 #include <string>
+#include <iostream>
 class SettingCLI
 {
 public:

@@ -2,7 +2,7 @@
 
 // readfile is for use by the server, reads from a given file to a standard writer and returns number of bytes read 
 // assumption made is that we either specify FULL file path or it exists in current directory where server is executing 
-int FileHandler::ReadFile(char* fileName, char echoBuffer[], int nBytes, int startPos = 0) { // we write to a buffer 
+int FileHandler::ReadFile(const char* fileName, char echoBuffer[], int nBytes, int startPos = 0) { // we write to a buffer 
   // file opening logic can be abstracted away for reuse
   // first we check if file exists 
   FILE * pFile; 
@@ -24,10 +24,10 @@ int FileHandler::ReadFile(char* fileName, char echoBuffer[], int nBytes, int sta
   fseek (pFile, 0, SEEK_END);   
   lsize = ftell (pFile); // get size of the file 
 
-  if (lsize >  BUFFER_SIZE) { // no memory to allocate buffer: return error code to client 
-      sprintf (echoBuffer, "%s", "Memory error"); 
-      return ERR_MEMORY_INSUFFICIENT; 
-    }
+  if (lsize > bufferSize) { // no memory to allocate buffer: return error code to client 
+    sprintf (echoBuffer, "%s", "Memory error"); 
+    return ERR_MEMORY_INSUFFICIENT; 
+  }
 
   // check whether >= 0
   if (startPos < 0) { 
