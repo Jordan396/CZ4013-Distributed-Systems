@@ -58,7 +58,7 @@ public:
   int download_file(string remote_filepath, string local_filepath);
   string get_last_modified_time(string remote_filepath);
   int register_client(string remote_filepath, string local_filepath, string monitor_duration);
-  string RFAcli::receive_message();
+  string receive_message();
   int send_message(string destAddress, string destPort, string message);
   int get_response_code(cJSON *jobjReceived);
   void write_file(string remote_filepath, string toWrite, int nOffset);

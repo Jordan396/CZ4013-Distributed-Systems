@@ -158,7 +158,7 @@ bool CacheService::checkValidityFetch(std::string pathName)
 			// RFACli rc();
 			//TODO (Server side to provide method)
 			string last_modified_time;
-			client.get_last_modified_time(pathName, last_modified_time);
+			client.get_last_modified_time(pathName);
 
 			// TODO: Convert last_modified_time to below format
 
@@ -206,7 +206,7 @@ bool CacheService::fetchFile(std::string pathName)
 
 	// RFACli rc();
 	string last_modified_time;
-	client.get_last_modified_time(pathName, last_modified_time);
+	client.get_last_modified_time(pathName);
 
 	// TODO: Convert last_modified_time to below format
 
