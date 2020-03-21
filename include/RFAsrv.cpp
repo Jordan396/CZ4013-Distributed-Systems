@@ -26,16 +26,24 @@
 // void readFile(char* filepath, int offset, int nBytes, char* responseContent);
 // void writeFile(char* filepath, int offset, int nBytes, char *responseContent);
 // int get_client_command_code(cJSON *jobjReceived);
-int get_offset(cJSON *jobjReceived);
-int get_nBytes(cJSON *jobjReceived);
-void get_filepath(cJSON *jobjReceived, char *filepath);
-char* get_toWrite(cJSON *jobjReceived);
+// int get_offset(cJSON *jobjReceived);
+// int get_nBytes(cJSON *jobjReceived);
+// void get_filepath(cJSON *jobjReceived, char *filepath);
+// char* get_toWrite(cJSON *jobjReceived);
 // int ReadFile(char* fileName, char echoBuffer[], int nBytes, int startPos);
 // int WriteFile(char* filepath, char* toWrite, char *responseContent, int offset); 
+
+
 // TODO: Integrate the hardcoded variables below with command prompt parser 
 // Variables relating to server addressing
-char *servAddressHardcode = "172.21.148.168";
-unsigned short servPortHardcode = Socket::resolveService("2222", "udp");
+int freshnessInterval = 100;
+int lossRate = 0;
+int timeOut = 300;
+int bufferSize = 255;
+int sel;
+string serverIP = "172.21.148.168";
+string serverPortNo = "2222";
+string clientPortNo = "0";
 bool RMI_SCHEME = true; // at most once if true
 
 /* Variables to handle transfer of data */
@@ -44,8 +52,6 @@ std::string response;
 
 /* Variables for commands */
 char filepath[200];
-const int bufferSize = 255;     // Longest string to echo
-
 
 /* Variables to store request and response messages */
 std::map<std::string, size_t> requestMap;
@@ -58,12 +64,13 @@ struct RegisteredClient
   unsigned short port;
   string expiration;
 } RegisteredClient;
-std::map<std::string, std::list <RegisteredClient>> monitorMap;
+
+std::map<std::string, std::list<struct RegisteredClient> > monitorMap;
 
 int main(int argc, char *argv[]) {
 
   try {
-    UDPSocket sock(servPortHardcode);                
+    UDPSocket sock(Socket::resolveService(serverPortNo, "udp"));                
   
     char serverBuffer[bufferSize];   // Buffer for echo string
     int recvMsgSize;                  // Size of received message
@@ -80,7 +87,7 @@ int main(int argc, char *argv[]) {
       cout << "Listening..." << endl;
       recvMsgSize = sock.recvFrom(serverBuffer, bufferSize, sourceAddress, sourcePort);
       cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
-      strncpy(request, serverBuffer, sizeof(serverBuffer));
+      request.assign(serverBuffer);
 
       // Check RMI scheme
       if (RMI_SCHEME){ // at most once - check if request exists
@@ -104,24 +111,26 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void *monitor_registered_clients( void *ptr )(){
+void *monitor_registered_clients( void *ptr ){
   while (true){
     cout << "Checking for expired clients...";
     // Get current time
-    auto currentTime = std::chrono::system_clock::now();
+    auto time_now = std::chrono::system_clock::now();
+    time_t currentTime = std::chrono::system_clock::to_time_t(time_now);
 
     // Stack to track expired clients to remove
     std::stack <int> s;
 
-    // Create a map iterator and point to beginning of map
-    std::map<std::string, std::list <RegisteredClient>>::iterator filepathIterator = monitorMap.begin();
-
     // Iterate over the map using Iterator till end.
-    while (filepathIterator != monitorMap.end()) {
+    for (std::map<std::string, std::list <struct RegisteredClient>>::iterator filepathIterator = monitorMap.begin(); filepathIterator != monitorMap.end(); ++filepathIterator){
       // Iterate over all registered clients for file
-      for (std::list<RegisteredClient>::iterator it = filepathIterator.begin(); it != filepathIterator.end(); ++it){
-        if(it->expiration < currentTime){
-          s.push(std::distance(registeredClientList.begin(), it));
+      for (std::list<struct RegisteredClient>::iterator it = (filepathIterator->second).begin(); it != (filepathIterator->second).end(); ++it){
+        struct tm tm;
+        strptime((it->expiration).c_str(), "%H:%M:%S", &tm);
+        time_t expirationTime = mktime(&tm);
+        if (comparetime(expirationTime, currentTime) == -1)
+        {
+          s.push(std::distance((filepathIterator->second).begin(), it));
         }
         else{
           // Update registered client
@@ -135,7 +144,10 @@ void *monitor_registered_clients( void *ptr )(){
       // Remove expired clients
       while (!s.empty())
       {
-        registeredClientList.erase(s.pop());
+        std::list<struct RegisteredClient>::iterator it_to_erase;
+        std::advance( it_to_erase, s.top() );
+        (filepathIterator->second).erase(it_to_erase);
+        s.pop();
       }
     }
     // Sleep for 10,000 milliseconds
@@ -143,10 +155,14 @@ void *monitor_registered_clients( void *ptr )(){
   }
 }
 
+int comparetime(time_t time1,time_t time2){
+ return difftime(time1,time2) > 0.0 ? 1 : -1; 
+} 
+
 int send_message(string destAddress, unsigned short destPort, string message){
   try {
     UDPSocket sock;
-    sock.sendTo(message, strlen(message), destAddress, destPort);
+    sock.sendTo(message.c_str(), strlen(message.c_str()), destAddress, destPort);
 
   } catch (SocketException &e) {
     cerr << e.what() << endl;
@@ -159,11 +175,11 @@ void process_request(string sourceAddress, unsigned short sourcePort, string req
   // Parse request message
   cJSON *jobjReceived;
   jobjReceived = cJSON_CreateObject();
-  jobjReceived = cJSON_Parse(request);
+  jobjReceived = cJSON_Parse(request.c_str());
   
   // Handle request accordingly
-  switch (get_client_command(jobjReceived)){
-    case GET_LAST_MODIFIED_TIME:
+  switch (get_request_code(jobjReceived)){
+    case GET_LAST_MODIFIED_TIME_CMD:
       cout << "Executing get_last_modified_time command..." << endl;
       execute_get_last_modified_time_command(sourceAddress, sourcePort, jobjReceived);
       break;
@@ -194,13 +210,13 @@ void execute_get_last_modified_time_command(string sourceAddress, unsigned short
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     if (std::experimental::filesystem::exists(actual_filepath)){
-      get_last_modified_time(actual_filepath, last_modified_time);
+      get_last_modified_time(actual_filepath.c_str(), last_modified_time);
 
       // TODO: Integrate with Jia Chin
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
-      cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString(last_modified_time)); 
+      cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString(last_modified_time.c_str())); 
       send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
@@ -299,7 +315,7 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
   string pseudo_filepath;
   string actual_filepath;
   string monitor_duration;
-  RegisteredClient registeredClient;
+  struct RegisteredClient registeredClient;
 
   // Extract parameters from message
   get_filepath(jobjReceived, pseudo_filepath);
@@ -339,8 +355,8 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
 }
 
 void update_registered_clients(string filepath){
-  std::list <RegisteredClient> registeredClientList = monitorMap[filepath];
-  for (std::list<RegisteredClient>::iterator it = registeredClientList.begin(); it != registeredClientList.end(); ++it){
+  std::list <struct RegisteredClient> registeredClientList = monitorMap[filepath];
+  for (std::list<struct RegisteredClient>::iterator it = registeredClientList.begin(); it != registeredClientList.end(); ++it){
     // Update registered client
     cJSON *jobjToSend;
     jobjToSend = cJSON_CreateObject();
@@ -382,7 +398,7 @@ void store_response(string sourceAddress, unsigned short sourcePort, string mess
 void retrieve_response(string sourceAddress, unsigned short sourcePort, string message){
   string responseMapKey = sourceAddress + ":" + std::to_string(sourcePort);
 
-  strcpy(message, responseMap[responseMapKey]);
+  message.assign(responseMap[responseMapKey]);
 
   // Debugging
   cout << "responseMapKey: " << responseMapKey << endl;
@@ -407,12 +423,12 @@ int get_nBytes(cJSON *jobjReceived)
 
 void get_filepath(cJSON *jobjReceived, string filepath)
 {
-  strcpy(filepath ,cJSON_GetObjectItemCaseSensitive(jobjReceived, "RFA_PATH")->valuestring);
+  filepath.assign(cJSON_GetObjectItemCaseSensitive(jobjReceived, "RFA_PATH")->valuestring);
 }
 
 void get_monitor_duration(cJSON *jobjReceived, string monitor_duration)
 {
-  strcpy(monitor_duration ,cJSON_GetObjectItemCaseSensitive(jobjReceived, "MONITOR_DURATION")->valuestring);
+  monitor_duration.assign(cJSON_GetObjectItemCaseSensitive(jobjReceived, "MONITOR_DURATION")->valuestring);
 }
 
 char* get_toWrite(cJSON *jobjReceived) {
@@ -420,10 +436,10 @@ char* get_toWrite(cJSON *jobjReceived) {
 }
 
 bool translate_filepath(string pseudo_filepath, string actual_filepath){
-  string rfa_prefix;
+  char rfa_prefix[6];
 
-  strcpy(actual_filepath, pseudo_filepath);
-  strncpy(rfa_prefix, pseudo_filepath, 6); // Copy just the "RFA://" portion
+  actual_filepath.assign(pseudo_filepath);
+  strncpy(rfa_prefix, pseudo_filepath.c_str(), 6); // Copy just the "RFA://" portion
   if (strcmp(rfa_prefix, "RFA://") == 0){
     actual_filepath.replace(0, 6, "../RemoteFileAccess/");
     return true;
@@ -431,10 +447,10 @@ bool translate_filepath(string pseudo_filepath, string actual_filepath){
   return false;
 }
 
-void get_last_modified_time(char *path, string last_modified_time) {
+void get_last_modified_time(const char *path, string last_modified_time) {
     struct stat attr;
     stat(path, &attr);
     printf("Last modified time: %s", ctime(&attr.st_mtime));
-    strcpy(last_modified_time, ctime(&attr.st_mtime));
+    last_modified_time.assign(ctime(&attr.st_mtime));
 }
 
