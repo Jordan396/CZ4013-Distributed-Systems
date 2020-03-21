@@ -94,10 +94,11 @@ void FileCLI::writeFile()
 void FileCLI::fetchFile()
 {
 	string filePath;
-	cout << "Please input a file path: ";
+	cout << "Please input a file path: "; // line hit 
 	cin >> filePath;
+	cout << "filepath is: " + filePath << endl; // filepath = RFA://documents/test.txt
 	if (cv.checkValidityFetch(filePath)) {
-		cout << "File is fetched and cached" << endl;
+		cout << "File is fetched and cached" << endl; // line is never hit 
 	}
 	else {
 		cout << "Failed to fetch and cache file" << endl;

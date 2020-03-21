@@ -1,7 +1,14 @@
 #include "FileHandler.h"
 
-// readfile is for use by the server, reads from a given file to a standard writer and returns number of bytes read 
-// assumption made is that we either specify FULL file path or it exists in current directory where server is executing 
+
+/** readfile reads from a given file into the buffer and returns an error code. 
+ * @param fileName absolute filename of the given file
+ * @param echoBuffer buffer where the data is read into 
+ * @param nBytes number of bytes to read
+ * @param startPos starting position to read at 
+ * @return an error code if reading unsuccessful
+ **/
+
 int FileHandler::ReadFile(const char* fileName, char echoBuffer[], int nBytes, int startPos = 0) { // we write to a buffer 
   // file opening logic can be abstracted away for reuse
   // first we check if file exists 
