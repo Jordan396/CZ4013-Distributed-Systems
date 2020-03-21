@@ -203,8 +203,8 @@ bool CacheService::fetchFile(std::string pathName)
 {
 	// convert to current directory cache file name
 	// filepath = RFA://documents/test.txt
-	cout << "path to save: " + pathName << endl;
 	string cachepath = getLocalPathToFile(pathName); // ../clientcache/{filename}
+	cout << "path to save: " + cachepath << endl;
 
 	// RFACli rc();
 	string last_modified_time;
