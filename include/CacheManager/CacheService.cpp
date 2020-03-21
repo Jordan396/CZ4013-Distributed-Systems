@@ -202,7 +202,9 @@ void CacheService::updateCacheMap(std::string pathName, chrono::system_clock::ti
 bool CacheService::fetchFile(std::string pathName)
 {
 	// convert to current directory cache file name
-	string cachepath = getLocalPathToFile(pathName);
+	// filepath = RFA://documents/test.txt
+	cout << "path to save: " + pathName << endl;
+	string cachepath = getLocalPathToFile(pathName); // ../clientcache/{filename}
 
 	// RFACli rc();
 	string last_modified_time;
@@ -242,9 +244,8 @@ string CacheService::extractFileName(string remoteFilePath)
 	const size_t last_slash_idx = remoteFilePath.find_last_of("\\/");
 	if (std::string::npos != last_slash_idx)
 	{
-		remoteFilePath.erase(0, last_slash_idx + 1);
+		return remoteFilePath.substr(last_slash_idx + 1);
 	}
-	return remoteFilePath;
 }
 
 bool CacheService::saveHashMap()
@@ -299,7 +300,9 @@ bool CacheService::restoreHashMap()
 
 std::string CacheService::getLocalPathToFile(std::string fileName)
 {
-	return "../../ClientCache/" + extractFileName(fileName);
+	// not always true - depends on where my execution is; currently is in bin so should be .. not ../..
+	// also requires that client cache be initialized
+	return "../ClientCache/" + extractFileName(fileName);
 }
 
 

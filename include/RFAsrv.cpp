@@ -87,10 +87,6 @@ int main(int argc, char *argv[]) {
       // Block until receive message from a client
       cout << "Listening..." << endl;
       recvMsgSize = sock.recvFrom(serverBuffer, bufferSize, sourceAddress, sourcePort);
-      if (recvMsgSize != bufferSize) { 
-        // TODO: make this throw because numbytes read != buffersize -> something went wrong while read or client malformed request  
-        return 0;
-      }
       cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
       request = serverBuffer;
 
@@ -119,7 +115,7 @@ int main(int argc, char *argv[]) {
 
 void *monitor_registered_clients( void *ptr ){
   while (true){
-    cout << "Checking for expired clients...";
+    cout << "Checking for expired clients..." << endl;
     // Get current time
     auto time_now = std::chrono::system_clock::now();
     time_t currentTime = std::chrono::system_clock::to_time_t(time_now);
