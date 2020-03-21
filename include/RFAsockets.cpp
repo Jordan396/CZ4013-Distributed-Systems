@@ -231,34 +231,70 @@ void UDPSocket::disconnect() throw(SocketException) {
 }
 
 void UDPSocket::sendTo(const void *buffer, int bufferLen, 
-    const string &foreignAddress, unsigned short foreignPort) 
+    const string &foreignAddress, unsigned short foreignPort, unsigned short sourcePort) 
     throw(SocketException) {
-  sockaddr_in destAddr;
-  fillAddr(foreignAddress, foreignPort, destAddr);
 
-  // Write out the whole buffer as a single message.
-  if (sendto(sockDesc, (raw_type *) buffer, bufferLen, 0,
-             (sockaddr *) &destAddr, sizeof(destAddr)) != bufferLen) {
-    throw SocketException("Send failed (sendto())", true);
-  }
+  int sockfd; 
+  sockaddr_in destAddr;
+  socklen_t addrLen = sizeof(destAddr);
+
+  // Creating socket file descriptor 
+  if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+      perror("socket creation failed"); 
+      exit(EXIT_FAILURE); 
+  } 
+
+  memset(&destAddr, 0, sizeof(destAddr)); 
+
+  // Filling server information 
+  destAddr.sin_family    = AF_INET; // IPv4 
+  destAddr.sin_addr.s_addr = INADDR_ANY; 
+  destAddr.sin_port = htons(sourcePort); 
+
+  sendto(sockfd, (raw_type *) buffer, bufferLen, 0, (const struct sockaddr *) &destAddr,  sizeof(destAddr)); 
+
+  printf("exiting UDP sockets\n");
 }
 
-int UDPSocket::recvFrom(void *buffer, int bufferLen, string &sourceAddress,
-    unsigned short &sourcePort) throw(SocketException) {
-  printf("inside UDPSocket\n");
-  cout << "Address: " + sourceAddress << endl;
+int UDPSocket::recvFrom(void *buffer, int bufferLen, string foreignAddress,
+    unsigned short &foreignPort, unsigned short sourcePort) throw(SocketException) {
+
+  int sockfd; 
   sockaddr_in clntAddr;
   socklen_t addrLen = sizeof(clntAddr);
-  int rtn;
-  if ((rtn = recvfrom(sockDesc, (raw_type *) buffer, bufferLen, 0, 
-                      (sockaddr *) &clntAddr, (socklen_t *) &addrLen)) < 0) {
-    throw SocketException("Receive failed (recvfrom())", true);
-  }
-  cout << "exited" << endl; 
-  sourceAddress = inet_ntoa(clntAddr.sin_addr);
-  sourcePort = ntohs(clntAddr.sin_port);
+
+  // Creating socket file descriptor 
+  if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+      perror("socket creation failed"); 
+      exit(EXIT_FAILURE); 
+  } 
+
+  memset(&clntAddr, 0, sizeof(clntAddr)); 
+
+  // Filling server information 
+  clntAddr.sin_family    = AF_INET; // IPv4 
+  clntAddr.sin_addr.s_addr = INADDR_ANY; 
+  clntAddr.sin_port = htons(sourcePort); 
+
+  // Bind the socket with the server address 
+  if (bind(sockfd, (const struct sockaddr *)&clntAddr,  
+          sizeof(clntAddr)) < 0 ) 
+  { 
+      perror("bind failed"); 
+      exit(EXIT_FAILURE); 
+  } 
+    
+  int len, n; 
+  len = sizeof(clntAddr);  //len is value/resuslt 
+  n = recvfrom(sockfd, (raw_type *) buffer, bufferLen, MSG_WAITALL, ( struct sockaddr *) &clntAddr, (socklen_t*)&len); 
+  
+  foreignAddress = inet_ntoa(clntAddr.sin_addr);
+  foreignPort = ntohs(clntAddr.sin_port);
+
+  close(sockfd); 
+
   printf("exiting UDP sockets\n");
-  return rtn;
+  return n;
 }
 
 void UDPSocket::setMulticastTTL(unsigned char multicastTTL) throw(SocketException) {

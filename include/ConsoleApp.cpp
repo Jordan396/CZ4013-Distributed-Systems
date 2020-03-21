@@ -9,6 +9,10 @@
 #include <string>
 #include <thread>
 #include <map>
+#include <sys/mman.h>   /* to create shared memory across child processes */
+#include <sys/socket.h> /* for socket(), bind(), and connect() */
+#include <sys/wait.h>   /* for waitpid() */
+#include <arpa/inet.h>  /* for sockaddr_in and inet_ntoa() */
 using namespace std;
 void displayClientMenu();
 
@@ -20,6 +24,8 @@ int sel;
 string serverIP = "";
 string serverPortNo = "";
 string clientPortNo = "";
+int sockfd;
+sockaddr_in destAddr, sourceAddr;
 
 int main(int argc, char* argv[])
 {
@@ -49,6 +55,30 @@ int main(int argc, char* argv[])
         cout << argc;
         return -1;
     }
+
+    
+    // Creating socket file descriptor 
+    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+        perror("socket creation failed"); 
+        exit(EXIT_FAILURE); 
+    } 
+
+    memset(&destAddr, 0, sizeof(destAddr)); 
+    memset(&sourceAddr, 0, sizeof(sourceAddr)); 
+
+    // Filling server information 
+    sourceAddr.sin_family    = AF_INET; // IPv4 
+    sourceAddr.sin_addr.s_addr = INADDR_ANY; 
+    sourceAddr.sin_port = htons((unsigned short) strtoul(clientPortNo.c_str(), NULL, 0)); 
+
+    // Bind the socket with the server address 
+    if (bind(sockfd, (const struct sockaddr *)&sourceAddr,  
+            sizeof(sourceAddr)) < 0 ) 
+    { 
+        perror("bind failed"); 
+        exit(EXIT_FAILURE); 
+    }
+    
 
     FileCLI fileCLI;
     SettingCLI settingCLI;

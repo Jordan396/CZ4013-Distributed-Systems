@@ -64,7 +64,6 @@
 #include "./Global.h"
 #include "./FileHandler.h"
 /* External libraries */
-#include "./RFAsockets.h"      // For UDPSocket and SocketException
 #include "./cJSON.h"      // For message formatting
 
 void *monitor_registered_clients( void *ptr );

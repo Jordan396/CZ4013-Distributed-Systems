@@ -43,13 +43,11 @@ int bufferSize = 255;
 int sel;
 string serverIP = "172.21.148.168";
 string serverPortNo = "2222";
-string clientPortNo = "2222";
+string clientPortNo = "0";
 bool RMI_SCHEME = true; // at most once if true
-int sockfd;
-sockaddr_in destAddr, sourceAddress;
 
 /* Variables to handle transfer of data */
-// std::string request;        /* String response received */
+std::string request;        /* String response received */
 std::string response;
 
 /* Variables for commands */
@@ -70,74 +68,52 @@ struct RegisteredClient
 std::map<std::string, std::list<struct RegisteredClient> > monitorMap;
 
 int main(int argc, char *argv[]) {
+
+  try {
+    UDPSocket sock(Socket::resolveService(serverPortNo, "udp"));                
   
-  // Creating socket file descriptor 
-  if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
-      perror("socket creation failed"); 
-      exit(EXIT_FAILURE); 
-  } 
+    char serverBuffer[bufferSize];   // Buffer for echo string
+    int recvMsgSize;                  // Size of received message
+    string sourceAddress;             // Address of datagram source
+    unsigned short sourcePort;        // Port of datagram source
 
-  memset(&destAddr, 0, sizeof(destAddr)); 
-  memset(&sourceAddress, 0, sizeof(sourceAddress)); 
+    pthread_t child_thread;
+    int i;
 
-  // Filling server information 
-  sourceAddress.sin_family    = AF_INET; // IPv4 
-  sourceAddress.sin_addr.s_addr = INADDR_ANY; 
-  sourceAddress.sin_port = htons((unsigned short) strtoul(serverPortNo.c_str(), NULL, 0)); 
+    pthread_create(&child_thread, NULL, monitor_registered_clients, (void*) i);
 
-  // Bind the socket with the server address 
-  if (bind(sockfd, (const struct sockaddr *)&sourceAddress,  
-          sizeof(sourceAddress)) < 0 ) 
-  { 
-      perror("bind failed"); 
-      exit(EXIT_FAILURE); 
-  } 
+    for (;;) {  // Run forever
+      // Block until receive message from a client
+      cout << "Listening..." << endl;
+      recvMsgSize = sock.recvFrom(serverBuffer, bufferSize, sourceAddress, sourcePort);
+      cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
+      request.assign(serverBuffer);
 
-  string request; 
-  char serverBuffer[bufferSize];   // Buffer for echo string
-  int recvMsgSize;                  // Size of received message
-  string sourceAddress;             // Address of datagram source
-  unsigned short sourcePort;        // Port of datagram source
-
-  pthread_t child_thread;
-  int i;
-  pthread_create(&child_thread, NULL, monitor_registered_clients, (void*) i);
-
-  for (;;) {  // Run forever
-    // Block until receive message from a client
-    cout << "Listening..." << endl;
-    int len = sizeof(destAddr);
-    int n = recvfrom(sockfd, serverBuffer, bufferSize, MSG_WAITALL, ( struct sockaddr *) &destAddr, (socklen_t*)&len); 
-    
-    serverBuffer[n] = '\0'; 
-
-    sourceAddress = inet_ntoa(destAddr.sin_addr);
-    sourcePort = ntohs(destAddr.sin_port);
-
-    cout << "Received packet to " << sourceAddress << ":" << sourcePort << endl;
-    request.assign(serverBuffer);
-
-    // Check RMI scheme
-    if (RMI_SCHEME){ // at most once - check if request exists
-      if (is_request_exists(sourceAddress, sourcePort, request)){ // request already exists
-        retrieve_response(sourceAddress, sourcePort, response);
-        send_message(sourceAddress, sourcePort, response);
+      // Check RMI scheme
+      if (RMI_SCHEME){ // at most once - check if request exists
+        if (is_request_exists(sourceAddress, sourcePort, request)){ // request already exists
+          retrieve_response(sourceAddress, sourcePort, response);
+          send_message(sourceAddress, sourcePort, response);
+        }
+        else { // new request
+          process_request(sourceAddress, sourcePort, request);
+        }
       }
-      else { // new request
+      else {
         process_request(sourceAddress, sourcePort, request);
       }
     }
-    else {
-      process_request(sourceAddress, sourcePort, request);
-    }
   }
-  
+  catch (SocketException &e) {
+    cerr << e.what() << endl;
+    exit(1);
+  }
   return 0;
 }
 
 void *monitor_registered_clients( void *ptr ){
   while (true){
-    cout << "Checking for expired clients..." << endl;
+    cout << "Checking for expired clients...";
     // Get current time
     auto time_now = std::chrono::system_clock::now();
     time_t currentTime = std::chrono::system_clock::to_time_t(time_now);
@@ -184,9 +160,15 @@ int comparetime(time_t time1,time_t time2){
 } 
 
 int send_message(string destAddress, unsigned short destPort, string message){
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  sendto(sockfd, message.c_str(), strlen(message.c_str()), 0, (const struct sockaddr *) &destAddr,  sizeof(destAddr)); 
-  cout << "Sending message: " + message + " : to " + destAddress + ":" + std::to_string(destPort) << endl;
+  try {
+    UDPSocket sock;
+    sock.sendTo(message.c_str(), strlen(message.c_str()), destAddress, destPort);
+
+  } catch (SocketException &e) {
+    cerr << e.what() << endl;
+    exit(1);
+  }
+  return 0;
 }
 
 void process_request(string sourceAddress, unsigned short sourcePort, string request){
@@ -194,8 +176,6 @@ void process_request(string sourceAddress, unsigned short sourcePort, string req
   cJSON *jobjReceived;
   jobjReceived = cJSON_CreateObject();
   jobjReceived = cJSON_Parse(request.c_str());
-
-  cout << "Processing request from " + sourceAddress + " at port " + std::to_string(sourcePort) << endl;
   
   // Handle request accordingly
   switch (get_request_code(jobjReceived)){
@@ -225,14 +205,12 @@ void execute_get_last_modified_time_command(string sourceAddress, unsigned short
   string last_modified_time;
 
   // Extract parameters from message
-  pseudo_filepath = get_filepath(jobjReceived);
-  actual_filepath = translate_filepath(pseudo_filepath);
-  if (actual_filepath != ""){
+  get_filepath(jobjReceived, pseudo_filepath);
+  if (translate_filepath(pseudo_filepath, actual_filepath)){
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     if (std::experimental::filesystem::exists(actual_filepath)){
-      cout << "File exists." << endl;
-      last_modified_time = get_last_modified_time(actual_filepath.c_str());
+      get_last_modified_time(actual_filepath.c_str(), last_modified_time);
 
       // TODO: Integrate with Jia Chin
       cJSON *jobjToSend;
@@ -243,6 +221,7 @@ void execute_get_last_modified_time_command(string sourceAddress, unsigned short
       cJSON_Delete(jobjToSend);
     }
     else {
+      // TODO: Integrate with Jia Chin
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
@@ -261,17 +240,15 @@ void execute_read_command(string sourceAddress, unsigned short sourcePort, cJSON
   string last_modified_time;
 
   // Extract parameters from message
-  pseudo_filepath = get_filepath(jobjReceived);
+  get_filepath(jobjReceived, pseudo_filepath);
   offset = get_offset(jobjReceived);
   nBytes = get_nBytes(jobjReceived);
-  actual_filepath = translate_filepath(pseudo_filepath); 
-  if (actual_filepath != "") {
+  if (translate_filepath(pseudo_filepath, actual_filepath)){
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     if (std::experimental::filesystem::exists(actual_filepath)){
       // TODO: Integrate with Jia Chin
       // ReadFile()
-      cout << "File exists." << endl;
 
       // Send response
       cJSON *jobjToSend;
@@ -301,17 +278,15 @@ void execute_write_command(string sourceAddress, unsigned short sourcePort, cJSO
   string last_modified_time;
 
   // Extract parameters from message
-  pseudo_filepath = get_filepath(jobjReceived);
+  get_filepath(jobjReceived, pseudo_filepath);
   offset = get_offset(jobjReceived);
   nBytes = get_nBytes(jobjReceived);
-  actual_filepath = translate_filepath(pseudo_filepath); 
-  if (actual_filepath != ""){
+  if (translate_filepath(pseudo_filepath, actual_filepath)){
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     if (std::experimental::filesystem::exists(actual_filepath)){
       // TODO: Integrate with Jia Chin
       // WriteFile()
-      cout << "File exists." << endl;
 
       // Send response
       cJSON *jobjToSend;
@@ -343,10 +318,10 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
   struct RegisteredClient registeredClient;
 
   // Extract parameters from message
-  pseudo_filepath = get_filepath(jobjReceived);
+  get_filepath(jobjReceived, pseudo_filepath);
   int offset = get_offset(jobjReceived);
   int nBytes = get_nBytes(jobjReceived);
-  monitor_duration = get_monitor_duration(jobjReceived);
+  get_monitor_duration(jobjReceived, monitor_duration);
 
   // Assign registeredClient attributes
   registeredClient.address = sourceAddress;
@@ -354,8 +329,8 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
   registeredClient.expiration = monitor_duration;
 
   // Extract parameters from message
-  actual_filepath = get_filepath(jobjReceived);
-  if (actual_filepath != "") {
+  get_filepath(jobjReceived, filepath);
+  if (translate_filepath(pseudo_filepath, actual_filepath)){
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     (monitorMap[actual_filepath]).push_back(registeredClient);
@@ -446,40 +421,38 @@ int get_nBytes(cJSON *jobjReceived)
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "N_BYTES")->valueint;
 }
 
-string get_filepath(cJSON *jobjReceived)
+void get_filepath(cJSON *jobjReceived, string filepath)
 {
-  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "RFA_PATH")->valuestring;
+  filepath.assign(cJSON_GetObjectItemCaseSensitive(jobjReceived, "RFA_PATH")->valuestring);
+  cout << "filepath: " + filepath << endl;
 }
 
-string get_monitor_duration(cJSON *jobjReceived)
+void get_monitor_duration(cJSON *jobjReceived, string monitor_duration)
 {
-  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "MONITOR_DURATION")->valuestring;
+  monitor_duration.assign(cJSON_GetObjectItemCaseSensitive(jobjReceived, "MONITOR_DURATION")->valuestring);
 }
 
 char* get_toWrite(cJSON *jobjReceived) {
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "toWrite")->valuestring;
 }
 
-string translate_filepath(string pseudo_filepath){
+bool translate_filepath(string pseudo_filepath, string actual_filepath){
   char rfa_prefix[6];
 
-  // assign here 
-  string actual_filepath = pseudo_filepath;
+  actual_filepath.assign(pseudo_filepath);
   strncpy(rfa_prefix, pseudo_filepath.c_str(), 6); // Copy just the "RFA://" portion
-  if (strcmp(rfa_prefix, "RFA://") == 0){ 
-    // actual_filepath = actual_filepath.replace(0, 6, "../RemoteFileAccess/");
-    actual_filepath = "../RemoteFileAccess/" + actual_filepath.substr(6);
+  if (strcmp(rfa_prefix, "RFA://") == 0){
+    actual_filepath.replace(0, 6, "../RemoteFileAccess/");
     cout << "actual_filepath: " + actual_filepath << endl;
-    return actual_filepath;
+    return true;
   }
-  cout << "pseudo_filepath: " + pseudo_filepath << endl;
-  return "";
+  return false;
 }
 
-string get_last_modified_time(const char *path) {
+void get_last_modified_time(const char *path, string last_modified_time) {
     struct stat attr;
     stat(path, &attr);
     printf("Last modified time: %s", ctime(&attr.st_mtime));
-    return string(ctime(&attr.st_mtime));
+    last_modified_time.assign(ctime(&attr.st_mtime));
 }
 

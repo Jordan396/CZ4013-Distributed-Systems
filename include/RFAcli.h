@@ -36,13 +36,14 @@
 #include <signal.h>     /* for sigaction() */
 #include <ctype.h>      /* for char validation */
 #include <time.h>       /* for waitFor() */
+#include <chrono>
+#include <thread>
 #include <sys/mman.h>   /* to create shared memory across child processes */
 #include <sys/socket.h> /* for socket(), bind(), and connect() */
 #include <sys/wait.h>   /* for waitpid() */
 #include <arpa/inet.h>  /* for sockaddr_in and inet_ntoa() */
 
 /* External libraries */
-#include "RFAsockets.h"      // For UDPSocket and SocketException
 #include "cJSON.h"      // For message formatting
 #include "Global.h"
 #include "FileHandler.h"
@@ -59,7 +60,7 @@ public:
   int download_file(string remote_filepath, string local_filepath);
   string get_last_modified_time(string remote_filepath);
   int register_client(string remote_filepath, string local_filepath, string monitor_duration);
-  string receive_message(string serverIP, string serverPortNo);
+  string receive_message();
   int send_message(string destAddress, string destPort, string message);
   int get_response_code(cJSON *jobjReceived);
   void write_file(string remote_filepath, string toWrite, int nOffset);

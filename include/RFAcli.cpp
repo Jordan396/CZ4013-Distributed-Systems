@@ -78,7 +78,7 @@ int RFAcli::download_file(string remote_filepath, string local_filepath){
     cJSON_Delete(jobjToSend);
 
     // Wait for response...
-    response = receive_message(serverIP, serverPortNo);
+    response = receive_message();
 
     // Parse response message
     cJSON *jobjReceived;
@@ -118,7 +118,7 @@ string RFAcli::get_last_modified_time(string remote_filepath){
   cJSON_Delete(jobjToSend);
   // Wait for response...
   string response; // blocking here.
-  response = receive_message(serverIP, serverPortNo);
+  response = receive_message();
   cout << "response is: " << response << endl; 
   // Parse response message
   cJSON *jobjReceived;
@@ -147,7 +147,7 @@ int RFAcli::register_client(string remote_filepath, string local_filepath, strin
   cJSON_Delete(jobjToSend);
 
   // Wait for response...
-  response = receive_message(serverIP, serverPortNo);
+  response = receive_message();
 
   // Parse response message
   cJSON *jobjReceived;
@@ -162,7 +162,7 @@ int RFAcli::register_client(string remote_filepath, string local_filepath, strin
   // Enter monitoring loop...
   while (true){
     // Wait for response...
-    response = receive_message(serverIP, serverPortNo);
+    response = receive_message();
 
     // Parse response message
     cJSON *jobjReceived;
@@ -183,41 +183,24 @@ int RFAcli::register_client(string remote_filepath, string local_filepath, strin
   return 1;
 }
 
-string RFAcli::receive_message(string serverIP, string portNo){
-  try {
-    unsigned short sourcePort = (unsigned short) strtoul(clientPortNo.c_str(), NULL, 0);
-    UDPSocket sock(sourcePort);                
+string RFAcli::receive_message(){
+  char clientBuffer[bufferSize];
 
-    char clientBuffer[bufferSize]; /* String response received */
-    int recvMsgSize;                  // Size of received message
-    // string serverIP;             // Address of datagram source
-    // unsigned short portNo;        // Port of datagram source
+  int len = sizeof(destAddr);
+  int n = recvfrom(sockfd, clientBuffer, bufferSize, MSG_WAITALL, ( struct sockaddr *) &destAddr, (socklen_t*)&len); 
+  clientBuffer[n] = '\0'; 
+  // sourceAddress = inet_ntoa(destAddr.sin_addr);
+  // sourcePort = ntohs(destAddr.sin_port);
 
-    // Block until receive message from a client
-    cout << "Listening..." << endl; 
-    // blocks until you get a resp back 
-    // hard-coded for testing below 
-    unsigned short portNum = (unsigned short) strtoul(portNo.c_str(), NULL, 0);
-    recvMsgSize = sock.recvFrom(clientBuffer, bufferSize, serverIP, portNum);
-    cout << recvMsgSize << endl; 
-    cout << "Received packet from " << serverIP << ":" << portNo << endl;
-    return string(clientBuffer);
-  }
-  catch (SocketException &e) {
-    cerr << e.what() << endl;
-    exit(1);
-  }
+  // cout << "Received packet to " << sourceAddress << ":" << sourcePort << endl;
+  string s = clientBuffer;
+  return s;
 }
 
-int RFAcli::send_message(string destIP, string destPort, string message){
-  try {
-    UDPSocket sock;
-    unsigned short destPortNo = (unsigned short) strtoul(destPort.c_str(), NULL, 0);
-    sock.sendTo(message.c_str(), strlen(message.c_str()), destIP, destPortNo);
-  } catch (SocketException &e) {
-    cerr << e.what() << endl;
-    exit(1);
-  }
+int RFAcli::send_message(string destAddress, string destPort, string message){
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  sendto(sockfd, message.c_str(), strlen(message.c_str()), 0, (const struct sockaddr *) &destAddr, sizeof(destAddr)); 
+  cout << "Sending message: " + message + " : to " + destAddress + ":" + destPort << endl;
   return 0;
 }
 

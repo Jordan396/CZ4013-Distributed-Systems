@@ -234,7 +234,7 @@ public:
    *   @exception SocketException thrown if unable to send datagram
    */
   void sendTo(const void *buffer, int bufferLen, const string &foreignAddress,
-            unsigned short foreignPort) throw(SocketException);
+            unsigned short foreignPort, unsigned short sourcePort) throw(SocketException);
 
   /**
    *   Read read up to bufferLen bytes data from this socket.  The given buffer
@@ -246,8 +246,8 @@ public:
    *   @return number of bytes received and -1 for error
    *   @exception SocketException thrown if unable to receive datagram
    */
-  int recvFrom(void *buffer, int bufferLen, string &sourceAddress, 
-               unsigned short &sourcePort) throw(SocketException);
+  int recvFrom(void *buffer, int bufferLen, string foreignAddress,
+      unsigned short &foreignPort, unsigned short sourcePort) throw(SocketException);
 
   /**
    *   Set the multicast TTL
