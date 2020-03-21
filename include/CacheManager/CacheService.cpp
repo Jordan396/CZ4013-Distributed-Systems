@@ -143,10 +143,12 @@ bool CacheService::checkValidityFetch(std::string pathName)
 
 	if (it == cacheMap.end()) {
 		// does not exist in map (thus need to request file from server again before proceeding)
+		cout << "file not exist" << endl; 
 		return fetchFile(pathName);
 	}
 	else {
 		// exist in map (need to check freshness)
+		cout << "file exist" << endl; 
 		File file = it->second;
 		// check if exceed the freshness interval 
 		// if does not exceed, then is valid
@@ -155,11 +157,10 @@ bool CacheService::checkValidityFetch(std::string pathName)
 		}
 		else {
 			// check if server side last modified is the same 
-			// RFACli rc();
 			//TODO (Server side to provide method)
 			string last_modified_time;
-			client.get_last_modified_time(pathName);
-
+			last_modified_time = client.get_last_modified_time(pathName);
+			cout << "last modified : " << last_modified_time << endl;
 			// TODO: Convert last_modified_time to below format
 
 			std::tm tm = {0};
@@ -208,7 +209,7 @@ bool CacheService::fetchFile(std::string pathName)
 
 	// RFACli rc();
 	string last_modified_time;
-	client.get_last_modified_time(pathName);
+	last_modified_time = client.get_last_modified_time(pathName);
 
 	// TODO: Convert last_modified_time to below format
 
@@ -253,7 +254,7 @@ bool CacheService::saveHashMap()
 	if (cacheMap.empty())
 		return false;
 
-	FILE* fp = fopen("../../ClientCache/cacheHistory.txt", "w");
+	FILE* fp = fopen("../ClientCache/cacheHistory.txt", "w");
 
 	for (map<string, File>::iterator it = cacheMap.begin(); it != cacheMap.end(); it++) {
 		fprintf(fp, "%s=%s\n", it->first.c_str(), it->second);
@@ -265,7 +266,7 @@ bool CacheService::saveHashMap()
 
 bool CacheService::restoreHashMap()
 {
-	FILE* fp = fopen("../../ClientCache/cacheHistory.txt", "r");
+	FILE* fp = fopen("../ClientCache/cacheHistory.txt", "r");
 	if (!fp) return false;
 
 	cacheMap.clear();

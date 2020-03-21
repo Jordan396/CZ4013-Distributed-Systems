@@ -74,6 +74,7 @@ int RFAcli::download_file(string remote_filepath, string local_filepath){
     cJSON_AddItemToObject(jobjToSend, "N_BYTES", cJSON_CreateNumber(bufferSize)); 
     cJSON_AddItemToObject(jobjToSend, "OFFSET", cJSON_CreateNumber(offset)); 
     send_message(serverIP, serverPortNo, cJSON_Print(jobjToSend));
+    cout << cJSON_Print(jobjToSend) << endl; 
     cJSON_Delete(jobjToSend);
 
     // Wait for response...
@@ -115,11 +116,10 @@ string RFAcli::get_last_modified_time(string remote_filepath){
   cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath.c_str())); 
   send_message(serverIP, serverPortNo, cJSON_Print(jobjToSend));
   cJSON_Delete(jobjToSend);
-
   // Wait for response...
-  string response;
+  string response; // blocking here.
   response = receive_message(serverIP, serverPortNo);
-
+  cout << "response is: " << response << endl; 
   // Parse response message
   cJSON *jobjReceived;
   jobjReceived = cJSON_CreateObject();
