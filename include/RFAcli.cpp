@@ -61,10 +61,10 @@
 // void format_read_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes);
 // void format_write_message(cJSON *jobjToSend, char *filepath, int offset, int nBytes);
 
-
 int RFAcli::download_file(string remote_filepath, string local_filepath){
   string response;
   int offset = 0;
+  FileHandler fh = FileHandler(); 
 
   while(true){
     // Send request
@@ -77,14 +77,15 @@ int RFAcli::download_file(string remote_filepath, string local_filepath){
     cJSON_Delete(jobjToSend);
 
     // Wait for response...
-    response = receive_message();
+    response = receive_message(serverIP, serverPortNo);
 
     // Parse response message
     cJSON *jobjReceived;
     jobjReceived = cJSON_CreateObject();
     jobjReceived = cJSON_Parse(response.c_str());
     if (get_response_code(jobjReceived) == 1){
-      // write();
+      cout << "writing" << endl; 
+      fh.WriteFile(local_filepath.c_str(), cJSON_GetObjectItem(jobjReceived, "CONTENT")->valuestring, offset);
       // Increase offset
       offset += bufferSize;
       cJSON_Delete(jobjReceived);
@@ -117,7 +118,7 @@ string RFAcli::get_last_modified_time(string remote_filepath){
 
   // Wait for response...
   string response;
-  response = receive_message();
+  response = receive_message(serverIP, serverPortNo);
 
   // Parse response message
   cJSON *jobjReceived;
@@ -146,7 +147,7 @@ int RFAcli::register_client(string remote_filepath, string local_filepath, strin
   cJSON_Delete(jobjToSend);
 
   // Wait for response...
-  response = receive_message();
+  response = receive_message(serverIP, serverPortNo);
 
   // Parse response message
   cJSON *jobjReceived;
@@ -161,7 +162,7 @@ int RFAcli::register_client(string remote_filepath, string local_filepath, strin
   // Enter monitoring loop...
   while (true){
     // Wait for response...
-    response = receive_message();
+    response = receive_message(serverIP, serverPortNo);
 
     // Parse response message
     cJSON *jobjReceived;
@@ -182,23 +183,28 @@ int RFAcli::register_client(string remote_filepath, string local_filepath, strin
   return 1;
 }
 
-string RFAcli::receive_message(){
+string RFAcli::receive_message(string serverIP, string portNo){
   try {
     unsigned short sourcePort = (unsigned short) strtoul(clientPortNo.c_str(), NULL, 0);
     UDPSocket sock(sourcePort);                
 
     char clientBuffer[bufferSize]; /* String response received */
     int recvMsgSize;                  // Size of received message
-    string serverIP;             // Address of datagram source
-    unsigned short portNo;        // Port of datagram source
+    // string serverIP;             // Address of datagram source
+    // unsigned short portNo;        // Port of datagram source
 
     // Block until receive message from a client
     cout << "Listening..." << endl; 
     // blocks until you get a resp back 
-    cout << serverIP << endl; 
     // hard-coded for testing below 
+<<<<<<< HEAD
     // serverip not bound - is empty 
     recvMsgSize = sock.recvFrom(clientBuffer, bufferSize, serverIP, portNo);
+=======
+    unsigned short portNum = (unsigned short) strtoul(portNo.c_str(), NULL, 0);
+    recvMsgSize = sock.recvFrom(clientBuffer, bufferSize, serverIP, portNum);
+    cout << recvMsgSize << endl; 
+>>>>>>> ddbf3dcf0171a2ce46b97a383db2b110c8e662c9
     cout << "Received packet from " << serverIP << ":" << portNo << endl;
     return string(clientBuffer);
   }

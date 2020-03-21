@@ -34,6 +34,7 @@
 #include <netinet/in.h>           
 #include <iostream> 
 #include <errno.h>
+#include <iostream> 
 typedef void raw_type;       // Type used for raw data on this platform
 
 using namespace std;
@@ -245,7 +246,11 @@ void UDPSocket::sendTo(const void *buffer, int bufferLen,
 int UDPSocket::recvFrom(void *buffer, int bufferLen, string &sourceAddress,
     unsigned short &sourcePort) throw(SocketException) {
   printf("inside UDPSocket\n");
+<<<<<<< HEAD
   cout << "Address: " + sourceAddress << endl;
+=======
+  cout << sourceAddress << endl; 
+>>>>>>> ddbf3dcf0171a2ce46b97a383db2b110c8e662c9
   sockaddr_in clntAddr;
   socklen_t addrLen = sizeof(clntAddr);
   int rtn;
@@ -253,9 +258,14 @@ int UDPSocket::recvFrom(void *buffer, int bufferLen, string &sourceAddress,
                       (sockaddr *) &clntAddr, (socklen_t *) &addrLen)) < 0) {
     throw SocketException("Receive failed (recvfrom())", true);
   }
+  cout << "exited" << endl; 
   sourceAddress = inet_ntoa(clntAddr.sin_addr);
   sourcePort = ntohs(clntAddr.sin_port);
+<<<<<<< HEAD
   cout << "exiting" << endl; 
+=======
+  printf("exiting UDP sockets\n");
+>>>>>>> ddbf3dcf0171a2ce46b97a383db2b110c8e662c9
   return rtn;
 }
 
