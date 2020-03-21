@@ -22,9 +22,10 @@ bool CacheService::clearCache()
 {
 	try {
 		// remove all files in directory recursively
-		fs::remove_all("../client/CacheManager/TempFiles/");
+		fs::remove_all("../../ClientCache/");
 		// update hashing map
 		cacheMap.clear();
+		fs::create_directory("../../ClientCache/");
 		return true;
 	}
 	catch (const fs::filesystem_error & e) {
@@ -71,10 +72,11 @@ CacheService::~CacheService()
 // }
 
 // this method will call the server and transfer text chunk by chunk to the cache file 
-bool CacheService::writeAll(std::string pathName)
+bool CacheService::downloadFile(std::string remotePath, std::string cachePath)
 {
 	// TODO (include Jordan's method)
-	return true;
+	int result = client.download_file(remotePath, cachePath);
+	return result==1;
 }
 
 // std::string CacheService::read(std::string pathName, int offset, int bytes)
@@ -222,7 +224,7 @@ bool CacheService::fetchFile(std::string pathName)
     std::chrono::system_clock::time_point time = std::chrono::system_clock::from_time_t(tt);
 
 	// write from the server to the cache 
-	if (writeAll(pathName)) {
+	if (downloadFile(pathName,cachepath)) {
 		// update the hashing table 
 		updateCacheMap(pathName, time);
 		return true;
@@ -250,11 +252,7 @@ bool CacheService::saveHashMap()
 	if (cacheMap.empty())
 		return false;
 
-	FILE* fp = fopen("../client/CacheManager/TempFiles/cacheHistory.txt", "w");
-	if (!fp) {
-		fs::create_directory("../client/CacheManager/TempFiles");
-		fp = fopen("../client/CacheManager/TempFiles/cacheHistory.txt", "w");
-	}
+	FILE* fp = fopen("../../ClientCache/cacheHistory.txt", "w");
 
 	for (map<string, File>::iterator it = cacheMap.begin(); it != cacheMap.end(); it++) {
 		fprintf(fp, "%s=%s\n", it->first.c_str(), it->second);
@@ -266,7 +264,7 @@ bool CacheService::saveHashMap()
 
 bool CacheService::restoreHashMap()
 {
-	FILE* fp = fopen("../client/CacheManager/TempFiles/cacheHistory.txt", "r");
+	FILE* fp = fopen("../../ClientCache/cacheHistory.txt", "r");
 	if (!fp) return false;
 
 	cacheMap.clear();
@@ -301,7 +299,7 @@ bool CacheService::restoreHashMap()
 
 std::string CacheService::getLocalPathToFile(std::string fileName)
 {
-	return "../client/CacheManager/TempFiles/" + extractFileName(fileName);
+	return "../../ClientCache/" + extractFileName(fileName);
 }
 
 
