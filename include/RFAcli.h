@@ -56,12 +56,12 @@ class RFAcli
 {
 public:
   int download_file(string remote_filepath, string local_filepath);
-  int get_last_modified_time(string remote_filepath, string last_modified_time);
+  string get_last_modified_time(string remote_filepath);
   int register_client(string remote_filepath, string local_filepath, string monitor_duration);
-  int receive_message(string response);
+  string RFAcli::receive_message();
   int send_message(string destAddress, string destPort, string message);
   int get_response_code(cJSON *jobjReceived);
   void write_file(string remote_filepath, string toWrite, int nOffset);
-  void extract_last_modified_time(cJSON *jobjReceived, string last_modified);
+  string extract_last_modified_time(cJSON *jobjReceived);
   ~RFAcli();
 };

@@ -83,11 +83,11 @@ void retrieve_response(string sourceAddress, unsigned short sourcePort, string m
 int get_request_code(cJSON *jobjReceived);
 int get_offset(cJSON *jobjReceived);
 int get_nBytes(cJSON *jobjReceived);
-void get_filepath(cJSON *jobjReceived, string filepath);
-void get_monitor_duration(cJSON *jobjReceived, string monitor_duration);
+string get_filepath(cJSON *jobjReceived);
+string get_monitor_duration(cJSON *jobjReceived);
 char* get_toWrite(cJSON *jobjReceived);
-bool translate_filepath(string pseudo_filepath, string actual_filepath);
-void get_last_modified_time(const char *path, string last_modified_time);
+string translate_filepath(string pseudo_filepath);
+string get_last_modified_time(const char *path);
 
 
 // /**

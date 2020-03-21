@@ -47,7 +47,7 @@ string clientPortNo = "0";
 bool RMI_SCHEME = true; // at most once if true
 
 /* Variables to handle transfer of data */
-std::string request;        /* String response received */
+// std::string request;        /* String response received */
 std::string response;
 
 /* Variables for commands */
@@ -71,7 +71,8 @@ int main(int argc, char *argv[]) {
 
   try {
     UDPSocket sock(Socket::resolveService(serverPortNo, "udp"));                
-  
+
+    string request; 
     char serverBuffer[bufferSize];   // Buffer for echo string
     int recvMsgSize;                  // Size of received message
     string sourceAddress;             // Address of datagram source
@@ -86,8 +87,12 @@ int main(int argc, char *argv[]) {
       // Block until receive message from a client
       cout << "Listening..." << endl;
       recvMsgSize = sock.recvFrom(serverBuffer, bufferSize, sourceAddress, sourcePort);
+      if (recvMsgSize != bufferSize) { 
+        // TODO: make this throw because numbytes read != buffersize -> something went wrong while read or client malformed request  
+        return 0;
+      }
       cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
-      request.assign(serverBuffer);
+      request = serverBuffer;
 
       // Check RMI scheme
       if (RMI_SCHEME){ // at most once - check if request exists
@@ -104,6 +109,7 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+
   catch (SocketException &e) {
     cerr << e.what() << endl;
     exit(1);
@@ -205,12 +211,13 @@ void execute_get_last_modified_time_command(string sourceAddress, unsigned short
   string last_modified_time;
 
   // Extract parameters from message
-  get_filepath(jobjReceived, pseudo_filepath);
-  if (translate_filepath(pseudo_filepath, actual_filepath)){
+  pseudo_filepath = get_filepath(jobjReceived);
+  actual_filepath = translate_filepath(pseudo_filepath);
+  if (actual_filepath != ""){
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     if (std::experimental::filesystem::exists(actual_filepath)){
-      get_last_modified_time(actual_filepath.c_str(), last_modified_time);
+      last_modified_time = get_last_modified_time(actual_filepath.c_str());
 
       // TODO: Integrate with Jia Chin
       cJSON *jobjToSend;
@@ -240,10 +247,11 @@ void execute_read_command(string sourceAddress, unsigned short sourcePort, cJSON
   string last_modified_time;
 
   // Extract parameters from message
-  get_filepath(jobjReceived, pseudo_filepath);
+  pseudo_filepath = get_filepath(jobjReceived);
   offset = get_offset(jobjReceived);
   nBytes = get_nBytes(jobjReceived);
-  if (translate_filepath(pseudo_filepath, actual_filepath)){
+  actual_filepath = translate_filepath(pseudo_filepath); 
+  if (actual_filepath != "") {
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     if (std::experimental::filesystem::exists(actual_filepath)){
@@ -278,10 +286,11 @@ void execute_write_command(string sourceAddress, unsigned short sourcePort, cJSO
   string last_modified_time;
 
   // Extract parameters from message
-  get_filepath(jobjReceived, pseudo_filepath);
+  pseudo_filepath = get_filepath(jobjReceived);
   offset = get_offset(jobjReceived);
   nBytes = get_nBytes(jobjReceived);
-  if (translate_filepath(pseudo_filepath, actual_filepath)){
+  actual_filepath = translate_filepath(pseudo_filepath); 
+  if (actual_filepath != ""){
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     if (std::experimental::filesystem::exists(actual_filepath)){
@@ -318,10 +327,10 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
   struct RegisteredClient registeredClient;
 
   // Extract parameters from message
-  get_filepath(jobjReceived, pseudo_filepath);
+  pseudo_filepath = get_filepath(jobjReceived);
   int offset = get_offset(jobjReceived);
   int nBytes = get_nBytes(jobjReceived);
-  get_monitor_duration(jobjReceived, monitor_duration);
+  monitor_duration = get_monitor_duration(jobjReceived);
 
   // Assign registeredClient attributes
   registeredClient.address = sourceAddress;
@@ -329,8 +338,8 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
   registeredClient.expiration = monitor_duration;
 
   // Extract parameters from message
-  get_filepath(jobjReceived, filepath);
-  if (translate_filepath(pseudo_filepath, actual_filepath)){
+  actual_filepath = get_filepath(jobjReceived);
+  if (actual_filepath != "") {
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     (monitorMap[actual_filepath]).push_back(registeredClient);
@@ -421,36 +430,40 @@ int get_nBytes(cJSON *jobjReceived)
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "N_BYTES")->valueint;
 }
 
-void get_filepath(cJSON *jobjReceived, string filepath)
+string get_filepath(cJSON *jobjReceived)
 {
-  filepath.assign(cJSON_GetObjectItemCaseSensitive(jobjReceived, "RFA_PATH")->valuestring);
+  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "RFA_PATH")->valuestring;
 }
 
-void get_monitor_duration(cJSON *jobjReceived, string monitor_duration)
+string get_monitor_duration(cJSON *jobjReceived)
 {
-  monitor_duration.assign(cJSON_GetObjectItemCaseSensitive(jobjReceived, "MONITOR_DURATION")->valuestring);
+  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "MONITOR_DURATION")->valuestring;
 }
 
 char* get_toWrite(cJSON *jobjReceived) {
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "toWrite")->valuestring;
 }
 
-bool translate_filepath(string pseudo_filepath, string actual_filepath){
+string translate_filepath(string pseudo_filepath){
   char rfa_prefix[6];
 
-  actual_filepath.assign(pseudo_filepath);
+  // assign here 
+  string actual_filepath = pseudo_filepath;
   strncpy(rfa_prefix, pseudo_filepath.c_str(), 6); // Copy just the "RFA://" portion
-  if (strcmp(rfa_prefix, "RFA://") == 0){
-    actual_filepath.replace(0, 6, "../RemoteFileAccess/");
-    return true;
+  if (strcmp(rfa_prefix, "RFA://") == 0){ 
+    // actual_filepath = actual_filepath.replace(0, 6, "../RemoteFileAccess/");
+    actual_filepath = "../RemoteFileAccess/" + actual_filepath.substr(6);
+    cout << "actual_filepath: " + actual_filepath << endl;
+    return actual_filepath;
   }
-  return false;
+  cout << "pseudo_filepath: " + pseudo_filepath << endl;
+  return "";
 }
 
-void get_last_modified_time(const char *path, string last_modified_time) {
+string get_last_modified_time(const char *path) {
     struct stat attr;
     stat(path, &attr);
     printf("Last modified time: %s", ctime(&attr.st_mtime));
-    last_modified_time.assign(ctime(&attr.st_mtime));
+    return string(ctime(&attr.st_mtime));
 }
 
