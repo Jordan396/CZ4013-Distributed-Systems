@@ -24,6 +24,8 @@ public:
 	// this method will be called when client wants to delete a particular cache entry
 	bool clearFile(std::string pathName);
 
+	bool downloadFile(std::string remotePath, std::string cachePath);
+
 	// this method will be called when client wants to clear the whole cache
 	bool clearCache();
 
