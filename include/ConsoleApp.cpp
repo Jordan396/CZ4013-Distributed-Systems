@@ -23,7 +23,7 @@ int bufferSize = 255;
 int sel;
 string serverIP = "";
 string serverPortNo = "";
-string clientPortNo = "";
+string clientPortNo = "2221";
 
 
 int main(int argc, char* argv[])

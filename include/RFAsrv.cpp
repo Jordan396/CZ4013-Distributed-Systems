@@ -125,7 +125,7 @@ void init_sockets()
 
   // Bind the socket with the source address 
   socklen_t len = sizeof(sourceAddr);
-  if (bind(inboundSockFD, (const struct sockaddr *)&sourceAddr, sizeof(sourceAddr)) < 0 ) 
+  if (bind(inboundSockFD, (const struct sockaddr *)&sourceAddr, len) < 0 ) 
   { 
       perror("bind failed"); 
       exit(EXIT_FAILURE); 

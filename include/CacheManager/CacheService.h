@@ -10,7 +10,6 @@
 #include "./../FileHandler.h"
 #include "./../RFAcli.h"
 #include "./../Global.h"
-#include "./../RFAcli.h"
 
 class CacheService
 {

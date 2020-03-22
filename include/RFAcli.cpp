@@ -78,7 +78,7 @@ RFAcli::RFAcli(void){
   // Filling source information 
   sourceAddr.sin_family    = AF_INET; // IPv4 
   sourceAddr.sin_addr.s_addr = INADDR_ANY; 
-  // sourceAddr.sin_port = htons((unsigned short) strtoul(clientPortNo.c_str(), NULL, 0)); 
+  sourceAddr.sin_port = htons((unsigned short) strtoul(clientPortNo.c_str(), NULL, 0)); 
   // Filling destination information 
   destAddr.sin_family    = AF_INET; // IPv4 
   destAddr.sin_addr.s_addr = inet_addr(serverIP.c_str()); 
@@ -98,7 +98,6 @@ RFAcli::RFAcli(void){
     clientPortNo = std::to_string(ntohs(sourceAddr.sin_port));
     cout << "Source port number: " + clientPortNo << endl;
   }
-  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 }
 
 
@@ -234,8 +233,12 @@ string RFAcli::receive_message(){
   int len = sizeof(destAddr);
   int n = recvfrom(inboundSockFD, clientBuffer, bufferSize, MSG_WAITALL, ( struct sockaddr *) &destAddr, (socklen_t*)&len); 
   clientBuffer[n] = '\0'; 
-  // sourceAddress = inet_ntoa(destAddr.sin_addr);
-  // sourcePort = ntohs(destAddr.sin_port);
+
+  string sourceAddress;             // Address of datagram source
+  unsigned short sourcePort;        // Port of datagram source
+  sourceAddress = inet_ntoa(destAddr.sin_addr);
+  sourcePort = ntohs(destAddr.sin_port);
+  cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
 
   // cout << "Received packet to " << sourceAddress << ":" << sourcePort << endl;
   string s = clientBuffer;

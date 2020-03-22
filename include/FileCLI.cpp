@@ -164,6 +164,6 @@ FileCLI::~FileCLI()
 
 FileCLI::FileCLI()
 {
-	CacheService cv;
+	// CacheService cv;
 	cv.restoreHashMap();
 }
