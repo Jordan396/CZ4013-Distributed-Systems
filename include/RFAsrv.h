@@ -66,9 +66,10 @@
 /* External libraries */
 #include "./cJSON.h"      // For message formatting
 
+void init_sockets();
 void *monitor_registered_clients( void *ptr );
 int comparetime(time_t time1,time_t time2);
-int send_message(string destAddress, unsigned short destPort, string message);
+int send_message(string destAddress, string message);
 void process_request(string sourceAddress, unsigned short sourcePort, string request);
 void execute_get_last_modified_time_command(string sourceAddress, unsigned short sourcePort, cJSON *jobjReceived);
 void execute_read_command(string sourceAddress, unsigned short sourcePort, cJSON *jobjReceived);

@@ -14,8 +14,6 @@ extern int bufferSize;
 extern std::string serverIP;
 extern std::string serverPortNo;
 extern std::string clientPortNo;
-extern int sockfd;
-extern sockaddr_in destAddr;
 #endif
 
 #endif

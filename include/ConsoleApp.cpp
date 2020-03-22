@@ -23,13 +23,12 @@ int bufferSize = 255;
 int sel;
 string serverIP = "";
 string serverPortNo = "";
-string clientPortNo = "";
-int sockfd;
-sockaddr_in destAddr, sourceAddr;
+string clientPortNo = "2221";
+
 
 int main(int argc, char* argv[])
 {
-    setlocale(LC_CTYPE, "");
+    setlocale(LC_CTYPE, "");    
     // read in command line arguments 
     // TODO to write serverno and portno input check
     // -f for freshness interval, -s for server IP, -p for server port number
@@ -46,7 +45,6 @@ int main(int argc, char* argv[])
             else if (s1=="-p") {
                 string s2(argv[i + 1]);
                 serverPortNo = s2;
-                clientPortNo = s2;
             }
         }
     }
@@ -55,30 +53,6 @@ int main(int argc, char* argv[])
         cout << argc;
         return -1;
     }
-
-    
-    // Creating socket file descriptor 
-    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
-        perror("socket creation failed"); 
-        exit(EXIT_FAILURE); 
-    } 
-
-    memset(&destAddr, 0, sizeof(destAddr)); 
-    memset(&sourceAddr, 0, sizeof(sourceAddr)); 
-
-    // Filling server information 
-    sourceAddr.sin_family    = AF_INET; // IPv4 
-    sourceAddr.sin_addr.s_addr = INADDR_ANY; 
-    sourceAddr.sin_port = htons((unsigned short) strtoul(clientPortNo.c_str(), NULL, 0)); 
-
-    // Bind the socket with the server address 
-    if (bind(sockfd, (const struct sockaddr *)&sourceAddr,  
-            sizeof(sourceAddr)) < 0 ) 
-    { 
-        perror("bind failed"); 
-        exit(EXIT_FAILURE); 
-    }
-    
 
     FileCLI fileCLI;
     SettingCLI settingCLI;

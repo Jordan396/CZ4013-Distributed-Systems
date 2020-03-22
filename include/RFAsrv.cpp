@@ -43,10 +43,10 @@ int bufferSize = 255;
 int sel;
 string serverIP = "172.21.148.168";
 string serverPortNo = "2222";
-string clientPortNo = "2222";
+string clientPortNo = "2221";
 bool RMI_SCHEME = true; // at most once if true
-int sockfd;
-sockaddr_in destAddr, sourceAddress;
+int inboundSockFD, outboundSockFD;
+sockaddr_in destAddr, sourceAddr;
 
 /* Variables to handle transfer of data */
 // std::string request;        /* String response received */
@@ -70,44 +70,25 @@ struct RegisteredClient
 std::map<std::string, std::list<struct RegisteredClient> > monitorMap;
 
 int main(int argc, char *argv[]) {
-  
-  // Creating socket file descriptor 
-  if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
-      perror("socket creation failed"); 
-      exit(EXIT_FAILURE); 
-  } 
-
-  memset(&destAddr, 0, sizeof(destAddr)); 
-  memset(&sourceAddress, 0, sizeof(sourceAddress)); 
-
-  // Filling server information 
-  sourceAddress.sin_family    = AF_INET; // IPv4 
-  sourceAddress.sin_addr.s_addr = INADDR_ANY; 
-  sourceAddress.sin_port = htons((unsigned short) strtoul(serverPortNo.c_str(), NULL, 0)); 
-
-  // Bind the socket with the server address 
-  if (bind(sockfd, (const struct sockaddr *)&sourceAddress,  
-          sizeof(sourceAddress)) < 0 ) 
-  { 
-      perror("bind failed"); 
-      exit(EXIT_FAILURE); 
-  } 
-
   string request; 
   char serverBuffer[bufferSize];   // Buffer for echo string
   int recvMsgSize;                  // Size of received message
   string sourceAddress;             // Address of datagram source
   unsigned short sourcePort;        // Port of datagram source
 
+  // Set up separate thread to monitor expired clients
   pthread_t child_thread;
   int i;
   pthread_create(&child_thread, NULL, monitor_registered_clients, (void*) i);
 
+  // Initialize sockets
+  init_sockets();
+  int len = sizeof(destAddr);
+
   for (;;) {  // Run forever
     // Block until receive message from a client
     cout << "Listening..." << endl;
-    int len = sizeof(destAddr);
-    int n = recvfrom(sockfd, serverBuffer, bufferSize, MSG_WAITALL, ( struct sockaddr *) &destAddr, (socklen_t*)&len); 
+    int n = recvfrom(inboundSockFD, serverBuffer, bufferSize, MSG_WAITALL, ( struct sockaddr *) &destAddr, (socklen_t*)&len); 
     
     serverBuffer[n] = '\0'; 
 
@@ -121,7 +102,7 @@ int main(int argc, char *argv[]) {
     if (RMI_SCHEME){ // at most once - check if request exists
       if (is_request_exists(sourceAddress, sourcePort, request)){ // request already exists
         retrieve_response(sourceAddress, sourcePort, response);
-        send_message(sourceAddress, sourcePort, response);
+        send_message(sourceAddress, response);
       }
       else { // new request
         process_request(sourceAddress, sourcePort, request);
@@ -133,6 +114,36 @@ int main(int argc, char *argv[]) {
   }
   
   return 0;
+}
+
+void init_sockets()
+{
+  // Creating socket file descriptor 
+  if ( (inboundSockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+      perror("socket creation failed"); 
+      exit(EXIT_FAILURE); 
+  } 
+  if ( (outboundSockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+      perror("socket creation failed"); 
+      exit(EXIT_FAILURE); 
+  } 
+
+  memset(&destAddr, 0, sizeof(destAddr)); 
+  memset(&sourceAddr, 0, sizeof(sourceAddr)); 
+
+  // Filling source information 
+  sourceAddr.sin_family    = AF_INET; // IPv4 
+  sourceAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
+  sourceAddr.sin_port = htons((unsigned short) strtoul(serverPortNo.c_str(), NULL, 0)); 
+  // Filling destination information 
+  destAddr.sin_family    = AF_INET; // IPv4 
+
+  // Bind the socket with the source address 
+  if (bind(inboundSockFD, (const struct sockaddr *)&sourceAddr, sizeof(sourceAddr)) < 0 ) 
+  { 
+      perror("bind failed"); 
+      exit(EXIT_FAILURE); 
+  }
 }
 
 void *monitor_registered_clients( void *ptr ){
@@ -161,7 +172,7 @@ void *monitor_registered_clients( void *ptr ){
           cJSON *jobjToSend;
           jobjToSend = cJSON_CreateObject();
           cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
-          send_message(it->address, it->port, cJSON_Print(jobjToSend));
+          send_message(it->address, cJSON_Print(jobjToSend));
           cJSON_Delete(jobjToSend);
         }
       }
@@ -183,10 +194,11 @@ int comparetime(time_t time1,time_t time2){
  return difftime(time1,time2) > 0.0 ? 1 : -1; 
 } 
 
-int send_message(string destAddress, unsigned short destPort, string message){
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  sendto(sockfd, message.c_str(), strlen(message.c_str()), 0, (const struct sockaddr *) &destAddr,  sizeof(destAddr)); 
-  cout << "Sending message: " + message + " : to " + destAddress + ":" + std::to_string(destPort) << endl;
+int send_message(string destAddress, string message){
+  destAddr.sin_addr.s_addr = inet_addr(destAddress.c_str()); 
+  destAddr.sin_port = htons((unsigned short) strtoul(clientPortNo.c_str(), NULL, 0));
+  sendto(outboundSockFD, message.c_str(), strlen(message.c_str()), 0, (const struct sockaddr *) &destAddr,  sizeof(destAddr)); 
+  cout << "Sending message: " + message + " : to " + (char*)inet_ntoa((struct in_addr)destAddr.sin_addr) << endl;
 }
 
 void process_request(string sourceAddress, unsigned short sourcePort, string request){
@@ -239,7 +251,7 @@ void execute_get_last_modified_time_command(string sourceAddress, unsigned short
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString(last_modified_time.c_str())); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(sourceAddress, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
     else {
@@ -247,7 +259,7 @@ void execute_get_last_modified_time_command(string sourceAddress, unsigned short
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString("Error reading file.")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(sourceAddress, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
   }
@@ -278,7 +290,7 @@ void execute_read_command(string sourceAddress, unsigned short sourcePort, cJSON
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
       cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Content read!")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(sourceAddress, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
     else {
@@ -287,7 +299,7 @@ void execute_read_command(string sourceAddress, unsigned short sourcePort, cJSON
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString("Error reading file.")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(sourceAddress, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
   }
@@ -318,7 +330,7 @@ void execute_write_command(string sourceAddress, unsigned short sourcePort, cJSO
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
       cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Content written!")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(sourceAddress, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
 
       // TODO: Update registered clients in monitorMap
@@ -330,7 +342,7 @@ void execute_write_command(string sourceAddress, unsigned short sourcePort, cJSO
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString("Error reading file.")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(sourceAddress, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
   }
@@ -365,7 +377,7 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
       cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Client registered")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(sourceAddress, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
   }
   else {
@@ -374,7 +386,7 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString("ERROR: Cannot register client.")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(sourceAddress, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
 }
@@ -386,7 +398,7 @@ void update_registered_clients(string filepath){
     cJSON *jobjToSend;
     jobjToSend = cJSON_CreateObject();
     cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
-    send_message(it->address, it->port, cJSON_Print(jobjToSend));
+    send_message(it->address, cJSON_Print(jobjToSend));
     cJSON_Delete(jobjToSend);
   }
 }

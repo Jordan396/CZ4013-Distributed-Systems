@@ -56,14 +56,18 @@
 
 class RFAcli 
 {
-public:
-  int download_file(string remote_filepath, string local_filepath);
-  string get_last_modified_time(string remote_filepath);
-  int register_client(string remote_filepath, string local_filepath, string monitor_duration);
-  string receive_message();
-  int send_message(string destAddress, string destPort, string message);
-  int get_response_code(cJSON *jobjReceived);
-  void write_file(string remote_filepath, string toWrite, int nOffset);
-  string extract_last_modified_time(cJSON *jobjReceived);
-  ~RFAcli();
+  public:
+    RFAcli();
+    int download_file(string remote_filepath, string local_filepath);
+    string get_last_modified_time(string remote_filepath);
+    int register_client(string remote_filepath, string local_filepath, string monitor_duration);
+    string receive_message();
+    int send_message(string message);
+    int get_response_code(cJSON *jobjReceived);
+    void write_file(string remote_filepath, string toWrite, int nOffset);
+    string extract_last_modified_time(cJSON *jobjReceived);
+    ~RFAcli();
+  private:
+    int inboundSockFD, outboundSockFD;
+    sockaddr_in destAddr, sourceAddr;
 };
