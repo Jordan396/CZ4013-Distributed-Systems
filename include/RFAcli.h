@@ -69,5 +69,6 @@ class RFAcli
     ~RFAcli();
   private:
     int inboundSockFD, outboundSockFD;
-    sockaddr_in destAddr, sourceAddr;
+    sockaddr_in destAddr = {0};
+    sockaddr_in sourceAddr = {0}; 
 };

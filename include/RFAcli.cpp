@@ -77,18 +77,28 @@ RFAcli::RFAcli(void){
 
   // Filling source information 
   sourceAddr.sin_family    = AF_INET; // IPv4 
-  sourceAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
-  sourceAddr.sin_port = htons((unsigned short) strtoul(clientPortNo.c_str(), NULL, 0)); 
+  sourceAddr.sin_addr.s_addr = INADDR_ANY; 
+  // sourceAddr.sin_port = htons((unsigned short) strtoul(clientPortNo.c_str(), NULL, 0)); 
   // Filling destination information 
-  inet_pton(AF_INET, serverIP.c_str(), &(destAddr.sin_addr));
+  destAddr.sin_family    = AF_INET; // IPv4 
+  destAddr.sin_addr.s_addr = inet_addr(serverIP.c_str()); 
   destAddr.sin_port = htons((unsigned short) strtoul(serverPortNo.c_str(), NULL, 0));
 
   // Bind the socket with the source address 
-  if (bind(inboundSockFD, (const struct sockaddr *)&sourceAddr, sizeof(sourceAddr)) < 0 ) 
+  socklen_t len = sizeof(sourceAddr);
+  if (bind(inboundSockFD, (const struct sockaddr *)&sourceAddr, len) < 0 ) 
   { 
       perror("bind failed"); 
       exit(EXIT_FAILURE); 
   }
+  if (getsockname(inboundSockFD, (struct sockaddr *)&sourceAddr, &len) == -1){
+    perror("getsockname");
+  }
+  else {
+    clientPortNo = std::to_string(ntohs(sourceAddr.sin_port));
+    cout << "Source port number: " + clientPortNo << endl;
+  }
+  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 }
 
 
@@ -104,6 +114,7 @@ int RFAcli::download_file(string remote_filepath, string local_filepath){
     cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(READ_CMD)); 
     cJSON_AddItemToObject(jobjToSend, "N_BYTES", cJSON_CreateNumber(bufferSize)); 
     cJSON_AddItemToObject(jobjToSend, "OFFSET", cJSON_CreateNumber(offset)); 
+    cJSON_AddItemToObject(jobjToSend, "PORT", cJSON_CreateString(clientPortNo.c_str())); 
     send_message(cJSON_Print(jobjToSend));
     cout << cJSON_Print(jobjToSend) << endl; 
     cJSON_Delete(jobjToSend);
@@ -145,6 +156,7 @@ string RFAcli::get_last_modified_time(string remote_filepath){
   jobjToSend = cJSON_CreateObject();
   cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(GET_LAST_MODIFIED_TIME_CMD)); 
   cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath.c_str())); 
+  cJSON_AddItemToObject(jobjToSend, "PORT", cJSON_CreateString(clientPortNo.c_str())); 
   send_message(cJSON_Print(jobjToSend));
   cJSON_Delete(jobjToSend);
   // Wait for response...
@@ -174,6 +186,7 @@ int RFAcli::register_client(string remote_filepath, string local_filepath, strin
   cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(REGISTER_CMD)); 
   cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath.c_str()));
   cJSON_AddItemToObject(jobjToSend, "MONITOR_DURATION", cJSON_CreateString(monitor_duration.c_str()));  
+  cJSON_AddItemToObject(jobjToSend, "PORT", cJSON_CreateString(clientPortNo.c_str())); 
   send_message(cJSON_Print(jobjToSend));
   cJSON_Delete(jobjToSend);
 
@@ -215,6 +228,7 @@ int RFAcli::register_client(string remote_filepath, string local_filepath, strin
 }
 
 string RFAcli::receive_message(){
+  cout << "Listening..." << endl;
   char clientBuffer[bufferSize];
 
   int len = sizeof(destAddr);
@@ -229,6 +243,7 @@ string RFAcli::receive_message(){
 }
 
 int RFAcli::send_message(string message){
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   sendto(outboundSockFD, message.c_str(), strlen(message.c_str()), 0, (const struct sockaddr *) &destAddr, sizeof(destAddr)); 
   cout << "Sending message: " + message + " : to " + (char*)inet_ntoa((struct in_addr)destAddr.sin_addr) << endl;
   return 0;
@@ -254,6 +269,7 @@ void RFAcli::write_file(string remote_filepath, string toWrite, int nOffset){
   jobjToSend = cJSON_CreateObject();
   cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(WRITE_CMD)); 
   cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath.c_str()));
+  cJSON_AddItemToObject(jobjToSend, "PORT", cJSON_CreateString(clientPortNo.c_str())); 
   send_message(cJSON_Print(jobjToSend));
   cJSON_Delete(jobjToSend);
 

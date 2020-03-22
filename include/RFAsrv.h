@@ -32,7 +32,6 @@
 // defined in server class; can shift here if needed
 
 /* Standard libraries */
-#define _GNU_SOURCE
 #include <stdio.h>      /* for printf() and fprintf() */
 #include <iostream>          // For cout and cerr
 #include <fstream>
@@ -69,17 +68,17 @@
 void init_sockets();
 void *monitor_registered_clients( void *ptr );
 int comparetime(time_t time1,time_t time2);
-int send_message(string destAddress, string message);
-void process_request(string sourceAddress, unsigned short sourcePort, string request);
-void execute_get_last_modified_time_command(string sourceAddress, unsigned short sourcePort, cJSON *jobjReceived);
-void execute_read_command(string sourceAddress, unsigned short sourcePort, cJSON *jobjReceived);
-void execute_write_command(string sourceAddress, unsigned short sourcePort, cJSON *jobjReceived);
-void execute_register_command(string sourceAddress, unsigned short sourcePort, cJSON *jobjReceived);
+int send_message(string destAddress, string destPort, string message);
+void process_request(string request);
+void execute_get_last_modified_time_command(string destAddress, string destPort, cJSON *jobjReceived);
+void execute_read_command(string destAddress, string destPort, cJSON *jobjReceived);
+void execute_write_command(string destAddress, string destPort, cJSON *jobjReceived);
+void execute_register_command(string destAddress, string destPort, cJSON *jobjReceived);
 void update_registered_clients(string filepath);
-bool is_request_exists(string sourceAddress, unsigned short sourcePort, string message);
-void store_request(string sourceAddress, unsigned short sourcePort, string message);
-void store_response(string sourceAddress, unsigned short sourcePort, string message);
-void retrieve_response(string sourceAddress, unsigned short sourcePort, string message);
+bool is_request_exists(string destAddress, string destPort, string message);
+void store_request(string destAddress, string destPort, string message);
+void store_response(string destAddress, string destPort, string message);
+string retrieve_response(string destAddress, string destPort);
 int get_request_code(cJSON *jobjReceived);
 int get_offset(cJSON *jobjReceived);
 int get_nBytes(cJSON *jobjReceived);
@@ -88,6 +87,7 @@ string get_monitor_duration(cJSON *jobjReceived);
 char* get_toWrite(cJSON *jobjReceived);
 string translate_filepath(string pseudo_filepath);
 string get_last_modified_time(const char *path);
+string get_dest_port(cJSON *jobjReceived);
 
 
 // /**
