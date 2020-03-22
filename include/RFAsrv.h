@@ -30,6 +30,8 @@
 
 /* SERVER STATUS CODES */ 
 // defined in server class; can shift here if needed
+#define GET_LAST_MODIFIED_TIME_SUCCESS 100
+#define GET_LAST_MODIFIED_TIME_FAILURE 200
 
 /* Standard libraries */
 #include <stdio.h>      /* for printf() and fprintf() */
@@ -53,6 +55,7 @@
 #include <signal.h>     /* for sigaction() */
 #include <ctype.h>      /* for char validation */
 #include <time.h>       /* for waitFor() */
+#include <experimental/filesystem>
 #include <sys/mman.h>   /* to create shared memory across child processes */
 #include <sys/socket.h> /* for socket(), bind(), and connect() */
 #include <sys/wait.h>   /* for waitpid() */

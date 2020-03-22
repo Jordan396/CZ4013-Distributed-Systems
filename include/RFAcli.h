@@ -54,6 +54,11 @@
 #define WRITE_CMD 2  
 #define REGISTER_CMD 3 
 
+/* SERVER STATUS CODES */ 
+// defined in server class; can shift here if needed
+#define GET_LAST_MODIFIED_TIME_SUCCESS 100
+#define GET_LAST_MODIFIED_TIME_FAILURE 200
+
 class RFAcli 
 {
   public:

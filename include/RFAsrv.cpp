@@ -257,7 +257,7 @@ void execute_get_last_modified_time_command(string destAddress, string destPort,
       // TODO: Integrate with Jia Chin
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(GET_LAST_MODIFIED_TIME_SUCCESS)); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString(last_modified_time.c_str())); 
       send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
@@ -265,7 +265,7 @@ void execute_get_last_modified_time_command(string destAddress, string destPort,
     else {
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(GET_LAST_MODIFIED_TIME_FAILURE)); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString("Error reading file.")); 
       send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
@@ -489,13 +489,14 @@ char* get_toWrite(cJSON *jobjReceived) {
 
 string translate_filepath(string pseudo_filepath){
   char rfa_prefix[6];
+  string current_path = std::experimental::filesystem::current_path();
 
   // assign here 
   string actual_filepath = pseudo_filepath;
   strncpy(rfa_prefix, pseudo_filepath.c_str(), 6); // Copy just the "RFA://" portion
   if (strcmp(rfa_prefix, "RFA://") == 0){ 
     // actual_filepath = actual_filepath.replace(0, 6, "../RemoteFileAccess/");
-    actual_filepath = "../RemoteFileAccess/" + actual_filepath.substr(6);
+    actual_filepath = current_path + "/ServerRemoteFileAccess/" + actual_filepath.substr(6);
     cout << "actual_filepath: " + actual_filepath << endl;
     return actual_filepath;
   }

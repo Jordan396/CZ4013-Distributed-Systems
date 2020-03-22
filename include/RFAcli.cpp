@@ -166,13 +166,14 @@ string RFAcli::get_last_modified_time(string remote_filepath){
   cJSON *jobjReceived;
   jobjReceived = cJSON_CreateObject();
   jobjReceived = cJSON_Parse(response.c_str());
-  if (get_response_code(jobjReceived) == 1){
+  if (get_response_code(jobjReceived) == GET_LAST_MODIFIED_TIME_SUCCESS){
     string last_modified_time = extract_last_modified_time(jobjReceived);
     cJSON_Delete(jobjReceived);
     return last_modified_time;
   }
   cJSON_Delete(jobjReceived);
-  return "";
+  cout << "Unable to retrieve last modified time." << endl;
+  return "ERROR";
 }
 
 int RFAcli::register_client(string remote_filepath, string local_filepath, string monitor_duration){
