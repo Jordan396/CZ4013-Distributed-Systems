@@ -11,6 +11,7 @@ extern int freshnessInterval;
 extern int lossRate;
 extern int timeOut;
 extern int bufferSize;
+extern int udpDatagramSize;
 extern std::string serverIP;
 extern std::string serverPortNo;
 extern std::string clientPortNo;

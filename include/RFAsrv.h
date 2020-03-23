@@ -23,15 +23,17 @@
 
 
 /* CLIENT COMMAND CODES */
-#define GET_LAST_MODIFIED_TIME_CMD 0
+#define FETCH_LAST_MODIFIED_TIME_CMD 0
 #define READ_CMD 1
 #define WRITE_CMD 2  
 #define REGISTER_CMD 3 
 
 /* SERVER STATUS CODES */ 
 // defined in server class; can shift here if needed
-#define GET_LAST_MODIFIED_TIME_SUCCESS 100
-#define GET_LAST_MODIFIED_TIME_FAILURE 200
+#define FETCH_LAST_MODIFIED_TIME_SUCCESS 100
+#define FETCH_LAST_MODIFIED_TIME_FAILURE 101
+#define READ_SUCCESS 110
+#define READ_FAILURE 111
 
 /* Standard libraries */
 #include <stdio.h>      /* for printf() and fprintf() */
@@ -73,7 +75,7 @@ void *monitor_registered_clients( void *ptr );
 int comparetime(time_t time1,time_t time2);
 int send_message(string destAddress, string destPort, string message);
 void process_request(string request);
-void execute_get_last_modified_time_command(string destAddress, string destPort, cJSON *jobjReceived);
+void execute_fetch_last_modified_time_command(string destAddress, string destPort, cJSON *jobjReceived);
 void execute_read_command(string destAddress, string destPort, cJSON *jobjReceived);
 void execute_write_command(string destAddress, string destPort, cJSON *jobjReceived);
 void execute_register_command(string destAddress, string destPort, cJSON *jobjReceived);
@@ -91,7 +93,7 @@ char* get_toWrite(cJSON *jobjReceived);
 string translate_filepath(string pseudo_filepath);
 string get_last_modified_time(const char *path);
 string get_dest_port(cJSON *jobjReceived);
-
+int filehandler_result_to_response_code(int result);
 
 // /**
 //  * @brief Accepts a cJSON object and sends its string representation over a socket.

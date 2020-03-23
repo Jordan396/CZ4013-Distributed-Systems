@@ -159,7 +159,7 @@ bool CacheService::checkValidityFetch(std::string pathName)
 			// check if server side last modified is the same 
 			//TODO (Server side to provide method)
 			string last_modified_time;
-			last_modified_time = client.get_last_modified_time(pathName);
+			last_modified_time = client.fetch_last_modified_time(pathName);
 			cout << "last modified : " << last_modified_time << endl;
 			// TODO: Convert last_modified_time to below format
 
@@ -207,9 +207,8 @@ bool CacheService::fetchFile(std::string pathName)
 	string cachepath = getLocalPathToFile(pathName); // ../clientcache/{filename}
 	cout << "path to save: " + cachepath << endl;
 
-	// RFACli rc();
 	string last_modified_time;
-	last_modified_time = client.get_last_modified_time(pathName);
+	last_modified_time = client.fetch_last_modified_time(pathName);
 
 	// TODO: Convert last_modified_time to below format
 

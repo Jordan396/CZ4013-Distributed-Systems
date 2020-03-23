@@ -49,31 +49,36 @@
 #include "FileHandler.h"
 
 /* CLIENT COMMAND CODES */
-#define GET_LAST_MODIFIED_TIME_CMD 0
+#define FETCH_LAST_MODIFIED_TIME_CMD 0
 #define READ_CMD 1
 #define WRITE_CMD 2  
 #define REGISTER_CMD 3 
 
 /* SERVER STATUS CODES */ 
 // defined in server class; can shift here if needed
-#define GET_LAST_MODIFIED_TIME_SUCCESS 100
-#define GET_LAST_MODIFIED_TIME_FAILURE 200
+#define FETCH_LAST_MODIFIED_TIME_SUCCESS 100
+#define FETCH_LAST_MODIFIED_TIME_FAILURE 101
+#define READ_SUCCESS 110
+#define READ_FAILURE 111
 
 class RFAcli 
 {
   public:
     RFAcli();
     int download_file(string remote_filepath, string local_filepath);
-    string get_last_modified_time(string remote_filepath);
+    string fetch_last_modified_time(string remote_filepath);
     int register_client(string remote_filepath, string local_filepath, string monitor_duration);
     string receive_message();
     int send_message(string message);
     int get_response_code(cJSON *jobjReceived);
+    int get_nBytes(cJSON *jobjReceived);
     void write_file(string remote_filepath, string toWrite, int nOffset);
-    string extract_last_modified_time(cJSON *jobjReceived);
+    string get_last_modified_time(cJSON *jobjReceived);
+    void reset_destAddr();
     ~RFAcli();
   private:
+    FileHandler fh;
     int inboundSockFD, outboundSockFD;
-    sockaddr_in destAddr = {0};
-    sockaddr_in sourceAddr = {0}; 
+    sockaddr_in destAddr = {0};    // Address and port of server
+    sockaddr_in sourceAddr = {0};  // Address and port of client
 };
