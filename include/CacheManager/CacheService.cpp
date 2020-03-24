@@ -22,7 +22,7 @@ bool CacheService::clearCache()
 {
 	try {
 		// remove all files in directory recursively
-		string directoryPath = getAbsoluteFilePathToMainFolder() + "ClientCache";
+		string directoryPath = getAbsoluteFilePathToMainFolder() + "/ClientCache";
 		fs::remove_all(directoryPath);
 		// update hashing map
 		cacheMap.clear();
@@ -205,7 +205,6 @@ bool CacheService::fetchFile(std::string pathName)
 {
 	// convert to current directory cache file name
 	string cachepath = getLocalPathToFile(pathName);
-	// RFACli rc();
 
 	string last_modified_time;
 	last_modified_time = client.fetch_last_modified_time(pathName);
@@ -252,7 +251,7 @@ bool CacheService::saveHashMap()
 {
 	if (cacheMap.empty())
 		return false;
-	string filePath = getAbsoluteFilePathToMainFolder() + "ClientCache/cacheHistory.txt";
+	string filePath = getAbsoluteFilePathToMainFolder() + "/ClientCache/cacheHistory.txt";
 	FILE* fp = fopen(filePath.c_str(), "w");
 
 
@@ -266,7 +265,7 @@ bool CacheService::saveHashMap()
 
 bool CacheService::restoreHashMap()
 {
-	string filePath = getAbsoluteFilePathToMainFolder() + "ClientCache/cacheHistory.txt";
+	string filePath = getAbsoluteFilePathToMainFolder() + "/ClientCache/cacheHistory.txt";
 
 	FILE* fp = fopen(filePath.c_str(), "r");
 
@@ -304,18 +303,23 @@ bool CacheService::restoreHashMap()
 
 std::string CacheService::getLocalPathToFile(std::string fileName)
 {
-	return getAbsoluteFilePathToMainFolder() + "ClientCache/"+extractFileName(fileName);
+	string localPath = getAbsoluteFilePathToMainFolder() + "/ClientCache/" + extractFileName(fileName);
+	cout << "Local path: " + localPath << endl;
+	return localPath;
 }
 
 std::string CacheService::getAbsoluteFilePathToMainFolder()
 {
-	string absolutePathForWorkingDirectory = fs::current_path();
-	const size_t last_slash_idx = absolutePathForWorkingDirectory.find_last_of("\\/");
-	if (std::string::npos != last_slash_idx)
-	{
-		absolutePathForWorkingDirectory.erase(last_slash_idx + 1, absolutePathForWorkingDirectory.length());
-	}
-	return absolutePathForWorkingDirectory;
+	// string absolutePathForWorkingDirectory = fs::current_path();
+	// cout << absolutePathForWorkingDirectory << endl;
+	// const size_t last_slash_idx = absolutePathForWorkingDirectory.find_last_of("\\/");
+	// if (std::string::npos != last_slash_idx)
+	// {
+	// 	absolutePathForWorkingDirectory.erase(last_slash_idx + 1, absolutePathForWorkingDirectory.length());
+	// }
+	// cout << absolutePathForWorkingDirectory << endl;
+	// return absolutePathForWorkingDirectory;
+	return fs::current_path();
 
 }
 

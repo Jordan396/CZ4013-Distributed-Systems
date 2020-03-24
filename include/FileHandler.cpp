@@ -78,7 +78,7 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
   long lsize;
   fseek (pFile, 0, SEEK_END);   
   lsize = ftell (pFile); // get size of the file 
-  cout << "Size of the file is " << lsize << endl; 
+  // cout << "Size of the file is " << lsize << endl; 
 
   // check whether startPos > maxlength 
   if (offset > lsize) { 
@@ -91,17 +91,32 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
   } 
 
   size_t length = strlen(toWrite); // get number of elements from array pointer 
-  cout << "length is " << length << endl; 
+  // cout << "length is " << length << endl; 
+
   // overwrite with toWrite + [offset:] of original file 
-  char originalFile [lsize + length]; // allocate length of string to be written + filesize to ensure capacity
+  int originalFileSize = lsize - offset + length;
+  int tempSize = lsize - offset;
+  char originalFile [originalFileSize]; // allocate length of string to be written + filesize to ensure capacity
   fseek(pFile, offset, SEEK_SET);
-  strcpy(originalFile, toWrite);
-  char temp[lsize - offset]; // holds off set till end 
+  char temp[tempSize]; // holds offset till end 
   fread(temp, 1, lsize - offset, pFile); 
-  strcat(originalFile, temp);
+
+  // Transfer toWrite and remaining segment to originalFile
+  int charIdx;
+  for (charIdx = 0; charIdx < length; charIdx++){
+    originalFile[charIdx] = toWrite[charIdx]; 
+    cout << charIdx << endl;
+  }
+  for (int i = 0; i < tempSize; tempSize++){
+    originalFile[charIdx] = temp[i]; 
+    charIdx++;
+    cout << charIdx << endl;
+  }
+
   fseek(pFile, offset, SEEK_SET);
-  int written = fwrite(originalFile, 1, (lsize-offset)+length, pFile);
-  if (written != (lsize-offset)+length) {
+
+  int written = fwrite(originalFile, 1, originalFileSize, pFile);
+  if (written != originalFileSize) {
     return ERR_WRITE;
   } 
 
@@ -162,6 +177,12 @@ int FileHandler::Rename(char * oldname, char * newname) {
 // } 
 
 // }
+
+int FileHandler::CreateFile(const char * filename){
+  std::ofstream output(filename);
+  output.close();
+  return FILE_CREATE_SUCCESS;
+}
 
 FileHandler::~FileHandler()
 {

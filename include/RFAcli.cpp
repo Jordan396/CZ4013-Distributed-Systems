@@ -126,6 +126,12 @@ int RFAcli::download_file(string remote_filepath, string local_filepath){
     jobjReceived = cJSON_CreateObject();
     jobjReceived = cJSON_Parse(response.c_str());
     if (get_response_code(jobjReceived) == READ_SUCCESS){
+      // Create empty file
+      if (offset == 0){
+        fh.CreateFile(local_filepath.c_str());
+      }
+
+      // Read nBytes returned
       nBytes = get_nBytes(jobjReceived);
 
       // EOF reached

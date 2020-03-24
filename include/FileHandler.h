@@ -14,6 +14,7 @@
 #define ERR_NEGATIVE_OFFSET -5; 
 #define ERR_WRITE -6;
 #define FILE_WRITE_SUCCESS 1; 
+#define FILE_CREATE_SUCCESS 1;
 
 using namespace std;
 
@@ -25,5 +26,6 @@ public:
     int ClearFile(char* filepath, char *responseContent);
     int DeleteFile(char * filename);
     int Rename(char * oldname, char * newname);
+    int CreateFile(const char * filename);
 	~FileHandler();
 };

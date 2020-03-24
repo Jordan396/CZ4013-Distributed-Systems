@@ -6,5 +6,5 @@ https://entuedu-my.sharepoint.com/personal/jtan396_e_ntu_edu_sg/_layouts/15/oned
 
 
 Commands
-./bin/ConsoleApp -f 300 -s 172.21.148.168 -p 2222
- scp -r ./bin/* VMuser@172.21.148.168:/home/VMuser/CZ4013-Distributed-Systems/bin/
+- ./bin/ConsoleApp -f 300 -s 172.21.148.168 -p 2222
+- scp -r ./bin/* VMuser@172.21.148.168:/home/VMuser/CZ4013-Distributed-Systems/bin/
