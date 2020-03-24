@@ -127,6 +127,7 @@ std::string CacheService::readFile(std::string pathName, int offset, int bytes)
 {
 	char echoBuffer[bufferSize];
 	if (checkValidityFetch(pathName)) {
+		cout << "Debug cv.readFile pathName: " + pathName << endl;
 		fh.ReadFile(pathName.c_str(), echoBuffer, offset, bytes);
 		string s(echoBuffer);
 		return s;
@@ -158,24 +159,16 @@ bool CacheService::checkValidityFetch(std::string pathName)
 		}
 		else {
 			// check if server side last modified is the same 
-			//TODO (Server side to provide method)
-			string last_modified_time;
-			last_modified_time = client.fetch_last_modified_time(pathName);
-			cout << "last modified : " << last_modified_time << endl;
-			// TODO: Convert last_modified_time to below format
+			time_t last_modified_time = client.fetch_last_modified_time(pathName);
 
-			std::tm tm = {0};
-			tm.tm_sec = 40;
-			tm.tm_min = 38;
-			tm.tm_hour = 12;
-			tm.tm_mday = 10;
-			tm.tm_mon = 9;
-			tm.tm_year = 112;
-			tm.tm_isdst = -1;
-			// Convert std::tm to std::time_t (popular extension)
-			std::time_t tt = timegm(&tm);
+			// Debugging
+			char last_modified_time_string[80];
+			strftime(last_modified_time_string, 20, "%Y-%m-%d %H:%M:%S", gmtime(&last_modified_time));
+			string s = last_modified_time_string;
+			cout << "Last modified time in CacheService.cpp checkValidityFetch: " + s << endl;
+
 			// Convert std::time_t to std::chrono::system_clock::time_point
-			std::chrono::system_clock::time_point time = std::chrono::system_clock::from_time_t(tt);
+			std::chrono::system_clock::time_point time = std::chrono::system_clock::from_time_t(last_modified_time);
 
 			if (time != file.createdTime) {
 				return fetchFile(pathName);
@@ -206,23 +199,16 @@ bool CacheService::fetchFile(std::string pathName)
 	// convert to current directory cache file name
 	string cachepath = getLocalPathToFile(pathName);
 
-	string last_modified_time;
-	last_modified_time = client.fetch_last_modified_time(pathName);
+	time_t last_modified_time = client.fetch_last_modified_time(pathName);
 
-	// TODO: Convert last_modified_time to below format
+	// Debugging
+	char last_modified_time_string[80];
+	strftime(last_modified_time_string, 20, "%Y-%m-%d %H:%M:%S", gmtime(&last_modified_time));
+	string s = last_modified_time_string;
+	cout << "Last modified time in CacheService.cpp fetchFile: " + s << endl;
 
-	std::tm tm = {0};
-    tm.tm_sec = 40;
-    tm.tm_min = 38;
-    tm.tm_hour = 12;
-    tm.tm_mday = 10;
-    tm.tm_mon = 9;
-    tm.tm_year = 112;
-    tm.tm_isdst = -1;
-    // Convert std::tm to std::time_t (popular extension)
-    std::time_t tt = timegm(&tm);
     // Convert std::time_t to std::chrono::system_clock::time_point
-    std::chrono::system_clock::time_point time = std::chrono::system_clock::from_time_t(tt);
+    std::chrono::system_clock::time_point time = std::chrono::system_clock::from_time_t(last_modified_time);
 
 	// write from the server to the cache 
 	if (downloadFile(pathName,cachepath)) {

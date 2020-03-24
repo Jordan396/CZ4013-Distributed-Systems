@@ -162,7 +162,7 @@ int RFAcli::download_file(string remote_filepath, string local_filepath){
  * @param last_modified_time local last modified time of requested file 
  * @return last modified time, caller checks for empty string 
  **/
-string RFAcli::fetch_last_modified_time(string remote_filepath){
+time_t RFAcli::fetch_last_modified_time(string remote_filepath){
   // Send request
   // TODO: jordan debug this please
   cJSON *jobjToSend;
@@ -175,19 +175,20 @@ string RFAcli::fetch_last_modified_time(string remote_filepath){
   // Wait for response...
   string response; // blocking here.
   response = receive_message();
-  cout << "response is: " << response << endl; 
+
   // Parse response message
   cJSON *jobjReceived;
   jobjReceived = cJSON_CreateObject();
   jobjReceived = cJSON_Parse(response.c_str());
+  time_t last_modified_time;
   if (get_response_code(jobjReceived) == FETCH_LAST_MODIFIED_TIME_SUCCESS){
-    string last_modified_time = get_last_modified_time(jobjReceived);
+    last_modified_time = get_last_modified_time(jobjReceived);
     cJSON_Delete(jobjReceived);
     return last_modified_time;
   }
   cJSON_Delete(jobjReceived);
   cout << "Unable to retrieve last modified time." << endl;
-  return "ERROR";
+  return last_modified_time;
 }
 
 int RFAcli::register_client(string remote_filepath, string local_filepath, string monitor_duration){
@@ -288,9 +289,12 @@ int RFAcli::get_response_code(cJSON *jobjReceived)
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "RESPONSE_CODE")->valueint;
 }
 
-string RFAcli::get_last_modified_time(cJSON *jobjReceived)
+time_t RFAcli::get_last_modified_time(cJSON *jobjReceived)
 {
-  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "LAST_MODIFIED")->valuestring;
+  struct tm tm;
+  string time_details = cJSON_GetObjectItemCaseSensitive(jobjReceived, "LAST_MODIFIED")->valuestring;
+  strptime(time_details.c_str(), "%Y-%m-%d %H:%M:%S", &tm);
+  return mktime(&tm);
 }
 
 int RFAcli::get_nBytes(cJSON *jobjReceived)

@@ -91,7 +91,7 @@ string get_filepath(cJSON *jobjReceived);
 string get_monitor_duration(cJSON *jobjReceived);
 char* get_toWrite(cJSON *jobjReceived);
 string translate_filepath(string pseudo_filepath);
-string get_last_modified_time(const char *path);
+time_t get_last_modified_time(const char *path);
 string get_dest_port(cJSON *jobjReceived);
 int filehandler_result_to_response_code(int result);
 

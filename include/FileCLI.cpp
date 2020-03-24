@@ -1,6 +1,5 @@
 #include "FileCLI.h"
-#include "CacheManager/CacheService.h"
-#include <iostream>
+
 using namespace std;
 
 
@@ -28,7 +27,9 @@ void FileCLI::readFile()
 		it = cacheReference.find(fileID);
 		string remoteFilePath = it->second;
 		
+		// @ChongYan: You should be passing in local file path!
 		cout << cv.readFile(remoteFilePath, offSet, numBytes) << endl;
+		std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 	}
 
 	return;

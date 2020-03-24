@@ -248,7 +248,8 @@ void process_request(string request){
 void execute_fetch_last_modified_time_command(string destAddress, string destPort, cJSON *jobjReceived) {
   string pseudo_filepath;
   string actual_filepath;
-  string last_modified_time;
+  time_t last_modified_time;
+  char last_modified_time_string[80];
 
   // Extract parameters from message
   pseudo_filepath = get_filepath(jobjReceived);
@@ -258,13 +259,16 @@ void execute_fetch_last_modified_time_command(string destAddress, string destPor
     cout << "Reference to file at: " << actual_filepath << endl;
     if (std::experimental::filesystem::exists(actual_filepath)){
       cout << "File exists." << endl;
+
+      // time_t manipulation
       last_modified_time = get_last_modified_time(actual_filepath.c_str());
+      strftime(last_modified_time_string, 20, "%Y-%m-%d %H:%M:%S", gmtime(&last_modified_time));
 
       // TODO: Integrate with Jia Chin
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(FETCH_LAST_MODIFIED_TIME_SUCCESS)); 
-      cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString(last_modified_time.c_str())); 
+      cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString(last_modified_time_string)); 
       send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
@@ -524,11 +528,11 @@ string translate_filepath(string pseudo_filepath){
   return "";
 }
 
-string get_last_modified_time(const char *path) {
+time_t get_last_modified_time(const char *path) {
     struct stat attr;
     stat(path, &attr);
     printf("Last modified time: %s", ctime(&attr.st_mtime));
-    return string(ctime(&attr.st_mtime));
+    return attr.st_mtime;
 }
 
 int filehandler_result_to_response_code(int result){

@@ -105,12 +105,10 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
   int charIdx;
   for (charIdx = 0; charIdx < length; charIdx++){
     originalFile[charIdx] = toWrite[charIdx]; 
-    cout << charIdx << endl;
   }
   for (int i = 0; i < tempSize; tempSize++){
     originalFile[charIdx] = temp[i]; 
     charIdx++;
-    cout << charIdx << endl;
   }
 
   fseek(pFile, offset, SEEK_SET);
