@@ -9,21 +9,27 @@
 #include <string>
 #include <thread>
 #include <map>
+#include <sys/mman.h>   /* to create shared memory across child processes */
+#include <sys/socket.h> /* for socket(), bind(), and connect() */
+#include <sys/wait.h>   /* for waitpid() */
+#include <arpa/inet.h>  /* for sockaddr_in and inet_ntoa() */
 using namespace std;
 void displayClientMenu();
 
 int freshnessInterval = 100;
 int lossRate = 0;
 int timeOut = 300;
-int bufferSize = 255;
+int bufferSize = 1024;
+int udpDatagramSize = 4096;
 int sel;
 string serverIP = "";
 string serverPortNo = "";
-string clientPortNo = "";
+string clientPortNo = "2221";
+
 
 int main(int argc, char* argv[])
 {
-    setlocale(LC_CTYPE, "");
+    setlocale(LC_CTYPE, "");    
     // read in command line arguments 
     // TODO to write serverno and portno input check
     // -f for freshness interval, -s for server IP, -p for server port number
@@ -40,7 +46,6 @@ int main(int argc, char* argv[])
             else if (s1=="-p") {
                 string s2(argv[i + 1]);
                 serverPortNo = s2;
-                clientPortNo = s2;
             }
         }
     }

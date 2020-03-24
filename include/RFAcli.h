@@ -36,32 +36,49 @@
 #include <signal.h>     /* for sigaction() */
 #include <ctype.h>      /* for char validation */
 #include <time.h>       /* for waitFor() */
+#include <chrono>
+#include <thread>
 #include <sys/mman.h>   /* to create shared memory across child processes */
 #include <sys/socket.h> /* for socket(), bind(), and connect() */
 #include <sys/wait.h>   /* for waitpid() */
 #include <arpa/inet.h>  /* for sockaddr_in and inet_ntoa() */
 
 /* External libraries */
-#include "RFAsockets.h"      // For UDPSocket and SocketException
 #include "cJSON.h"      // For message formatting
 #include "Global.h"
+#include "FileHandler.h"
 
 /* CLIENT COMMAND CODES */
-#define GET_LAST_MODIFIED_TIME_CMD 0
+#define FETCH_LAST_MODIFIED_TIME_CMD 0
 #define READ_CMD 1
 #define WRITE_CMD 2  
 #define REGISTER_CMD 3 
 
+/* SERVER STATUS CODES */ 
+// defined in server class; can shift here if needed
+#define FETCH_LAST_MODIFIED_TIME_SUCCESS 100
+#define FETCH_LAST_MODIFIED_TIME_FAILURE 101
+#define READ_SUCCESS 110
+#define READ_FAILURE 111
+
 class RFAcli 
 {
-public:
-  int download_file(string remote_filepath, string local_filepath);
-  string get_last_modified_time(string remote_filepath);
-  int register_client(string remote_filepath, string local_filepath, string monitor_duration);
-  string receive_message();
-  int send_message(string destAddress, string destPort, string message);
-  int get_response_code(cJSON *jobjReceived);
-  void write_file(string remote_filepath, string toWrite, int nOffset);
-  string extract_last_modified_time(cJSON *jobjReceived);
-  ~RFAcli();
+  public:
+    RFAcli();
+    int download_file(string remote_filepath, string local_filepath);
+    string fetch_last_modified_time(string remote_filepath);
+    int register_client(string remote_filepath, string local_filepath, string monitor_duration);
+    string receive_message();
+    int send_message(string message);
+    int get_response_code(cJSON *jobjReceived);
+    int get_nBytes(cJSON *jobjReceived);
+    void write_file(string remote_filepath, string toWrite, int nOffset);
+    string get_last_modified_time(cJSON *jobjReceived);
+    void reset_destAddr();
+    ~RFAcli();
+  private:
+    FileHandler fh;
+    int inboundSockFD, outboundSockFD;
+    sockaddr_in destAddr = {0};    // Address and port of server
+    sockaddr_in sourceAddr = {0};  // Address and port of client
 };

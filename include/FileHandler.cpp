@@ -31,10 +31,12 @@ int FileHandler::ReadFile(const char* fileName, char echoBuffer[], int nBytes, i
   fseek (pFile, 0, SEEK_END);   
   lsize = ftell (pFile); // get size of the file 
 
-  if (lsize > bufferSize) { // no memory to allocate buffer: return error code to client 
-    sprintf (echoBuffer, "%s", "Memory error"); 
-    return ERR_MEMORY_INSUFFICIENT; 
-  }
+  // @JiaChin: Assume buffer provided is always smaller than lsize
+  // Idea is to transfer by file by chunks of buffer size 
+  // if (lsize > bufferSize) { // no memory to allocate buffer: return error code to client 
+  //   sprintf (echoBuffer, "%s", "Memory error"); 
+  //   return ERR_MEMORY_INSUFFICIENT; 
+  // }
 
   // check whether >= 0
   if (startPos < 0) { 
@@ -53,10 +55,12 @@ int FileHandler::ReadFile(const char* fileName, char echoBuffer[], int nBytes, i
   
   // no checking of nBytes
   result = fread (echoBuffer, 1, nBytes, pFile); // pFile advanced to startPos 
-  if (result != lsize) {
-    sprintf (echoBuffer, "%s", "Reading error");  
-    return ERR_READ; 
+  if (result != nBytes) {
+    if (ferror (pFile)){
+      sprintf (echoBuffer, "%s", "Reading error");  
+      return ERR_READ; 
     }
+  }
   fclose (pFile);
   return result; 
 }

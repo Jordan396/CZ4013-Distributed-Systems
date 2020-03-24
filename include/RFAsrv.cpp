@@ -34,17 +34,20 @@
 // int WriteFile(char* filepath, char* toWrite, char *responseContent, int offset); 
 
 
-// TODO: Integrate the hardcoded variables below with command prompt parser 
-// Variables relating to server addressing
+// Global variables
 int freshnessInterval = 100;
 int lossRate = 0;
 int timeOut = 300;
-int bufferSize = 255;
+int bufferSize = 1024;
+int udpDatagramSize = 4096;
 int sel;
 string serverIP = "172.21.148.168";
 string serverPortNo = "2222";
-string clientPortNo = "0";
+string clientPortNo = "";
 bool RMI_SCHEME = true; // at most once if true
+int inboundSockFD, outboundSockFD;
+sockaddr_in destAddr, sourceAddr;
+FileHandler fh;
 
 /* Variables to handle transfer of data */
 // std::string request;        /* String response received */
@@ -61,65 +64,86 @@ std::map<std::string, std::string> responseMap;
 struct RegisteredClient
 {
   string address;
-  unsigned short port;
+  string port;
   string expiration;
 } RegisteredClient;
 
 std::map<std::string, std::list<struct RegisteredClient> > monitorMap;
 
 int main(int argc, char *argv[]) {
+  string request; 
+  char serverBuffer[udpDatagramSize];   // Buffer for echo string
+  int recvMsgSize;                  // Size of received message
+  string sourceAddress;             // Address of datagram source
+  unsigned short sourcePort;        // Port of datagram source
 
-  try {
-    UDPSocket sock(Socket::resolveService(serverPortNo, "udp"));                
+  // Set up separate thread to monitor expired clients
+  pthread_t child_thread;
+  int i;
+  pthread_create(&child_thread, NULL, monitor_registered_clients, (void*) i);
 
-    string request; 
-    char serverBuffer[bufferSize];   // Buffer for echo string
-    int recvMsgSize;                  // Size of received message
-    string sourceAddress;             // Address of datagram source
-    unsigned short sourcePort;        // Port of datagram source
+  // Initialize sockets
+  init_sockets();
+  int len = sizeof(destAddr);
 
-    pthread_t child_thread;
-    int i;
+  for (;;) {  // Run forever
+    // Block until receive message from a client
+    cout << "Listening..." << endl;
+    int n = recvfrom(inboundSockFD, serverBuffer, udpDatagramSize, MSG_WAITALL, ( struct sockaddr *) &destAddr, (socklen_t*)&len); 
+    serverBuffer[n] = '\0'; 
 
-    pthread_create(&child_thread, NULL, monitor_registered_clients, (void*) i);
+    sourceAddress = inet_ntoa(destAddr.sin_addr);
+    sourcePort = ntohs(destAddr.sin_port);
+    cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
 
-    for (;;) {  // Run forever
-      // Block until receive message from a client
-      cout << "Listening..." << endl;
-      recvMsgSize = sock.recvFrom(serverBuffer, bufferSize, sourceAddress, sourcePort);
-      if (recvMsgSize != bufferSize) { 
-        // TODO: make this throw because numbytes read != buffersize -> something went wrong while read or client malformed request  
-        return 0;
-      }
-      cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
-      request = serverBuffer;
-
-      // Check RMI scheme
-      if (RMI_SCHEME){ // at most once - check if request exists
-        if (is_request_exists(sourceAddress, sourcePort, request)){ // request already exists
-          retrieve_response(sourceAddress, sourcePort, response);
-          send_message(sourceAddress, sourcePort, response);
-        }
-        else { // new request
-          process_request(sourceAddress, sourcePort, request);
-        }
-      }
-      else {
-        process_request(sourceAddress, sourcePort, request);
-      }
-    }
-  }
-
-  catch (SocketException &e) {
-    cerr << e.what() << endl;
-    exit(1);
+    request = serverBuffer;
+    cout << "Received message:\n" + request << endl;
+    process_request(request);
   }
   return 0;
 }
 
+void init_sockets()
+{
+  // Creating socket file descriptor 
+  if ( (inboundSockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+      perror("socket creation failed"); 
+      exit(EXIT_FAILURE); 
+  } 
+  if ( (outboundSockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+      perror("socket creation failed"); 
+      exit(EXIT_FAILURE); 
+  } 
+
+  memset(&destAddr, 0, sizeof(destAddr)); 
+  memset(&sourceAddr, 0, sizeof(sourceAddr)); 
+
+  // Filling source information 
+  sourceAddr.sin_family    = AF_INET; // IPv4 
+  sourceAddr.sin_addr.s_addr = INADDR_ANY; 
+  sourceAddr.sin_port = htons((unsigned short) strtoul(serverPortNo.c_str(), NULL, 0)); 
+  // Filling destination information 
+  destAddr.sin_family    = AF_INET; // IPv4 
+
+  // Bind the socket with the source address 
+  socklen_t len = sizeof(sourceAddr);
+  if (bind(inboundSockFD, (const struct sockaddr *)&sourceAddr, len) < 0 ) 
+  { 
+      perror("bind failed"); 
+      exit(EXIT_FAILURE); 
+  }
+  if (getsockname(inboundSockFD, (struct sockaddr *)&sourceAddr, &len) == -1){
+    perror("getsockname");
+  }
+  else {
+    serverPortNo = std::to_string(ntohs(sourceAddr.sin_port));
+    cout << "Source port number: " + serverPortNo << endl;
+  }
+}
+
 void *monitor_registered_clients( void *ptr ){
   while (true){
-    cout << "Checking for expired clients...";
+    cout << "Checking for expired clients..." << endl;
     // Get current time
     auto time_now = std::chrono::system_clock::now();
     time_t currentTime = std::chrono::system_clock::to_time_t(time_now);
@@ -165,47 +189,63 @@ int comparetime(time_t time1,time_t time2){
  return difftime(time1,time2) > 0.0 ? 1 : -1; 
 } 
 
-int send_message(string destAddress, unsigned short destPort, string message){
-  try {
-    UDPSocket sock;
-    sock.sendTo(message.c_str(), strlen(message.c_str()), destAddress, destPort);
+int send_message(string destAddress, string destPort, string message){
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-  } catch (SocketException &e) {
-    cerr << e.what() << endl;
-    exit(1);
-  }
-  return 0;
+  destAddr.sin_family    = AF_INET; // IPv4 
+  destAddr.sin_addr.s_addr = inet_addr(destAddress.c_str()); 
+  destAddr.sin_port = htons((unsigned short) strtoul(destPort.c_str(), NULL, 0));
+  sendto(outboundSockFD, message.c_str(), strlen(message.c_str()), 0, (const struct sockaddr *) &destAddr,  sizeof(destAddr)); 
+  cout << "Sending message: " + message + " : to " + (char*)inet_ntoa((struct in_addr)destAddr.sin_addr) << endl;
+  
+  store_response(destAddress, destPort, message);
 }
 
-void process_request(string sourceAddress, unsigned short sourcePort, string request){
+void process_request(string request){
   // Parse request message
   cJSON *jobjReceived;
+  string sourceAddress;             // Address of datagram source
+  unsigned short sourcePort;        // Port of datagram source
+  string destPort;
+
   jobjReceived = cJSON_CreateObject();
   jobjReceived = cJSON_Parse(request.c_str());
-  
-  // Handle request accordingly
-  switch (get_request_code(jobjReceived)){
-    case GET_LAST_MODIFIED_TIME_CMD:
-      cout << "Executing get_last_modified_time command..." << endl;
-      execute_get_last_modified_time_command(sourceAddress, sourcePort, jobjReceived);
-      break;
-    case READ_CMD:
-      cout << "Executing read command..." << endl;
-      execute_read_command(sourceAddress, sourcePort, jobjReceived);
-      break;
-    case WRITE_CMD:
-      cout << "Executing write command..." << endl;
-      execute_write_command(sourceAddress, sourcePort, jobjReceived);
-      break;
-    case REGISTER_CMD:
-      cout << "Executing register command..." << endl;
-      execute_register_command(sourceAddress, sourcePort, jobjReceived);
-      break;
+  sourceAddress = inet_ntoa(destAddr.sin_addr);
+  sourcePort = ntohs(destAddr.sin_port);
+  destPort = get_dest_port(jobjReceived);
+
+  cout << "Processing request..." << endl;
+  // Check RMI scheme
+  if (RMI_SCHEME && is_request_exists(sourceAddress, destPort, request)){ // at most once - check if request exists
+    response = retrieve_response(sourceAddress, destPort);
+    send_message(sourceAddress, destPort, response);
+  }
+  else {
+    store_request(sourceAddress, destPort,request);
+    // Handle request accordingly
+    switch (get_request_code(jobjReceived)){
+      case FETCH_LAST_MODIFIED_TIME_CMD:
+        cout << "Executing get_last_modified_time command..." << endl;
+        execute_fetch_last_modified_time_command(sourceAddress, destPort, jobjReceived);
+        break;
+      case READ_CMD:
+        cout << "Executing read command..." << endl;
+        execute_read_command(sourceAddress, destPort, jobjReceived);
+        break;
+      case WRITE_CMD:
+        cout << "Executing write command..." << endl;
+        execute_write_command(sourceAddress, destPort, jobjReceived);
+        break;
+      case REGISTER_CMD:
+        cout << "Executing register command..." << endl;
+        execute_register_command(sourceAddress, destPort, jobjReceived);
+        break;
+    }
   }
   cJSON_Delete(jobjReceived);
 }
 
-void execute_get_last_modified_time_command(string sourceAddress, unsigned short sourcePort, cJSON *jobjReceived) {
+void execute_fetch_last_modified_time_command(string destAddress, string destPort, cJSON *jobjReceived) {
   string pseudo_filepath;
   string actual_filepath;
   string last_modified_time;
@@ -217,68 +257,83 @@ void execute_get_last_modified_time_command(string sourceAddress, unsigned short
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     if (std::experimental::filesystem::exists(actual_filepath)){
+      cout << "File exists." << endl;
       last_modified_time = get_last_modified_time(actual_filepath.c_str());
 
       // TODO: Integrate with Jia Chin
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(FETCH_LAST_MODIFIED_TIME_SUCCESS)); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString(last_modified_time.c_str())); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
     else {
-      // TODO: Integrate with Jia Chin
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(FETCH_LAST_MODIFIED_TIME_FAILURE)); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString("Error reading file.")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
   }
 }
 
-void execute_read_command(string sourceAddress, unsigned short sourcePort, cJSON *jobjReceived){
+void execute_read_command(string destAddress, string destPort, cJSON *jobjReceived){
   int offset;
   int nBytes;
+  int readResult;
+  int readStatus;
   string pseudo_filepath;
   string actual_filepath;
   string last_modified_time;
+  char readBuffer[bufferSize];
+  string content;
 
   // Extract parameters from message
   pseudo_filepath = get_filepath(jobjReceived);
   offset = get_offset(jobjReceived);
   nBytes = get_nBytes(jobjReceived);
   actual_filepath = translate_filepath(pseudo_filepath); 
+
   if (actual_filepath != "") {
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     if (std::experimental::filesystem::exists(actual_filepath)){
-      // TODO: Integrate with Jia Chin
-      // ReadFile()
+      cout << "File exists." << endl;
 
-      // Send response
-      cJSON *jobjToSend;
-      jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
-      cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Content read!")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
-      cJSON_Delete(jobjToSend);
-    }
-    else {
-      // TODO: Integrate with Jia Chin
-      cJSON *jobjToSend;
-      jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
-      cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString("Error reading file.")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
-      cJSON_Delete(jobjToSend);
+      // Empty buffer
+      memset(readBuffer, 0, bufferSize * (sizeof readBuffer[0]) );
+
+      // ReadFile
+      readResult = fh.ReadFile(actual_filepath.c_str(), readBuffer, nBytes, offset);
+      readStatus = filehandler_result_to_response_code(readResult);
+      content = readBuffer;
+
+      cout << "readResult: " + std::to_string(readResult) << endl;
+
+      if (readStatus == READ_SUCCESS){
+        // Send response
+        cJSON *jobjToSend;
+        jobjToSend = cJSON_CreateObject();
+        cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(readStatus)); 
+        cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString(content.c_str())); 
+        cJSON_AddItemToObject(jobjToSend, "N_BYTES", cJSON_CreateNumber(readResult)); 
+        send_message(destAddress, destPort, cJSON_Print(jobjToSend));
+        cJSON_Delete(jobjToSend);
+        return;
+      }
     }
   }
+  cJSON *jobjToSend;
+  jobjToSend = cJSON_CreateObject();
+  cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(READ_FAILURE)); 
+  send_message(destAddress, destPort, cJSON_Print(jobjToSend));
+  cJSON_Delete(jobjToSend);
+  return;
 }
 
-void execute_write_command(string sourceAddress, unsigned short sourcePort, cJSON *jobjReceived){
+void execute_write_command(string destAddress, string destPort, cJSON *jobjReceived){
   int offset;
   int nBytes;
   string pseudo_filepath;
@@ -296,13 +351,14 @@ void execute_write_command(string sourceAddress, unsigned short sourcePort, cJSO
     if (std::experimental::filesystem::exists(actual_filepath)){
       // TODO: Integrate with Jia Chin
       // WriteFile()
+      cout << "File exists." << endl;
 
       // Send response
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
       cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Content written!")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
 
       // TODO: Update registered clients in monitorMap
@@ -314,13 +370,13 @@ void execute_write_command(string sourceAddress, unsigned short sourcePort, cJSO
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString("Error reading file.")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
   }
 }
 
-void execute_register_command(string sourceAddress, unsigned short sourcePort, cJSON *jobjReceived){
+void execute_register_command(string destAddress, string destPort, cJSON *jobjReceived){
   string pseudo_filepath;
   string actual_filepath;
   string monitor_duration;
@@ -333,8 +389,8 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
   monitor_duration = get_monitor_duration(jobjReceived);
 
   // Assign registeredClient attributes
-  registeredClient.address = sourceAddress;
-  registeredClient.port = sourcePort;
+  registeredClient.address = destAddress;
+  registeredClient.port = destPort;
   registeredClient.expiration = monitor_duration;
 
   // Extract parameters from message
@@ -349,7 +405,7 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
       cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Client registered")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
   }
   else {
@@ -358,7 +414,7 @@ void execute_register_command(string sourceAddress, unsigned short sourcePort, c
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString("ERROR: Cannot register client.")); 
-      send_message(sourceAddress, sourcePort, cJSON_Print(jobjToSend));
+      send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
 }
@@ -375,16 +431,17 @@ void update_registered_clients(string filepath){
   }
 }
 
-bool is_request_exists(string sourceAddress, unsigned short sourcePort, string message){
+bool is_request_exists(string sourceAddress, string destPort, string message){
   std::hash<std::string> str_hash;
-  string requestMapKey = sourceAddress + ":" + std::to_string(sourcePort);
+  string requestMapKey = sourceAddress + ":" + destPort;
   size_t requestMapValue = str_hash(message);
   return (requestMapValue == requestMap[requestMapKey]);
 }
 
-void store_request(string sourceAddress, unsigned short sourcePort, string message){
+void store_request(string sourceAddress, string destPort, string message){
+  cout << "Storing request..." << endl;
   std::hash<std::string> str_hash;
-  string requestMapKey = sourceAddress + ":" + std::to_string(sourcePort);
+  string requestMapKey = sourceAddress + ":" + destPort;
   size_t requestMapValue = str_hash(message);
 
   // Debugging
@@ -394,8 +451,9 @@ void store_request(string sourceAddress, unsigned short sourcePort, string messa
   requestMap[requestMapKey] = requestMapValue;
 }
 
-void store_response(string sourceAddress, unsigned short sourcePort, string message){
-  string responseMapKey = sourceAddress + ":" + std::to_string(sourcePort);
+void store_response(string sourceAddress, string destPort, string message){
+  cout << "Storing response..." << endl;
+  string responseMapKey = sourceAddress + ":" + destPort;
 
   // Debugging
   cout << "responseMapKey: " << responseMapKey << endl;
@@ -404,14 +462,14 @@ void store_response(string sourceAddress, unsigned short sourcePort, string mess
   responseMap[responseMapKey] = message;
 }
 
-void retrieve_response(string sourceAddress, unsigned short sourcePort, string message){
-  string responseMapKey = sourceAddress + ":" + std::to_string(sourcePort);
-
-  message.assign(responseMap[responseMapKey]);
+string retrieve_response(string sourceAddress, string destPort){
+  cout << "Retrieving response..." << endl;
+  string responseMapKey = sourceAddress + ":" + destPort;
 
   // Debugging
   cout << "responseMapKey: " << responseMapKey << endl;
-  cout << "responseMapValue: " << message << endl;
+  cout << "responseMapValue: " << responseMap[responseMapKey] << endl;
+  return responseMap[responseMapKey];
 }
 
 /** \copydoc get_request_code */
@@ -440,19 +498,25 @@ string get_monitor_duration(cJSON *jobjReceived)
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "MONITOR_DURATION")->valuestring;
 }
 
+string get_dest_port(cJSON *jobjReceived)
+{
+  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "PORT")->valuestring;
+}
+
 char* get_toWrite(cJSON *jobjReceived) {
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "toWrite")->valuestring;
 }
 
 string translate_filepath(string pseudo_filepath){
   char rfa_prefix[6];
+  string current_path = std::experimental::filesystem::current_path();
 
   // assign here 
   string actual_filepath = pseudo_filepath;
   strncpy(rfa_prefix, pseudo_filepath.c_str(), 6); // Copy just the "RFA://" portion
   if (strcmp(rfa_prefix, "RFA://") == 0){ 
     // actual_filepath = actual_filepath.replace(0, 6, "../RemoteFileAccess/");
-    actual_filepath = "../RemoteFileAccess/" + actual_filepath.substr(6);
+    actual_filepath = current_path + "/ServerRemoteFileAccess/" + actual_filepath.substr(6);
     cout << "actual_filepath: " + actual_filepath << endl;
     return actual_filepath;
   }
@@ -467,3 +531,9 @@ string get_last_modified_time(const char *path) {
     return string(ctime(&attr.st_mtime));
 }
 
+int filehandler_result_to_response_code(int result){
+  if (result >= 0){
+    return READ_SUCCESS;
+  }
+  return READ_FAILURE;
+}
