@@ -22,10 +22,11 @@ bool CacheService::clearCache()
 {
 	try {
 		// remove all files in directory recursively
-		fs::remove_all("../../ClientCache/");
+		string directoryPath = getAbsoluteFilePathToMainFolder() + "ClientCache";
+		fs::remove_all(directoryPath);
 		// update hashing map
 		cacheMap.clear();
-		fs::create_directory("../../ClientCache/");
+		fs::create_directory(directoryPath);
 		return true;
 	}
 	catch (const fs::filesystem_error & e) {
@@ -203,7 +204,6 @@ bool CacheService::fetchFile(std::string pathName)
 {
 	// convert to current directory cache file name
 	string cachepath = getLocalPathToFile(pathName);
-
 	// RFACli rc();
 	string last_modified_time;
 	client.get_last_modified_time(pathName);
@@ -251,8 +251,8 @@ bool CacheService::saveHashMap()
 {
 	if (cacheMap.empty())
 		return false;
-
-	FILE* fp = fopen("../../ClientCache/cacheHistory.txt", "w");
+	string filePath = getAbsoluteFilePathToMainFolder() + "ClientCache/cacheHistory.txt";
+	FILE* fp = fopen(filePath.c_str(), "w");
 
 	for (map<string, File>::iterator it = cacheMap.begin(); it != cacheMap.end(); it++) {
 		fprintf(fp, "%s=%s\n", it->first.c_str(), it->second);
@@ -264,7 +264,9 @@ bool CacheService::saveHashMap()
 
 bool CacheService::restoreHashMap()
 {
-	FILE* fp = fopen("../../ClientCache/cacheHistory.txt", "r");
+	string filePath = getAbsoluteFilePathToMainFolder() + "ClientCache/cacheHistory.txt";
+
+	FILE* fp = fopen(filePath.c_str(), "r");
 	if (!fp) return false;
 
 	cacheMap.clear();
@@ -299,7 +301,18 @@ bool CacheService::restoreHashMap()
 
 std::string CacheService::getLocalPathToFile(std::string fileName)
 {
-	return "../../ClientCache/" + extractFileName(fileName);
+	return getAbsoluteFilePathToMainFolder() + "ClientCache/"+extractFileName(fileName);
+}
+
+std::string CacheService::getAbsoluteFilePathToMainFolder()
+{
+	string absolutePathForWorkingDirectory = fs::current_path();
+	const size_t last_slash_idx = absolutePathForWorkingDirectory.find_last_of("\\/");
+	if (std::string::npos != last_slash_idx)
+	{
+		absolutePathForWorkingDirectory.erase(last_slash_idx + 1, absolutePathForWorkingDirectory.length());
+	}
+	return absolutePathForWorkingDirectory;
 }
 
 

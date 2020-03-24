@@ -59,6 +59,7 @@ private:
 	// for resolving file path
 	std::string getLocalPathToFile(std::string fileName);
 	std::string extractFileName(std::string remoteFilePath);
+	std::string getAbsoluteFilePathToMainFolder();
 
 	// Chong Yan comment
 	void updateCacheMap(std::string pathName, chrono::system_clock::time_point time);
