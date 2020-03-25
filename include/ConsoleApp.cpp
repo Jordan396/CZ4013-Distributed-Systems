@@ -32,7 +32,7 @@ CacheService cv;
 
 int main(int argc, char* argv[])
 {   
-    std::atexit(exiting);
+    //std::atexit(exiting);
 
     setlocale(LC_CTYPE, "");    
     // read in command line arguments 
