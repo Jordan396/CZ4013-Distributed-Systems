@@ -61,6 +61,7 @@ int FileHandler::ReadFile(const char* fileName, char echoBuffer[], int nBytes, i
       return ERR_READ; 
     }
   }
+  cout << "hey: " << echoBuffer << endl;
   fclose (pFile);
   return result; 
 }
