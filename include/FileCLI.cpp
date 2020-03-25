@@ -29,7 +29,13 @@ void FileCLI::readFile()
 		
 		// @ChongYan: You should be passing in local file path!
 		cout << cv.readFile(remoteFilePath, offSet, numBytes) << endl;
-		std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+
+		// this one is just a blocking call to display the text until something is keyed by user
+		cin >> offSet;
+	}
+	else {
+		cout << "That is not a valid file ID" << endl;
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 
 	return;
@@ -57,9 +63,21 @@ void FileCLI::clearFile()
 			cout << "Failed to remove file" << endl;
 		}
 	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
 	return;
 }
 
+void FileCLI::clearCache()
+{
+	if (cv.clearCache()) {
+		cout << "Cache is cleared successfully" << endl;
+	}
+	else {
+		cout << "Failed to clear cache" << endl;
+	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+}
 void FileCLI::writeFile()
 {
 	int fileID;
@@ -89,6 +107,8 @@ void FileCLI::writeFile()
 			cout << "Failed to write to file" <<endl;
 		}
 	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
 	return;
 }
 
@@ -105,12 +125,40 @@ void FileCLI::fetchFile()
 	else {
 		cout << "Failed to fetch and cache file" << endl;
 	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 	return;
 }
 
 
+void FileCLI::clearContent()
+{
+	int fileID;
 
+	listFile();
+	cin >> fileID;
+
+	// check if the fileID input is within bounds
+	if (checkValidity(fileID)) {
+		int offSet;
+		string textAppend;
+
+		// translate fileID to real remote file path 
+		map<int, string>::iterator it;
+		it = cacheReference.find(fileID);
+		string remoteFilePath = it->second;
+
+		if (cv.clearContent(remoteFilePath)) {
+			cout << "Clear File content successfully" << endl;
+		}
+		else {
+			cout << "Failed to clear file content" << endl;
+		}
+	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+	return;
+}
 // table to show all the available files 
 void FileCLI::listFile()
 {

@@ -12,8 +12,10 @@ class FileCLI
 public:
 	void readFile();
 	void clearFile();
+	void clearContent();
 	void writeFile();
 	void fetchFile();
+	void clearCache();
 	~FileCLI();
 	FileCLI();
 private:

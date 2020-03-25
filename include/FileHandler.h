@@ -23,7 +23,7 @@ class FileHandler
 public:
     int ReadFile(const char* fileName, char echoBuffer[], int nBytes, int startPos);
     int WriteFile(const char* filepath, const char* toWrite, int offset);
-    int ClearFile(char* filepath, char *responseContent);
+    int ClearFile(char* filepath);
     int DeleteFile(char * filename);
     int Rename(char * oldname, char * newname);
     int CreateFile(const char * filename);
