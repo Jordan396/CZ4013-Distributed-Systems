@@ -3,6 +3,9 @@
 using namespace std;
 
 
+FileCLI::FileCLI(CacheService cs) {
+	cv = cs;
+}
 
 void FileCLI::readFile()
 {

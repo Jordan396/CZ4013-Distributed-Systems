@@ -17,7 +17,7 @@ public:
 	void fetchFile();
 	void clearCache();
 	~FileCLI();
-	FileCLI();
+	FileCLI(CacheService cs);
 private:
 	void listFile();
 	bool checkValidity(int fileID);

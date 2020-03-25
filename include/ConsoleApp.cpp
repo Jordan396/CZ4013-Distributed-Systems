@@ -13,6 +13,8 @@
 #include <sys/socket.h> /* for socket(), bind(), and connect() */
 #include <sys/wait.h>   /* for waitpid() */
 #include <arpa/inet.h>  /* for sockaddr_in and inet_ntoa() */
+#include "CacheManager/CacheService.h"
+
 using namespace std;
 void displayClientMenu();
 
@@ -25,10 +27,13 @@ int sel;
 string serverIP = "";
 string serverPortNo = "";
 string clientPortNo = "2221";
+CacheService cv;
 
 
 int main(int argc, char* argv[])
-{
+{   
+    std::atexit(exiting);
+
     setlocale(LC_CTYPE, "");    
     // read in command line arguments 
     // TODO to write serverno and portno input check
@@ -58,7 +63,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    FileCLI fileCLI;
+    FileCLI fileCLI(cv);
     SettingCLI settingCLI;
     // display client menu and listen
     while (true) {
@@ -120,6 +125,10 @@ void displayClientMenu() {
     cout << "\u2503" << "7.  " << "\u2503" << "Settings                           " << "\u2503" << endl;
     cout << "\u2517";  for (int i = 0; i < 4; i++) { cout << "\u2501"; }  cout << "\u253b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; }  cout << "\u251b" << endl;
 }
+
+//void exiting() {
+//
+//}
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu
 

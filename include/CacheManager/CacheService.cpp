@@ -101,7 +101,7 @@ bool CacheService::downloadFile(std::string remotePath, std::string cachePath)
 
 // std::string CacheService::read(std::string pathName, int offset, int bytes)
 // {
-// 	// TODO (Chin to provide me the method) (added my previous code, pls replace if needed)
+// 	// TODO (Chin to provide me the method) (added my previous code, pls replace if needed)f
 // 	FILE* pFile;
 // 	char* buffer;
 // 	size_t result;
@@ -137,6 +137,7 @@ bool CacheService::writeFile(std::string pathName, std::string text, int offset)
 			client.write_file(pathName, text, offset);
 			return true;
 		}
+	}
 	}
 
 	return false;
