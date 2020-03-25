@@ -129,8 +129,8 @@ std::string CacheService::readFile(std::string pathName, int offset, int bytes)
 	if (checkValidityFetch(pathName)) {
 		cout << "Debug cv.readFile pathName: " + pathName << endl;
 		fh.ReadFile(getLocalPathToFile(pathName).c_str(), echoBuffer, offset, bytes);
-		string s = echoBuffer;
-		cout << "CacheService::readFile: " + s << endl;
+		cout << getLocalPathToFile(pathName).c_str() << endl;
+		string s(echoBuffer);
 		return s;
 	}
 	else {
