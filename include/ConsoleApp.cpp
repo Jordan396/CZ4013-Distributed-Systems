@@ -103,10 +103,11 @@ int main(int argc, char* argv[])
             break;
         }
         case 8: {
-            break;
+            goto endloop;
         }
         }
     }
+    endloop:
 }
 
 // display client menu (main screen)
