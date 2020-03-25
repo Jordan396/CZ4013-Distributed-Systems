@@ -139,7 +139,7 @@ int FileHandler::ClearFile(const char* filepath) {
 }
 
 // wrapper around remove provided by cpp 
-int FileHandler::DeleteFile(char * filename) { 
+int FileHandler::DeleteFile(const char * filename) { 
   int a = remove(filename);
   // file deletion unsucessful
   if (a != 0) { 
