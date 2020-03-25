@@ -3,6 +3,10 @@
 namespace fs = std::experimental::filesystem;
 using namespace std;
 
+CacheService::CacheService()
+{
+}
+
 bool CacheService::clearFile(std::string pathName)
 {
 	try {
@@ -138,8 +142,6 @@ bool CacheService::writeFile(std::string pathName, std::string text, int offset)
 			return true;
 		}
 	}
-	}
-
 	return false;
 }
 

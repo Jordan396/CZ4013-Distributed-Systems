@@ -3,7 +3,7 @@
 using namespace std;
 
 
-FileCLI::FileCLI(CacheService cs):cv(cs) 
+FileCLI::FileCLI( CacheService& cs) :cv(cs)
 {
 }
 
@@ -215,8 +215,3 @@ FileCLI::~FileCLI()
 	cv.saveHashMap();
 }
 
-FileCLI::FileCLI()
-{
-	// CacheService cv;
-	cv.restoreHashMap();
-}

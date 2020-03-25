@@ -27,11 +27,12 @@ int sel;
 string serverIP = "";
 string serverPortNo = "";
 string clientPortNo = "2221";
-CacheService cv;
 
 
 int main(int argc, char* argv[])
 {   
+    CacheService cv;
+
     //std::atexit(exiting);
 
     setlocale(LC_CTYPE, "");    

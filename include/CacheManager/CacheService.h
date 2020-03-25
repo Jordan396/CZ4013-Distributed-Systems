@@ -40,6 +40,7 @@ public:
 	bool saveHashMap();
 	bool restoreHashMap();
 
+	CacheService();
 	~CacheService();
 private:
 	FileHandler fh;

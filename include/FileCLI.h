@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include "CacheManager/CacheService.h"
+class CacheService;
 
 class FileCLI
 {
@@ -17,7 +18,7 @@ public:
 	void fetchFile();
 	void clearCache();
 	~FileCLI();
-	FileCLI(CacheService cs);
+	FileCLI( CacheService& cs);
 private:
 	void listFile();
 	bool checkValidity(int fileID);
