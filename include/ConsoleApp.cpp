@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
         }
         }
     }
-    endloop:
+endloop:;
 }
 
 // display client menu (main screen)
