@@ -101,6 +101,9 @@ int main(int argc, char* argv[])
             settingCLI.editSetting();
             break;
         }
+        case 8: {
+            exit(0);
+        }
         }
     }
 }
@@ -124,6 +127,8 @@ void displayClientMenu() {
     cout << "\u2503" << "6.  " << "\u2503" << "Clear Cache                        " << "\u2503" << endl;
     cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
     cout << "\u2503" << "7.  " << "\u2503" << "Settings                           " << "\u2503" << endl;
+    cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
+    cout << "\u2503" << "8.  " << "\u2503" << "Exit Program                       " << "\u2503" << endl;
     cout << "\u2517";  for (int i = 0; i < 4; i++) { cout << "\u2501"; }  cout << "\u253b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; }  cout << "\u251b" << endl;
 }
 
