@@ -80,10 +80,18 @@ int main(int argc, char* argv[])
             break;
         }
         case 4: {
-            fileCLI.clearFile();
+            fileCLI.clearContent();
             break;
         }
         case 5: {
+            fileCLI.clearFile();
+            break;
+        }
+        case 6: {
+            fileCLI.clearCache();
+            break;
+        }
+        case 7: {
             settingCLI.editSetting();
             break;
         }
@@ -103,9 +111,13 @@ void displayClientMenu() {
     cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
     cout << "\u2503" << "3.  " << "\u2503" << "Write File                         " << "\u2503" << endl;
     cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
-    cout << "\u2503" << "4.  " << "\u2503" << "Clear File                         " << "\u2503" << endl;
+    cout << "\u2503" << "4.  " << "\u2503" << "Clear Content in File              " << "\u2503" << endl;
     cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
-    cout << "\u2503" << "5.  " << "\u2503" << "Settings                           " << "\u2503" << endl;
+    cout << "\u2503" << "5.  " << "\u2503" << "Remove File in Cache               " << "\u2503" << endl;
+    cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
+    cout << "\u2503" << "6.  " << "\u2503" << "Clear Cache                        " << "\u2503" << endl;
+    cout << "\u2523";  for (int i = 0; i < 4; i++) { cout << "\u2501"; } cout << "\u254b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; } cout << "\u252b" << endl;
+    cout << "\u2503" << "7.  " << "\u2503" << "Settings                           " << "\u2503" << endl;
     cout << "\u2517";  for (int i = 0; i < 4; i++) { cout << "\u2501"; }  cout << "\u253b";  for (int i = 0; i < 35; i++) { cout << "\u2501"; }  cout << "\u251b" << endl;
 }
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
