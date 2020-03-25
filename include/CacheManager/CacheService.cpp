@@ -78,7 +78,7 @@ bool CacheService::clearContent(std::string pathName)
 
 	//if (client.clearFileContent(pathName)) {
 	//	// if manage to clear server file content the clear cache file content
-	//	if(fh.ClearFile(getLocalPathToFile(pathName).c_str())==1) return true;
+	if(fh.ClearFile(getLocalPathToFile(pathName).c_str())==1) return true;
 	//	else {
 	//		cout << "Cannot clear file content in client cache" << endl;
 	//		return false;
@@ -147,7 +147,6 @@ std::string CacheService::readFile(std::string pathName, int offset, int bytes)
 	char echoBuffer[bufferSize];
 	if (checkValidityFetch(pathName)) {
 		cout << "Debug cv.readFile pathName: " + pathName << endl;
-		cout << "dir name: " << get_current_dir_name() << endl; 
 		fh.ReadFile(getLocalPathToFile(pathName).c_str(), echoBuffer, offset, bytes);
 		cout << getLocalPathToFile(pathName).c_str() << endl;
 		cout << bufferSize << endl;
