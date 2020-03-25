@@ -95,7 +95,7 @@ void FileCLI::writeFile()
 void FileCLI::fetchFile()
 {
 	string filePath;
-	cout << "Please input a file path: "; // line hit 
+	cout << "Please input a file path: RFA://"; // line hit 
 	cin >> filePath;
 	string filePathModified = "RFA://" + filePath;
 	cout << "filepath is: " + filePathModified << endl; // filepath = RFA://documents/test.txt
