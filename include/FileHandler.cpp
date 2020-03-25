@@ -123,7 +123,7 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
 }
 
 // check if file exists - if yes, overwrite else return error 
-int FileHandler::ClearFile(char* filepath) {
+int FileHandler::ClearFile(const char* filepath) {
   FILE * pFile; 
 
   pFile = fopen(filepath, "r");
