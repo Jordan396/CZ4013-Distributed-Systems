@@ -184,7 +184,7 @@ void FileCLI::listFile()
 
 	for (int i = 0; i < cacheKeys.size(); i++) {
 		cout << cacheKeys[i].length() << endl;
-		cout << "\u2503" << i + 1; for (int i = 0; i < 4 - to_string(i + 1).length(); i++) { cout << " "; } cout << "\u2503" << cacheKeys[i];  for (int i = 0; i < 35 - cacheKeys[i].length(); i++) {
+		cout << "\u2503" << i + 1; for (int i = 0; i < 4 - to_string(i + 1).length(); i++) { cout << " "; } cout << "\u2503" << cacheKeys[i];  for (int i = 0; i < (35 - cacheKeys[i].length()); i++) {
 			cout << i;} cout << "\u2503" << endl;
 
 		if (i != cacheKeys.size() - 1) {
