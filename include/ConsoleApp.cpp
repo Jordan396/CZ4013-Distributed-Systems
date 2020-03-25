@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     // read in command line arguments 
     // TODO to write serverno and portno input check
     // -f for freshness interval, -s for server IP, -p for server port number
-    if (argc == 7) {
+    if (argc == 9) {
         for (int i = 1; i < argc; i+=2) {
             string s1(argv[i]);
             if (s1=="-f") {
@@ -46,6 +46,9 @@ int main(int argc, char* argv[])
             else if (s1=="-p") {
                 string s2(argv[i + 1]);
                 serverPortNo = s2;
+            }
+            else if (s1 == "-l") {
+                lossRate = atoi(argv[i + 1]);
             }
         }
     }
