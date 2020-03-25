@@ -77,6 +77,10 @@ int main(int argc, char *argv[]) {
   string sourceAddress;             // Address of datagram source
   unsigned short sourcePort;        // Port of datagram source
 
+  // testing utils function 
+  // TODO: figure out why no binary value @ chin
+  cout << utils::loss(50) << endl; 
+
   // Set up separate thread to monitor expired clients
   pthread_t child_thread;
   int i;
@@ -540,4 +544,8 @@ int filehandler_result_to_response_code(int result){
     return READ_SUCCESS;
   }
   return READ_FAILURE;
+}
+
+void testing(string s) { 
+  cout << s << endl; 
 }

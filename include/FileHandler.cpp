@@ -156,25 +156,7 @@ int FileHandler::Rename(char * oldname, char * newname) {
     return ERR_FILE_NOT_EXIST;
   }
   return a; // 0 
-}
-
-
-// taken from stackoverflow - decorator pattern in cpp???
-// call it as decorate(int, func)(params)
-// template<class T>
-// auto decorator(int lossRate, T&& func) {
-//     int percent = rand() % 100;
-//     auto new_function = [func = std::forward<T>(func)](auto&&... args) {
-//         auto result = func(std::forward<decltype(args)>(args)...);   
-//         if (percent > lossRate) { 
-//           return result; 
-//         }
-//         return;
-//     };
-//     return new_function;
-// } 
-
-// }
+} 
 
 int FileHandler::CreateFile(const char * filename){
   std::ofstream output(filename);

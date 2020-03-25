@@ -69,6 +69,7 @@
 #include "./FileHandler.h"
 /* External libraries */
 #include "./cJSON.h"      // For message formatting
+#include "./utils.h"
 
 void init_sockets();
 void *monitor_registered_clients( void *ptr );
