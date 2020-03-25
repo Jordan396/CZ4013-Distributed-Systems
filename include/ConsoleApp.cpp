@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    FileCLI fileCLI(&cv);
+    FileCLI fileCLI(cv);
     SettingCLI settingCLI;
     // display client menu and listen
     while (true) {
