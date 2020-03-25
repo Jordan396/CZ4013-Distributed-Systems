@@ -17,6 +17,7 @@
 
 using namespace std;
 void displayClientMenu();
+void exiting();
 
 int freshnessInterval = 100;
 int lossRate = 0;
