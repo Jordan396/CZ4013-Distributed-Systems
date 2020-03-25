@@ -133,7 +133,10 @@ std::string CacheService::readFile(std::string pathName, int offset, int bytes)
 		cout << bufferSize << endl;
 		cout << "offset: " << offset << endl;
 		cout << "bytes: " << bytes << endl;
+		// force utf-8 intepretation
+		cout << echoBuffer << endl; 
 		string s(echoBuffer);
+		cout << "string is: " << s << endl; 
 		return s;
 	}
 	else {
