@@ -75,19 +75,20 @@ CacheService::~CacheService()
 bool CacheService::clearContent(std::string pathName)
 {
 	// does not have to do validity check as is simply clear file content
-	if (client.clearFileContent(pathName)) {
-		// if manage to clear server file content the clear cache file content
-		if(fh.ClearFile(getLocalPathToFile(pathName).c_str())==1) return true;
-		else {
-			cout << "Cannot clear file content in client cache" << endl;
-			return false;
-		}
-	}
-	else {
-		cout << "Cannot clear file content in server" << endl;
-		return false;
-	}
 
+	//if (client.clearFileContent(pathName)) {
+	//	// if manage to clear server file content the clear cache file content
+	//	if(fh.ClearFile(getLocalPathToFile(pathName).c_str())==1) return true;
+	//	else {
+	//		cout << "Cannot clear file content in client cache" << endl;
+	//		return false;
+	//	}
+	//}
+	//else {
+	//	cout << "Cannot clear file content in server" << endl;
+	//	return false;
+	//}
+	return true;
 }
 
 // this method will call the server and transfer text chunk by chunk to the cache file 
