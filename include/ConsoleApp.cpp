@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
         cout << argc;
         return -1;
     }
-
+    FileCLI fileCLI;
     SettingCLI settingCLI;
     // display client menu and listen
     while (true) {
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
         system("clear");
         cout << "yyy" << endl;
 
-        FileCLI fileCLI(cv);
+        fileCLI(cv);
         cout << "eee" << endl;
 
         displayClientMenu();
