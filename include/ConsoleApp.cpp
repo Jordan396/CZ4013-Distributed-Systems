@@ -69,10 +69,10 @@ int main(int argc, char* argv[])
     // display client menu and listen
     while (true) {
         system("clear");
+        FileCLI fileCLI(cv);
         displayClientMenu();
         cin >> sel;
         system("clear");
-        FileCLI fileCLI(cv);
         switch (sel) {
         case 1: {
             fileCLI.fetchFile();
