@@ -266,54 +266,27 @@ bool CacheService::saveHashMap()
 {
 	if (cacheMap.empty())
 		return false;
-	string filePath = getAbsoluteFilePathToMainFolder() + "/ClientCache/cacheHistory.txt";
-	FILE* fp = fopen(filePath.c_str(), "w");
-
-
-	for (map<string, File>::iterator it = cacheMap.begin(); it != cacheMap.end(); it++) {
-		fprintf(fp, "%s=%s\n", it->first.c_str(), it->second);
-	}
-
-	fclose(fp);
+	string filePath = getAbsoluteFilePathToMainFolder() + "/ClientCache/cacheHistory.vtx";
+	std::ofstream ofs(filePath);
+	boost::archive::text_oarchive oa(ofs);
+	oa << cacheMap;
+	ofs.close();
 	return true;
 }
 
 bool CacheService::restoreHashMap()
 {
-	string filePath = getAbsoluteFilePathToMainFolder() + "/ClientCache/cacheHistory.txt";
+	string filePath = getAbsoluteFilePathToMainFolder() + "/ClientCache/cacheHistory.vtx";
 
 	FILE* fp = fopen(filePath.c_str(), "r");
 
 	if (!fp) return false;
-
 	cacheMap.clear();
-
-	char* buf = 0;
-	size_t buflen = 0;
-
-	while (getline(&buf, &buflen, fp) > 0) {
-		char* nl = strchr(buf, '\n');
-		if (nl == NULL)
-			continue;
-		*nl = 0;
-
-		char* sep = strchr(buf, '=');
-		if (sep == NULL)
-			continue;
-		*sep = 0;
-		sep++;
-
-		string s1 = buf;
-		string s2 = sep;
-
-		// cacheMap[s1] = s2;
-	}
-
-	if (buf)
-		free(buf);
-
-	fclose(fp);
-	return true;
+	std::ifstream ifs(filePath, std::ios::binary);
+	boost::archive::text_iarchive ia(ifs);
+	ia >> cacheMap;
+	ifs.close();
+	
 }
 
 std::string CacheService::getLocalPathToFile(std::string fileName)

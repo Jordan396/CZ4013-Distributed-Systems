@@ -10,6 +10,8 @@
 #include "./../FileHandler.h"
 #include "./../RFAcli.h"
 #include "./../Global.h"
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
 class CacheService
 {
