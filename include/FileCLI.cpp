@@ -169,6 +169,7 @@ void FileCLI::listFile()
 	int j;
 	cacheKeys = cv.listCache();
 	cacheSize = cacheKeys.size();
+	cacheReference.clear();
 	for (j = 0; j < cacheKeys.size(); j++) {
 		cacheReference.insert({ j +1 , cacheKeys[j] });
 	}
