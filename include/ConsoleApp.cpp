@@ -65,7 +65,6 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    FileCLI fileCLI(cv);
     SettingCLI settingCLI;
     // display client menu and listen
     while (true) {
@@ -73,6 +72,7 @@ int main(int argc, char* argv[])
         displayClientMenu();
         cin >> sel;
         system("clear");
+        FileCLI fileCLI(cv);
         switch (sel) {
         case 1: {
             fileCLI.fetchFile();
