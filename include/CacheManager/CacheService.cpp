@@ -264,29 +264,30 @@ string CacheService::extractFileName(string remoteFilePath)
 
 bool CacheService::saveHashMap()
 {
-	if (cacheMap.empty())
-		return false;
-	string filePath = getAbsoluteFilePathToMainFolder() + "/ClientCache/cacheHistory.vtx";
-	std::ofstream ofs(filePath);
-	boost::archive::text_oarchive oa(ofs);
-	oa << cacheMap;
-	ofs.close();
+	//if (cacheMap.empty())
+	//	return false;
+	//string filePath = getAbsoluteFilePathToMainFolder() + "/ClientCache/cacheHistory.vtx";
+	//std::ofstream ofs(filePath);
+	//boost::archive::text_oarchive oa(ofs);
+	//oa << cacheMap;
+	//ofs.close();
+	//return true;
 	return true;
 }
 
 bool CacheService::restoreHashMap()
 {
-	string filePath = getAbsoluteFilePathToMainFolder() + "/ClientCache/cacheHistory.vtx";
+	//string filePath = getAbsoluteFilePathToMainFolder() + "/ClientCache/cacheHistory.vtx";
 
-	FILE* fp = fopen(filePath.c_str(), "r");
+	//FILE* fp = fopen(filePath.c_str(), "r");
 
-	if (!fp) return false;
-	cacheMap.clear();
-	std::ifstream ifs(filePath, std::ios::binary);
-	boost::archive::text_iarchive ia(ifs);
-	ia >> cacheMap;
-	ifs.close();
-	
+	//if (!fp) return false;
+	//cacheMap.clear();
+	//std::ifstream ifs(filePath, std::ios::binary);
+	//boost::archive::text_iarchive ia(ifs);
+	//ia >> cacheMap;
+	//ifs.close();
+	return true;
 }
 
 std::string CacheService::getLocalPathToFile(std::string fileName)
