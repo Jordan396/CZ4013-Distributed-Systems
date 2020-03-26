@@ -76,6 +76,7 @@ int main(int argc, char* argv[])
         switch (sel) {
         case 1: {
             fileCLI.fetchFile();
+            cout << "why" << endl;
             break;
         }
         case 2: {
