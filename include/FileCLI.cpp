@@ -3,8 +3,9 @@
 using namespace std;
 
 
-FileCLI::FileCLI( CacheService& cs) :cv(cs)
+FileCLI::FileCLI()
 {
+	cv.restoreHashMap();
 }
 
 void FileCLI::readFile()

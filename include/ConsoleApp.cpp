@@ -28,14 +28,13 @@ int sel;
 string serverIP = "";
 string serverPortNo = "";
 string clientPortNo = "2221";
-CacheService cv;
+//CacheService cv;
 
 
 int main(int argc, char* argv[])
 {   
 
     std::atexit(exiting);
-    cv.restoreHashMap();
     setlocale(LC_CTYPE, "");    
     // read in command line arguments 
     // TODO to write serverno and portno input check
@@ -64,24 +63,18 @@ int main(int argc, char* argv[])
         cout << argc;
         return -1;
     }
+
+    FileCLI fileCLI();
     SettingCLI settingCLI;
     // display client menu and listen
     while (true) {
-        FileCLI fileCLI(cv);
-
-        cout << "hhh" << endl;
         system("clear");
-        cout << "yyy" << endl;
-
-        cout << "eee" << endl;
-
         displayClientMenu();
         cin >> sel;
         system("clear");
         switch (sel) {
         case 1: {
             fileCLI.fetchFile();
-            cout << "why" << endl;
             break;
         }
         case 2: {
@@ -110,7 +103,6 @@ int main(int argc, char* argv[])
         }
         case 8: {
             goto endloop;
-            break;
         }
         }
     }
@@ -142,7 +134,7 @@ void displayClientMenu() {
 }
 
 void exiting() {
-    cv.saveHashMap();
+    //cv.saveHashMap();
 }
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu
