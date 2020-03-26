@@ -82,31 +82,31 @@ int main(int argc, char* argv[])
         case 1: {
             fileCLI.fetchFile();
             cout << "why" << endl;
-            break;
+            continue;
         }
         case 2: {
             fileCLI.readFile();
-            break;
+            continue;
         }
         case 3: {
             fileCLI.writeFile();
-            break;
+            continue;
         }
         case 4: {
             fileCLI.clearContent();
-            break;
+            continue;
         }
         case 5: {
             fileCLI.clearFile();
-            break;
+            continue;
         }
         case 6: {
             fileCLI.clearCache();
-            break;
+            continue;
         }
         case 7: {
             settingCLI.editSetting();
-            break;
+            continue;
         }
         case 8: {
             goto endloop;
