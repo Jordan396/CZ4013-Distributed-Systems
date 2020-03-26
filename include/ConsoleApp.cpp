@@ -64,15 +64,15 @@ int main(int argc, char* argv[])
         cout << argc;
         return -1;
     }
-    FileCLI fileCLI(cv);
     SettingCLI settingCLI;
     // display client menu and listen
     while (true) {
+        FileCLI fileCLI(cv);
+
         cout << "hhh" << endl;
         system("clear");
         cout << "yyy" << endl;
 
-        fileCLI(cv);
         cout << "eee" << endl;
 
         displayClientMenu();
