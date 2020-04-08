@@ -315,7 +315,7 @@ void execute_read_command(string destAddress, string destPort, cJSON *jobjReceiv
 
       // ReadFile
       readResult = fh.ReadFile(actual_filepath.c_str(), readBuffer, nBytes, offset);
-      readStatus = filehandler_result_to_response_code(readResult);
+      readStatus = fh_read_status(readResult);
       content = readBuffer;
 
       cout << "readResult: " + std::to_string(readResult) << endl;
@@ -344,46 +344,48 @@ void execute_read_command(string destAddress, string destPort, cJSON *jobjReceiv
 void execute_write_command(string destAddress, string destPort, cJSON *jobjReceived){
   int offset;
   int nBytes;
+  int writeResult;
+  int writeStatus;
+  string content;
   string pseudo_filepath;
   string actual_filepath;
-  string last_modified_time;
 
   // Extract parameters from message
   pseudo_filepath = get_filepath(jobjReceived);
   offset = get_offset(jobjReceived);
-  nBytes = get_nBytes(jobjReceived);
   actual_filepath = translate_filepath(pseudo_filepath); 
-  if (actual_filepath != ""){
+  content = get_content(jobjReceived);
+
+  if (actual_filepath != "") {
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     if (std::experimental::filesystem::exists(actual_filepath)){
-      // TODO: Integrate with Jia Chin
-      // WriteFile()
       cout << "File exists." << endl;
 
-      // Send response
-      cJSON *jobjToSend;
-      jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
-      cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Content written!")); 
-      send_message(destAddress, destPort, cJSON_Print(jobjToSend));
-      cJSON_Delete(jobjToSend);
+      // WriteFile
+      writeResult = fh.WriteFile(actual_filepath.c_str(), content.c_str(), offset);
+      writeStatus = fh_write_status(writeResult);
 
-      // TODO: Update registered clients in monitorMap
-      update_registered_clients(pseudo_filepath);
-    }
-    else {
-      // TODO: Integrate with Jia Chin
-      cJSON *jobjToSend;
-      jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
-      cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString("Error reading file.")); 
-      send_message(destAddress, destPort, cJSON_Print(jobjToSend));
-      cJSON_Delete(jobjToSend);
+      cout << "writeResult: " + std::to_string(writeResult) << endl;
+
+      if (writeStatus == WRITE_SUCCESS){
+        // Send response
+        cJSON *jobjToSend;
+        jobjToSend = cJSON_CreateObject();
+        cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(writeStatus));
+        send_message(destAddress, destPort, cJSON_Print(jobjToSend));
+        cJSON_Delete(jobjToSend);
+        return;
+      }
     }
   }
+  cJSON *jobjToSend;
+  jobjToSend = cJSON_CreateObject();
+  cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(WRITE_FAILURE)); 
+  send_message(destAddress, destPort, cJSON_Print(jobjToSend));
+  cJSON_Delete(jobjToSend);
+  return;
 }
-
 void execute_register_command(string destAddress, string destPort, cJSON *jobjReceived){
   string pseudo_filepath;
   string actual_filepath;
@@ -480,6 +482,24 @@ string retrieve_response(string sourceAddress, string destPort){
   return responseMap[responseMapKey];
 }
 
+
+string translate_filepath(string pseudo_filepath){
+  char rfa_prefix[6];
+  string current_path = std::experimental::filesystem::current_path();
+
+  // assign here 
+  string actual_filepath = pseudo_filepath;
+  strncpy(rfa_prefix, pseudo_filepath.c_str(), 6); // Copy just the "RFA://" portion
+  if (strcmp(rfa_prefix, "RFA://") == 0){ 
+    // actual_filepath = actual_filepath.replace(0, 6, "../RemoteFileAccess/");
+    actual_filepath = current_path + "/ServerRemoteFileAccess/" + actual_filepath.substr(6);
+    cout << "actual_filepath: " + actual_filepath << endl;
+    return actual_filepath;
+  }
+  cout << "pseudo_filepath: " + pseudo_filepath << endl;
+  return "";
+}
+
 /** \copydoc get_request_code */
 int get_request_code(cJSON *jobjReceived)
 {
@@ -511,26 +531,15 @@ string get_dest_port(cJSON *jobjReceived)
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "PORT")->valuestring;
 }
 
+string get_content(cJSON *jobjReceived)
+{
+  return cJSON_GetObjectItem(jobjReceived, "CONTENT")->valuestring;
+}
+
 char* get_toWrite(cJSON *jobjReceived) {
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "toWrite")->valuestring;
 }
 
-string translate_filepath(string pseudo_filepath){
-  char rfa_prefix[6];
-  string current_path = std::experimental::filesystem::current_path();
-
-  // assign here 
-  string actual_filepath = pseudo_filepath;
-  strncpy(rfa_prefix, pseudo_filepath.c_str(), 6); // Copy just the "RFA://" portion
-  if (strcmp(rfa_prefix, "RFA://") == 0){ 
-    // actual_filepath = actual_filepath.replace(0, 6, "../RemoteFileAccess/");
-    actual_filepath = current_path + "/ServerRemoteFileAccess/" + actual_filepath.substr(6);
-    cout << "actual_filepath: " + actual_filepath << endl;
-    return actual_filepath;
-  }
-  cout << "pseudo_filepath: " + pseudo_filepath << endl;
-  return "";
-}
 
 time_t get_last_modified_time(const char *path) {
     struct stat attr;
@@ -539,11 +548,19 @@ time_t get_last_modified_time(const char *path) {
     return attr.st_mtime;
 }
 
-int filehandler_result_to_response_code(int result){
+int fh_read_status(int result){
   if (result >= 0){
     return READ_SUCCESS;
   }
   return READ_FAILURE;
+}
+
+int fh_write_status(int result)
+{
+  if (result >= 0){
+    return WRITE_SUCCESS;
+  }
+  return WRITE_FAILURE;
 }
 
 void testing(string s) { 

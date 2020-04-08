@@ -34,6 +34,8 @@
 #define FETCH_LAST_MODIFIED_TIME_FAILURE 101
 #define READ_SUCCESS 110
 #define READ_FAILURE 111
+#define WRITE_SUCCESS 120
+#define WRITE_FAILURE 121
 
 /* Standard libraries */
 #include <stdio.h>      /* for printf() and fprintf() */
@@ -94,7 +96,9 @@ char* get_toWrite(cJSON *jobjReceived);
 string translate_filepath(string pseudo_filepath);
 time_t get_last_modified_time(const char *path);
 string get_dest_port(cJSON *jobjReceived);
-int filehandler_result_to_response_code(int result);
+string get_content(cJSON *jobjReceived);
+int fh_read_status(int result);
+int fh_write_status(int result);
 
 // /**
 //  * @brief Accepts a cJSON object and sends its string representation over a socket.

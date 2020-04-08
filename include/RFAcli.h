@@ -60,6 +60,8 @@
 #define FETCH_LAST_MODIFIED_TIME_FAILURE 101
 #define READ_SUCCESS 110
 #define READ_FAILURE 111
+#define WRITE_SUCCESS 120
+#define WRITE_FAILURE 121
 
 class RFAcli 
 {
@@ -74,6 +76,7 @@ class RFAcli
     int get_nBytes(cJSON *jobjReceived);
     void write_file(string remote_filepath, string toWrite, int nOffset);
     time_t get_last_modified_time(cJSON *jobjReceived);
+    string get_content(cJSON *jobjReceived);
     void reset_destAddr();
     ~RFAcli();
   private:
