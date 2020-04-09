@@ -95,6 +95,61 @@ RFAcli::RFAcli(void){
   }
 }
 
+RFAcli::~RFAcli(){}
+
+/****************************************************************************
+ *                                                                          *
+ *                    Network Methods                                       *
+ *                                                                          *
+ ****************************************************************************/
+
+string RFAcli::receive_message(){
+  cout << "Listening..." << endl;
+  char clientBuffer[udpDatagramSize];
+
+  int len = sizeof(destAddr);
+  int n = recvfrom(inboundSockFD, clientBuffer, udpDatagramSize, MSG_WAITALL, ( struct sockaddr *) &destAddr, (socklen_t*)&len); 
+  clientBuffer[n] = '\0'; 
+
+  string sourceAddress;             // Address of datagram source
+  unsigned short sourcePort;        // Port of datagram source
+  sourceAddress = inet_ntoa(destAddr.sin_addr);
+  sourcePort = ntohs(destAddr.sin_port);
+  cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
+
+  // Reset destAddr
+  reset_destAddr();
+
+  // cout << "Received packet to " << sourceAddress << ":" << sourcePort << endl;
+  string s = clientBuffer;
+  cout << "Received message:\n" + s << endl;
+  return s;
+}
+
+int RFAcli::send_message(string message){
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  
+  // Reset destAddr
+  reset_destAddr();
+
+  sendto(outboundSockFD, message.c_str(), strlen(message.c_str()), 0, (const struct sockaddr *) &destAddr, sizeof(destAddr)); 
+  cout << "Sending message: " + message + " : to " + (char*)inet_ntoa((struct in_addr)destAddr.sin_addr) << endl;
+  return 0;
+}
+
+void RFAcli::reset_destAddr(){
+  // Filling destination information 
+  destAddr.sin_family    = AF_INET; // IPv4 
+  destAddr.sin_addr.s_addr = inet_addr(serverIP.c_str()); 
+  destAddr.sin_port = htons((unsigned short) strtoul(serverPortNo.c_str(), NULL, 0));
+}
+
+
+/****************************************************************************
+ *                                                                          *
+ *                    Program Features                                      *
+ *                                                                          *
+ ****************************************************************************/
 
 int RFAcli::download_file(string remote_filepath, string local_filepath){
   int offset = 0;
@@ -218,8 +273,13 @@ void RFAcli::write_file(string remote_filepath, string toWrite, int nOffset){
     cJSON_Delete(jobjReceived);
     return;
   }
+  if (get_response_code(jobjReceived) == WRITE_FAILURE){
+    cout << "ERROR: Clear file operation failed." << endl;
+    cJSON_Delete(jobjReceived);
+    return;
+  }
+  cout << "ERROR: Unknown response received." << endl;
   cJSON_Delete(jobjReceived);
-  cout << "Write operation failed." << endl;
   return;
 }
 
@@ -293,47 +353,45 @@ int RFAcli::register_client(string remote_filepath, string local_filepath, strin
   return 0;
 }
 
-string RFAcli::receive_message(){
-  cout << "Listening..." << endl;
-  char clientBuffer[udpDatagramSize];
+void RFAcli::clear_file(string remote_filepath){
+  // Response
+  std::string response;
 
-  int len = sizeof(destAddr);
-  int n = recvfrom(inboundSockFD, clientBuffer, udpDatagramSize, MSG_WAITALL, ( struct sockaddr *) &destAddr, (socklen_t*)&len); 
-  clientBuffer[n] = '\0'; 
+  // Send request
+  cJSON *jobjToSend;
+  jobjToSend = cJSON_CreateObject();
+  cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(CLEAR_FILE_CMD)); 
+  cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath.c_str()));
+  cJSON_AddItemToObject(jobjToSend, "PORT", cJSON_CreateString(clientPortNo.c_str())); 
+  send_message(cJSON_Print(jobjToSend));
+  cJSON_Delete(jobjToSend);
 
-  string sourceAddress;             // Address of datagram source
-  unsigned short sourcePort;        // Port of datagram source
-  sourceAddress = inet_ntoa(destAddr.sin_addr);
-  sourcePort = ntohs(destAddr.sin_port);
-  cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
+  // Wait for response...
+  response = receive_message();
 
-  // Reset destAddr
-  reset_destAddr();
-
-  // cout << "Received packet to " << sourceAddress << ":" << sourcePort << endl;
-  string s = clientBuffer;
-  cout << "Received message:\n" + s << endl;
-  return s;
+  // Parse response message
+  cJSON *jobjReceived;
+  jobjReceived = cJSON_CreateObject();
+  jobjReceived = cJSON_Parse(response.c_str());
+  if (get_response_code(jobjReceived) == CLEAR_FILE_SUCCESS){
+    cJSON_Delete(jobjReceived);
+    return;
+  }
+  if (get_response_code(jobjReceived) == CLEAR_FILE_FAILURE){
+    cout << "ERROR: Clear file operation failed." << endl;
+    cJSON_Delete(jobjReceived);
+    return;
+  }
+  cout << "ERROR: Unknown response received." << endl;
+  cJSON_Delete(jobjReceived);
+  return;
 }
 
-int RFAcli::send_message(string message){
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  
-  // Reset destAddr
-  reset_destAddr();
-
-  sendto(outboundSockFD, message.c_str(), strlen(message.c_str()), 0, (const struct sockaddr *) &destAddr, sizeof(destAddr)); 
-  cout << "Sending message: " + message + " : to " + (char*)inet_ntoa((struct in_addr)destAddr.sin_addr) << endl;
-  return 0;
-}
-
-void RFAcli::reset_destAddr(){
-  // Filling destination information 
-  destAddr.sin_family    = AF_INET; // IPv4 
-  destAddr.sin_addr.s_addr = inet_addr(serverIP.c_str()); 
-  destAddr.sin_port = htons((unsigned short) strtoul(serverPortNo.c_str(), NULL, 0));
-}
-
+/****************************************************************************
+ *                                                                          *
+ *                    Getter methods to parse response                      *
+ *                                                                          *
+ ****************************************************************************/
 
 int RFAcli::get_response_code(cJSON *jobjReceived)
 {
@@ -359,7 +417,3 @@ string RFAcli::get_content(cJSON *jobjReceived)
 }
 
 
-
-RFAcli::~RFAcli()
-{
-}

@@ -168,11 +168,7 @@ void *monitor_registered_clients( void *ptr ){
         }
         else{
           // Update registered client
-          cJSON *jobjToSend;
-          jobjToSend = cJSON_CreateObject();
-          cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
-          send_message(it->address, it->port, cJSON_Print(jobjToSend));
-          cJSON_Delete(jobjToSend);
+          update_registered_client(it->address, it->port);
         }
       }
       // Remove expired clients
@@ -243,6 +239,10 @@ void process_request(string request){
       case REGISTER_CMD:
         cout << "Executing register command..." << endl;
         execute_register_command(sourceAddress, destPort, jobjReceived);
+        break;
+      case CLEAR_FILE_CMD:
+        cout << "Executing clear file command..." << endl;
+        // execute_clear_file_command(sourceAddress, destPort, jobjReceived);
         break;
     }
   }
@@ -427,16 +427,13 @@ void execute_register_command(string destAddress, string destPort, cJSON *jobjRe
   return;
 }
 
-void update_registered_clients(string filepath){
-  std::list <struct RegisteredClient> registeredClientList = monitorMap[filepath];
-  for (std::list<struct RegisteredClient>::iterator it = registeredClientList.begin(); it != registeredClientList.end(); ++it){
-    // Update registered client
-    cJSON *jobjToSend;
-    jobjToSend = cJSON_CreateObject();
-    cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
-    send_message(it->address, it->port, cJSON_Print(jobjToSend));
-    cJSON_Delete(jobjToSend);
-  }
+void update_registered_client(string sourceAddress, string destPort){
+  cJSON *jobjToSend;
+  jobjToSend = cJSON_CreateObject();
+  cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(MONITOR_UPDATE)); 
+  send_message(sourceAddress, destPort, cJSON_Print(jobjToSend));
+  cJSON_Delete(jobjToSend);
+  return;
 }
 
 bool is_request_exists(string sourceAddress, string destPort, string message){

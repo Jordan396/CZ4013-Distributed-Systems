@@ -27,6 +27,7 @@
 #define READ_CMD 1
 #define WRITE_CMD 2  
 #define REGISTER_CMD 3 
+#define CLEAR_FILE_CMD 4
 
 /* SERVER STATUS CODES */ 
 // defined in server class; can shift here if needed
@@ -40,6 +41,8 @@
 #define MONITOR_FAILURE 131
 #define MONITOR_EXPIRED 132
 #define MONITOR_UPDATE 133
+#define CLEAR_FILE_SUCCESS 140
+#define CLEAR_FILE_FAILURE 141
 
 /* Standard libraries */
 #include <stdio.h>      /* for printf() and fprintf() */
@@ -86,7 +89,7 @@ void execute_fetch_last_modified_time_command(string destAddress, string destPor
 void execute_read_command(string destAddress, string destPort, cJSON *jobjReceived);
 void execute_write_command(string destAddress, string destPort, cJSON *jobjReceived);
 void execute_register_command(string destAddress, string destPort, cJSON *jobjReceived);
-void update_registered_clients(string filepath);
+void update_registered_client(string sourceAddress, string destPort);
 bool is_request_exists(string destAddress, string destPort, string message);
 void store_request(string destAddress, string destPort, string message);
 void store_response(string destAddress, string destPort, string message);

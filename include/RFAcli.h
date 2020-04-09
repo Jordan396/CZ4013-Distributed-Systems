@@ -53,6 +53,7 @@
 #define READ_CMD 1
 #define WRITE_CMD 2  
 #define REGISTER_CMD 3 
+#define CLEAR_FILE_CMD 4
 
 /* SERVER STATUS CODES */ 
 // defined in server class; can shift here if needed
@@ -66,6 +67,8 @@
 #define MONITOR_FAILURE 131
 #define MONITOR_EXPIRED 132
 #define MONITOR_UPDATE 133
+#define CLEAR_FILE_SUCCESS 140
+#define CLEAR_FILE_FAILURE 141
 
 class RFAcli 
 {
@@ -74,6 +77,7 @@ class RFAcli
     int download_file(string remote_filepath, string local_filepath);
     time_t fetch_last_modified_time(string remote_filepath);
     int register_client(string remote_filepath, string local_filepath, string monitor_duration);
+    void clear_file(string remote_filepath);
     string receive_message();
     int send_message(string message);
     int get_response_code(cJSON *jobjReceived);
