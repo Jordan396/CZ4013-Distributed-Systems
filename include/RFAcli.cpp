@@ -111,6 +111,19 @@ RFAcli::~RFAcli(){}
  *                    Network Methods                                       *
  *                                                                          *
  ****************************************************************************/
+int MagicalSocketCleanUP(SOCKET Socket) {
+    int r;
+    std::vector<char> buf(128 * 1024);
+    do {
+        r = recv(Socket, &buf[0], buf.size(), MSG_DONTWAIT);
+        if (r < 0 && errno == EINTR) continue;
+    } while (r > 0);
+    if (r < 0 && errno != EWOULDBLOCK) {
+        perror(__func__);
+        //... code to handle unexpected error
+    }
+    return r;
+}
 
 string RFAcli::receive_message(){
   cout << "Listening..." << endl;
@@ -134,6 +147,7 @@ string RFAcli::receive_message(){
 
   // cout << "Received packet to " << sourceAddress << ":" << sourcePort << endl;
   string s = clientBuffer;
+  clientBuffer[0] = '\0';
   cout << "Received message:\n" + s << endl;
   return s;
 }
@@ -143,7 +157,7 @@ int RFAcli::send_message(string message){
   
   // Reset destAddr
   reset_destAddr();
-
+  MagicalSocketCleanUP(inboundSockFD);
   sendto(outboundSockFD, message.c_str(), strlen(message.c_str()), 0, (const struct sockaddr *) &destAddr, sizeof(destAddr)); 
   cout << "Sending message: " + message + " : to " + (char*)inet_ntoa((struct in_addr)destAddr.sin_addr) << endl;
   return 0;
@@ -299,6 +313,26 @@ void RFAcli::write_file(string remote_filepath, string toWrite, int nOffset){
   response = send_receive_non_blocking(cJSON_Print(jobjToSend));
   cJSON_Delete(jobjToSend);
 
+<<<<<<< HEAD
+=======
+  // Wait for response...
+  response = receive_message();
+  while (response.compare("") == 0){
+    // Send request
+    cJSON *jobjToSend;
+    jobjToSend = cJSON_CreateObject();
+    cJSON_AddItemToObject(jobjToSend, "REQUEST_CODE", cJSON_CreateNumber(WRITE_CMD)); 
+    cJSON_AddItemToObject(jobjToSend, "RFA_PATH", cJSON_CreateString(remote_filepath.c_str()));
+    cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString(toWrite.c_str())); 
+    cJSON_AddItemToObject(jobjToSend, "OFFSET", cJSON_CreateNumber(nOffset)); 
+    cJSON_AddItemToObject(jobjToSend, "PORT", cJSON_CreateString(clientPortNo.c_str())); 
+    send_message(cJSON_Print(jobjToSend));
+    cJSON_Delete(jobjToSend);
+    response = receive_message();
+  }
+
+
+>>>>>>> fa00220b3a77e9c0c17654237769d5fe2f2cbac1
   // Parse response message
   cJSON *jobjReceived;
   jobjReceived = cJSON_CreateObject();
