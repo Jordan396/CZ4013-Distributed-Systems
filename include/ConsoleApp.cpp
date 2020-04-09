@@ -20,7 +20,7 @@ void exiting();
 
 int freshnessInterval = 100;
 int lossRate = 0;
-int timeOut = 300;
+int timeOut = 1000;
 int bufferSize = 1024;
 int udpDatagramSize = 4096;
 int sel;
