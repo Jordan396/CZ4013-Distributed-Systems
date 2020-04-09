@@ -82,7 +82,11 @@ bool CacheService::clearContent(std::string pathName)
 
 	//if (client.clearFileContent(pathName)) {
 	//	// if manage to clear server file content the clear cache file content
-	if(fh.ClearFile(getLocalPathToFile(pathName).c_str())==1) return true;
+	if(fh.ClearFile(getLocalPathToFile(pathName).c_str())==1){
+		cout << "Local file cleared." << endl;
+	} 
+	client.clear_file(pathName);
+	return true;
 	//	else {
 	//		cout << "Cannot clear file content in client cache" << endl;
 	//		return false;

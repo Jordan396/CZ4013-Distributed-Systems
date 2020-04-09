@@ -212,7 +212,7 @@ void *monitor_registered_clients( void *ptr ){
 }
 
 int comparetime(time_t time1,time_t time2){
- return difftime(time1,time2) > 0.0 ? 1 : -1; 
+  return difftime(time1,time2) > 0.0 ? 1 : -1; 
 } 
 
 int send_message(string destAddress, string destPort, string message){
