@@ -73,8 +73,7 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
   FILE * pFile; 
 
   pFile = fopen(filepath, "r+");
-  // *** r+ will return a new file if it does not exist so error code below will not be hit ***
-  if (pFile == NULL) { // file requested does not exist, we return error back to client  
+  if (pFile == NULL) { // file requested does not exist, we return error back to client 
       return ERR_FILE_NOT_EXIST; // server calling this function has to check err code 
   }
 
@@ -97,13 +96,13 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
   // cout << "length is " << length << endl; 
 
   // overwrite with toWrite + [offset:] of original file 
-  int originalFileSize = lsize - offset + length; 
-
+  int originalFileSize = lsize - offset + length;
   int tempSize = lsize - offset;
   char originalFile [originalFileSize]; // allocate length of string to be written + filesize to ensure capacity
   fseek(pFile, offset, SEEK_SET);
   char temp[tempSize]; // holds offset till end 
   fread(temp, 1, lsize - offset, pFile); 
+
   // Transfer toWrite and remaining segment to originalFile
   int charIdx;
   for (charIdx = 0; charIdx < length; charIdx++){
@@ -113,7 +112,9 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
     originalFile[charIdx] = temp[i]; 
     charIdx++;
   }
+
   fseek(pFile, offset, SEEK_SET);
+
   int written = fwrite(originalFile, 1, originalFileSize, pFile);
   if (written != originalFileSize) {
     return ERR_WRITE;

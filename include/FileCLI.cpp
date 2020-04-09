@@ -8,6 +8,11 @@ FileCLI::FileCLI()
 	cv.restoreHashMap();
 }
 
+
+/** readfile reads the user inputs for offset and num of bytes 
+ * @param void
+ * @return void
+ **/
 void FileCLI::readFile()
 {
 	int fileID;
@@ -31,7 +36,6 @@ void FileCLI::readFile()
 		it = cacheReference.find(fileID);
 		string remoteFilePath = it->second;
 		
-		// @ChongYan: You should be passing in local file path!
 		cout << cv.readFile(remoteFilePath, offSet, numBytes) << endl;
 
 		// this one is just a blocking call to display the text until something is keyed by user

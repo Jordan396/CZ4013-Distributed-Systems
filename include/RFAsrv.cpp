@@ -36,18 +36,21 @@
 
 // Global variables
 int freshnessInterval = 100;
-int lossRate = 0;
+// int lossRate = 0;
 int timeOut = 300;
 int bufferSize = 1024;
 int udpDatagramSize = 4096;
 int sel;
 string serverIP = "172.21.148.168";
-string serverPortNo = "2222";
+// string serverPortNo = "2222";
 string clientPortNo = "";
 bool RMI_SCHEME = true; // at most once if true
 int inboundSockFD, outboundSockFD;
 sockaddr_in destAddr, sourceAddr;
 FileHandler fh;
+int lossRate; 
+string serverPortNo; 
+int RMIScheme; 
 
 /* Variables to handle transfer of data */
 // std::string request;        /* String response received */
@@ -71,6 +74,26 @@ struct RegisteredClient
 std::map<std::string, std::list<struct RegisteredClient> > monitorMap;
 
 int main(int argc, char *argv[]) {
+  // initialization of cli arguments 
+  if (argc < 7) { 
+    perror("insufficient arguments");
+    exit(EXIT_FAILURE);
+  } else { 
+      for (int i = 1; i < argc; i+=2) {
+              string s1(argv[i]);
+              if (s1=="-rmi") {
+                  RMIScheme = atoi(argv[i+1]);
+              }
+              else if (s1=="-lr") {
+                  lossRate = atoi(argv[i+1]);
+              }
+              else if (s1=="-sp") {
+                  string s2(argv[i + 1]);
+                  serverPortNo = s2;
+              }
+          }
+        }
+
   string request; 
   char serverBuffer[udpDatagramSize];   // Buffer for echo string
   int recvMsgSize;                  // Size of received message
@@ -79,7 +102,7 @@ int main(int argc, char *argv[]) {
 
   // testing utils function 
   // TODO: figure out why no binary value @ chin
-  cout << utils::loss(50) << endl; 
+  cout << "loss: " << utils::loss(lossRate) << endl; 
 
   // Set up separate thread to monitor expired clients
   pthread_t child_thread;
@@ -98,11 +121,14 @@ int main(int argc, char *argv[]) {
 
     sourceAddress = inet_ntoa(destAddr.sin_addr);
     sourcePort = ntohs(destAddr.sin_port);
+    
+    // process only if succeed 
+    if (utils::loss(lossRate)) {
     cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
-
     request = serverBuffer;
     cout << "Received message:\n" + request << endl;
     process_request(request);
+    }
   }
   return 0;
 }

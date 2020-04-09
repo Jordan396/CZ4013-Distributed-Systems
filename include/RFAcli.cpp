@@ -79,6 +79,15 @@ RFAcli::RFAcli(void){
   destAddr.sin_addr.s_addr = inet_addr(serverIP.c_str()); 
   destAddr.sin_port = htons((unsigned short) strtoul(serverPortNo.c_str(), NULL, 0));
 
+  // set timeout 
+  struct timeval timeout_val;
+  timeout_val.tv_sec = 0; 
+  timeout_val.tv_usec = timeOut * 1000; 
+  if (setsockopt(inboundSockFD, SOL_SOCKET, SO_RCVTIMEO, &timeout_val, sizeof(timeout_val)) < 0) { 
+    perror("failed to set timeout");
+    exit(EXIT_FAILURE);
+  }
+
   // Bind the socket with the source address 
   socklen_t len = sizeof(sourceAddr);
   if (bind(inboundSockFD, (const struct sockaddr *)&sourceAddr, len) < 0 ) 
