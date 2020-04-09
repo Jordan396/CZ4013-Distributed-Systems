@@ -1,9 +1,11 @@
-// taken from stackoverflow - decorator pattern in cpp???
-// call it as decorate(int, func)(params)
 #include "./utils.h"
-
+#include <iostream> 
+using namespace std; 
 namespace utils {
-    bool loss(int lossRate) { 
-        return ((rand()%100) > lossRate);
+    int loss(int lossRate) { 
+        srand (time(NULL));
+        int a = rand()%100;
+        cout << "random number is: " << a << endl; 
+        return (a > lossRate);
     }
 }
