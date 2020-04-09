@@ -1,16 +1,17 @@
 #pragma once
 #include <string>
 #include <chrono>
+#include "time.h"
 //#include <boost/archive/text_oarchive.hpp>
 //#include <boost/archive/text_iarchive.hpp>
 //#include <boost/serialization/map.hpp>
 class File
 {
 public:
-	File(std::string lfp, std::chrono::system_clock::time_point ct);
+	File(std::string lfp, time_t ct);
 	std::string localFilePath;
 	time_t createdTime;
-	int computeTimeElapsed();
+	double computeTimeElapsed();
 	~File();
 };
 

@@ -1,14 +1,15 @@
 #include "File.h"
 
-File::File(std::string lfp, std::chrono::system_clock::time_point ct)
+File::File(std::string lfp, time_t ct)
 	:localFilePath(lfp), createdTime(ct)
 {
 }
 
-int File::computeTimeElapsed()
+double File::computeTimeElapsed()
 {
-	time_t now = std::chrono::system_clock::now();
-	return std::chrono::duration_cast<std::chrono::milliseconds>(now - createdTime).count();
+	time_t now;
+	time(&now);
+	return difftime(now, createdTime);
 }
 
 File::~File()
