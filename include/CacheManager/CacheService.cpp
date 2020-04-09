@@ -139,7 +139,7 @@ bool CacheService::writeFile(std::string pathName, std::string text, int offset)
 		if (fh.WriteFile(getLocalPathToFile(pathName).c_str(), text.c_str(), offset)) {
 			// inform the server about the change 
 			cout << "The text which will be written over is: " << text << endl;
-			client.write_file(pathName, text, offset);
+			client.write_file(pathName, text.c_str(), offset);
 			return true;
 		}
 	}
