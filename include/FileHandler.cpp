@@ -14,13 +14,14 @@ int FileHandler::ReadFile(const char* fileName, char echoBuffer[], int nBytes, i
   // first we check if file exists 
   FILE * pFile; 
 
-  /*
+  /* 
   int length = fileName.length(); 
   char char_array[length + 1];
   strcpy(char_array, fileName.c_str()); 
   pFile = fopen(char_array, "rb");
   */
-  
+  cout << "startpos: " << startPos << endl;
+  cout << "nbytes" << nBytes << endl;
   pFile = fopen(fileName, "rb");
   if (pFile == NULL) { // file requested does not exist, we return error back to client 
       sprintf (echoBuffer, "%s", "File does not exist"); 
