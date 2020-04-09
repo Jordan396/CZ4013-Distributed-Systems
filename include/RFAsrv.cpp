@@ -247,7 +247,8 @@ void process_request(string request){
     send_message(sourceAddress, destPort, response);
   }
   else {
-    store_request(sourceAddress, destPort,request);
+    store_request(sourceAddress, destPort, request);
+    cJSON_AddItemToObject(jobjReceived, "RESPONSE_ID", cJSON_CreateNumber(request.size()));
     // Handle request accordingly
     switch (get_request_code(jobjReceived)){
       case FETCH_LAST_MODIFIED_TIME_CMD:
@@ -298,6 +299,7 @@ void execute_fetch_last_modified_time_command(string destAddress, string destPor
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(FETCH_LAST_MODIFIED_TIME_SUCCESS)); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID", cJSON_CreateNumber(get_response_id(jobjReceived))); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString(last_modified_time_string)); 
       send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
@@ -307,6 +309,7 @@ void execute_fetch_last_modified_time_command(string destAddress, string destPor
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(FETCH_LAST_MODIFIED_TIME_FAILURE)); 
       cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString("Error reading file.")); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID", cJSON_CreateNumber(get_response_id(jobjReceived))); 
       send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
     }
@@ -353,6 +356,7 @@ void execute_read_command(string destAddress, string destPort, cJSON *jobjReceiv
         cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(readStatus)); 
         cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString(content.c_str())); 
         cJSON_AddItemToObject(jobjToSend, "N_BYTES", cJSON_CreateNumber(readResult)); 
+        cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID", cJSON_CreateNumber(get_response_id(jobjReceived))); 
         send_message(destAddress, destPort, cJSON_Print(jobjToSend));
         cJSON_Delete(jobjToSend);
         return;
@@ -362,6 +366,7 @@ void execute_read_command(string destAddress, string destPort, cJSON *jobjReceiv
   cJSON *jobjToSend;
   jobjToSend = cJSON_CreateObject();
   cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(READ_FAILURE)); 
+  cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID", cJSON_CreateNumber(get_response_id(jobjReceived))); 
   send_message(destAddress, destPort, cJSON_Print(jobjToSend));
   cJSON_Delete(jobjToSend);
   return;
@@ -399,6 +404,7 @@ void execute_write_command(string destAddress, string destPort, cJSON *jobjRecei
         cJSON *jobjToSend;
         jobjToSend = cJSON_CreateObject();
         cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(writeStatus));
+        cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID", cJSON_CreateNumber(get_response_id(jobjReceived))); 
         send_message(destAddress, destPort, cJSON_Print(jobjToSend));
         cJSON_Delete(jobjToSend);
         return;
@@ -408,6 +414,7 @@ void execute_write_command(string destAddress, string destPort, cJSON *jobjRecei
   cJSON *jobjToSend;
   jobjToSend = cJSON_CreateObject();
   cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(WRITE_FAILURE)); 
+  cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID", cJSON_CreateNumber(get_response_id(jobjReceived))); 
   send_message(destAddress, destPort, cJSON_Print(jobjToSend));
   cJSON_Delete(jobjToSend);
   return;
@@ -440,6 +447,7 @@ void execute_register_command(string destAddress, string destPort, cJSON *jobjRe
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(MONITOR_SUCCESS)); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID", cJSON_CreateNumber(get_response_id(jobjReceived))); 
       send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
       return;
@@ -448,6 +456,7 @@ void execute_register_command(string destAddress, string destPort, cJSON *jobjRe
   cJSON *jobjToSend;
   jobjToSend = cJSON_CreateObject();
   cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(MONITOR_FAILURE)); 
+  cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID", cJSON_CreateNumber(get_response_id(jobjReceived))); 
   send_message(destAddress, destPort, cJSON_Print(jobjToSend));
   cJSON_Delete(jobjToSend);
   return;
@@ -559,6 +568,10 @@ string get_content(cJSON *jobjReceived)
 
 char* get_toWrite(cJSON *jobjReceived) {
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "toWrite")->valuestring;
+}
+
+int get_response_id(cJSON *jobjReceived) {
+  return cJSON_GetObjectItemCaseSensitive(jobjReceived, "RESPONSE_ID")->valueint;
 }
 
 

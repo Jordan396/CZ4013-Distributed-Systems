@@ -84,7 +84,9 @@ class RFAcli
     int get_nBytes(cJSON *jobjReceived);
     void write_file(string remote_filepath, string toWrite, int nOffset);
     time_t get_last_modified_time(cJSON *jobjReceived);
+    string send_receive_non_blocking(string request);
     string get_content(cJSON *jobjReceived);
+    int get_response_id(cJSON *jobjReceived);
     void reset_destAddr();
     ~RFAcli();
   private:

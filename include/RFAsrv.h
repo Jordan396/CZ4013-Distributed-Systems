@@ -104,6 +104,7 @@ string translate_filepath(string pseudo_filepath);
 time_t get_last_modified_time(const char *path);
 string get_dest_port(cJSON *jobjReceived);
 string get_content(cJSON *jobjReceived);
+int get_response_id(cJSON *jobjReceived);
 int fh_read_status(int result);
 int fh_write_status(int result);
 
