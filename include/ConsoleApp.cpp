@@ -1,5 +1,4 @@
 // ConsoleApp.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 #define __MAIN_C__
 #include <iostream>
 #include "FileCLI.h"
