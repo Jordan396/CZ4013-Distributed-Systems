@@ -52,6 +52,7 @@ int FileHandler::ReadFile(const char* fileName, char echoBuffer[], int nBytes, i
   } 
   // check whether startPos > maxlength 
   if (startPos == lsize) {
+	echoBuffer[0]='\0';
       return 0;
   }
 
