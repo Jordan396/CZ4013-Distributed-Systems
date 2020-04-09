@@ -111,6 +111,19 @@ RFAcli::~RFAcli(){}
  *                    Network Methods                                       *
  *                                                                          *
  ****************************************************************************/
+int MagicalSocketCleanUP(SOCKET Socket) {
+    int r;
+    std::vector<char> buf(128 * 1024);
+    do {
+        r = recv(Socket, &buf[0], buf.size(), MSG_DONTWAIT);
+        if (r < 0 && errno == EINTR) continue;
+    } while (r > 0);
+    if (r < 0 && errno != EWOULDBLOCK) {
+        perror(__func__);
+        //... code to handle unexpected error
+    }
+    return r;
+}
 
 string RFAcli::receive_message(){
   cout << "Listening..." << endl;
@@ -144,7 +157,7 @@ int RFAcli::send_message(string message){
   
   // Reset destAddr
   reset_destAddr();
-
+  MagicalSocketCleanUP(inboundSockFD);
   sendto(outboundSockFD, message.c_str(), strlen(message.c_str()), 0, (const struct sockaddr *) &destAddr, sizeof(destAddr)); 
   cout << "Sending message: " + message + " : to " + (char*)inet_ntoa((struct in_addr)destAddr.sin_addr) << endl;
   return 0;
@@ -314,6 +327,7 @@ void RFAcli::write_file(string remote_filepath, string toWrite, int nOffset){
     cJSON_Delete(jobjToSend);
     response = receive_message();
   }
+
 
   // Parse response message
   cJSON *jobjReceived;
