@@ -245,34 +245,52 @@ int RFAcli::register_client(string remote_filepath, string local_filepath, strin
   cJSON *jobjReceived;
   jobjReceived = cJSON_CreateObject();
   jobjReceived = cJSON_Parse(response.c_str());
-  if (get_response_code(jobjReceived) == 0){
+
+  // Failed to register
+  if (get_response_code(jobjReceived) == MONITOR_FAILURE){
+    cout << "LOGS: Monitor failed.";
     cJSON_Delete(jobjReceived);
     return 0;
   }
-  cJSON_Delete(jobjReceived);
 
-  // Enter monitoring loop...
-  while (true){
-    // Wait for response...
-    response = receive_message();
+  // Successfully registered
+  if (get_response_code(jobjReceived) == MONITOR_SUCCESS){
+    cout << "LOGS: Monitor success.";
+    cJSON_Delete(jobjReceived);
 
-    // Parse response message
-    cJSON *jobjReceived;
-    jobjReceived = cJSON_CreateObject();
-    jobjReceived = cJSON_Parse(response.c_str());
-    if (get_response_code(jobjReceived) == 1000){ // monitor duration expired
-      cJSON_Delete(jobjReceived);
-      break;
-    }
-    else { // file written to, proceed to read new file
-      cJSON_Delete(jobjReceived);
-      if (download_file(remote_filepath, local_filepath) != 1){
-        cout << "ERROR: Cannot download file. Exiting...";
-        return 0;
+    // Enter monitoring loop...
+    while (true){
+      // Wait for response...
+      response = receive_message();
+
+      // Parse response message
+      cJSON *jobjReceived;
+      jobjReceived = cJSON_CreateObject();
+      jobjReceived = cJSON_Parse(response.c_str());
+
+      // monitor duration expired
+      if (get_response_code(jobjReceived) == MONITOR_EXPIRED){ 
+        cout << "LOGS: Monitor expired.";
+        cJSON_Delete(jobjReceived);
+        return 1;
+      } else if (get_response_code(jobjReceived) == MONITOR_UPDATE) { // changes encountered
+        cout << "LOGS: Changes detected. Redownloading file...";
+        cJSON_Delete(jobjReceived);
+        // Redownload file
+        if (download_file(remote_filepath, local_filepath) != 1){
+          cout << "ERROR: Cannot download file. Exiting...";
+          return 0;
+        }
+      } else {
+        cJSON_Delete(jobjReceived);
+        cout << "LOGS: Unknown response received.";
       }
     }
   }
-  return 1;
+
+  cJSON_Delete(jobjReceived);
+  cout << "LOGS: Unknown response received.";
+  return 0;
 }
 
 string RFAcli::receive_message(){

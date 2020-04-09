@@ -397,36 +397,34 @@ void execute_register_command(string destAddress, string destPort, cJSON *jobjRe
   int offset = get_offset(jobjReceived);
   int nBytes = get_nBytes(jobjReceived);
   monitor_duration = get_monitor_duration(jobjReceived);
+  actual_filepath = translate_filepath(pseudo_filepath); 
 
   // Assign registeredClient attributes
   registeredClient.address = destAddress;
   registeredClient.port = destPort;
   registeredClient.expiration = monitor_duration;
 
-  // Extract parameters from message
-  actual_filepath = get_filepath(jobjReceived);
   if (actual_filepath != "") {
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
-    (monitorMap[actual_filepath]).push_back(registeredClient);
+    if (std::experimental::filesystem::exists(actual_filepath)){
+      cout << "File exists." << endl;
+      (monitorMap[actual_filepath]).push_back(registeredClient);
 
-    // TODO: Integrate with Jia Chin
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(100)); 
-      cJSON_AddItemToObject(jobjToSend, "CONTENT", cJSON_CreateString("Client registered")); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(MONITOR_SUCCESS)); 
       send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
-  }
-  else {
-      // TODO: Integrate with Jia Chin
-      cJSON *jobjToSend;
-      jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(0)); 
-      cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED", cJSON_CreateString("ERROR: Cannot register client.")); 
-      send_message(destAddress, destPort, cJSON_Print(jobjToSend));
-      cJSON_Delete(jobjToSend);
+      return;
     }
+  }
+  cJSON *jobjToSend;
+  jobjToSend = cJSON_CreateObject();
+  cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(MONITOR_FAILURE)); 
+  send_message(destAddress, destPort, cJSON_Print(jobjToSend));
+  cJSON_Delete(jobjToSend);
+  return;
 }
 
 void update_registered_clients(string filepath){

@@ -36,6 +36,10 @@
 #define READ_FAILURE 111
 #define WRITE_SUCCESS 120
 #define WRITE_FAILURE 121
+#define MONITOR_SUCCESS 130
+#define MONITOR_FAILURE 131
+#define MONITOR_EXPIRED 132
+#define MONITOR_UPDATE 133
 
 /* Standard libraries */
 #include <stdio.h>      /* for printf() and fprintf() */
