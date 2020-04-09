@@ -49,7 +49,12 @@ int FileHandler::ReadFile(const char* fileName, char echoBuffer[], int nBytes, i
   if (startPos > lsize) { 
     sprintf(echoBuffer, "%s", "The specified offset is greater than the length of the file");
     return ERR_OFFSET_OVERFLOW;
+  } 
+  // check whether startPos > maxlength 
+  if (startPos == lsize) {
+      return 0;
   }
+
   
   fseek(pFile, startPos, SEEK_SET);
   size_t result;
