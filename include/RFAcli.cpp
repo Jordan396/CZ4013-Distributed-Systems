@@ -134,6 +134,7 @@ string RFAcli::receive_message(){
 
   // cout << "Received packet to " << sourceAddress << ":" << sourcePort << endl;
   string s = clientBuffer;
+  clientBuffer[0] = '\0';
   cout << "Received message:\n" + s << endl;
   return s;
 }
