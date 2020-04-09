@@ -108,7 +108,7 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
   for (charIdx = 0; charIdx < length; charIdx++){
     originalFile[charIdx] = toWrite[charIdx]; 
   }
-  for (int i = 0; i < tempSize; tempSize++){
+  for (int i = 0; i < tempSize; i++){
     originalFile[charIdx] = temp[i]; 
     charIdx++;
   }
