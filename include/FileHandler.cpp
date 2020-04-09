@@ -118,7 +118,6 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
     originalFile[charIdx] = temp[i]; 
     charIdx++;
   }
-  cout << string(originalFile) << endl;
   fseek(pFile, offset, SEEK_SET);
 
   int written = fwrite(originalFile, 1, originalFileSize, pFile);
