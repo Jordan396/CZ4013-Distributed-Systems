@@ -1,4 +1,4 @@
-  
+
 /****************************************************************************
  * @author:                                                                 *
  * - Jordan396 <https://github.com/Jordan396/>                              *
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
   // Set up separate thread to monitor expired clients
   pthread_t child_thread;
   int i;
-  pthread_create(&child_thread, NULL, monitor_registered_clients, (void*) i);
+  pthread_create(&child_thread, NULL, monitor_registered_clients, &i);
 
   // Initialize sockets
   init_sockets();
@@ -269,7 +269,7 @@ void process_request(string request){
         break;
       case CLEAR_FILE_CMD:
         cout << "Executing clear file command..." << endl;
-        // execute_clear_file_command(sourceAddress, destPort, jobjReceived);
+        execute_clear_file_command(sourceAddress, destPort, jobjReceived);
         break;
     }
   }
@@ -456,6 +456,40 @@ void execute_register_command(string destAddress, string destPort, cJSON *jobjRe
   cJSON *jobjToSend;
   jobjToSend = cJSON_CreateObject();
   cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(MONITOR_FAILURE)); 
+  cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID", cJSON_CreateNumber(get_response_id(jobjReceived))); 
+  send_message(destAddress, destPort, cJSON_Print(jobjToSend));
+  cJSON_Delete(jobjToSend);
+  return;
+}
+
+void execute_clear_file_command(string destAddress, string destPort, cJSON *jobjReceived){
+  string pseudo_filepath;
+  string actual_filepath;
+
+  // Extract parameters from message
+  pseudo_filepath = get_filepath(jobjReceived);
+  actual_filepath = translate_filepath(pseudo_filepath); 
+
+  if (actual_filepath != "") {
+    // Debugging
+    cout << "Reference to file at: " << actual_filepath << endl;
+    if (std::experimental::filesystem::exists(actual_filepath)){
+      cout << "File exists." << endl;
+
+      fh.ClearFile(actual_filepath.c_str());
+
+      cJSON *jobjToSend;
+      jobjToSend = cJSON_CreateObject();
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(CLEAR_FILE_SUCCESS)); 
+      cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID", cJSON_CreateNumber(get_response_id(jobjReceived))); 
+      send_message(destAddress, destPort, cJSON_Print(jobjToSend));
+      cJSON_Delete(jobjToSend);
+      return;
+    }
+  }
+  cJSON *jobjToSend;
+  jobjToSend = cJSON_CreateObject();
+  cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE", cJSON_CreateNumber(CLEAR_FILE_FAILURE)); 
   cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID", cJSON_CreateNumber(get_response_id(jobjReceived))); 
   send_message(destAddress, destPort, cJSON_Print(jobjToSend));
   cJSON_Delete(jobjToSend);
