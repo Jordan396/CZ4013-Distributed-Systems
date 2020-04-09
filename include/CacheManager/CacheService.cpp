@@ -140,6 +140,8 @@ bool CacheService::writeFile(std::string pathName, std::string text, int offset)
 			// inform the server about the change 
 			cout << "The text which will be written over is: " << text << endl;
 			client.write_file(pathName, text.c_str(), offset);
+			time_t servertime = client.fetch_last_modified_time(pathName);
+			updateCacheMap(pathName, servertime);
 			return true;
 		}
 	}
