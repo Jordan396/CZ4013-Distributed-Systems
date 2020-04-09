@@ -61,7 +61,7 @@ int FileHandler::ReadFile(const char* fileName, char echoBuffer[], int nBytes, i
       return ERR_READ; 
     }
   }
-  echoBuffer[result] = '\0'
+  echoBuffer[result] = '\0';
   fclose (pFile);
   return result; 
 }
