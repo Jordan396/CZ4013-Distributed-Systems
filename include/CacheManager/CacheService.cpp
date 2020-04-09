@@ -197,9 +197,9 @@ bool CacheService::checkValidityFetch(std::string pathName)
 			string s = last_modified_time_string;
 			cout << "Last modified time in CacheService.cpp checkValidityFetch: " + s << endl;
 
-			// Convert std::time_t to std::chrono::system_clock::time_point
-			std::chrono::system_clock::time_point time = std::chrono::system_clock::from_time_t(last_modified_time);
-			if (time >= file.createdTime) {
+			//// Convert std::time_t to std::chrono::system_clock::time_point
+			//std::chrono::system_clock::time_point time = std::chrono::system_clock::from_time_t(last_modified_time);
+			if (last_modified_time >= file.createdTime) {
 				return fetchFile(pathName);
 			}
 			else {
@@ -210,7 +210,7 @@ bool CacheService::checkValidityFetch(std::string pathName)
 
 }
 
-void CacheService::updateCacheMap(std::string pathName, chrono::system_clock::time_point time) {
+void CacheService::updateCacheMap(std::string pathName, time_t time) {
 	if (cacheMap.find(pathName) == cacheMap.end()) {
 		// does not exist in map
 		File file(getLocalPathToFile(pathName), time);
@@ -237,12 +237,12 @@ bool CacheService::fetchFile(std::string pathName)
 	cout << "Last modified time in CacheService.cpp fetchFile: " + s << endl;
 
     // Convert std::time_t to std::chrono::system_clock::time_point
-    std::chrono::system_clock::time_point time = std::chrono::system_clock::from_time_t(last_modified_time);
+    /*std::chrono::system_clock::time_point time = std::chrono::system_clock::from_time_t(last_modified_time);*/
 
 	// write from the server to the cache 
 	if (downloadFile(pathName,cachepath)) {
 		// update the hashing table 
-		updateCacheMap(pathName, time);
+		updateCacheMap(pathName, last_modified_time);
 		return true;
 	}
 	else {

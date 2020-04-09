@@ -68,7 +68,7 @@ private:
 	std::string getAbsoluteFilePathToMainFolder();
 
 	// Chong Yan comment
-	void updateCacheMap(std::string pathName, chrono::system_clock::time_point time);
+	void updateCacheMap(std::string pathName, time_t time);
 
 };
 
