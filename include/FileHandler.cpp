@@ -73,8 +73,7 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
   FILE * pFile; 
 
   pFile = fopen(filepath, "r+");
-  // r+ will return a new file if it does not exist so error code below will not be hit ***
-  if (pFile == NULL) { // file requested does not exist, we return error back to client  
+  if (pFile == NULL) { // file requested does not exist, we return error back to client 
       return ERR_FILE_NOT_EXIST; // server calling this function has to check err code 
   }
 
