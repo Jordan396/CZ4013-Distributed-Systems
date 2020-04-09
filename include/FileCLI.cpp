@@ -101,7 +101,7 @@ void FileCLI::writeFile()
 		cout << "Offset: ";
 		cin >> offSet;
 		cout << "Input the text to be appended: ";
-		getline(cin, dumb);
+		getchar();
 		getline(cin, textAppend);
 
 		// translate fileID to real remote file path 
