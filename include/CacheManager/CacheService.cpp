@@ -199,7 +199,7 @@ bool CacheService::checkValidityFetch(std::string pathName)
 
 			// Convert std::time_t to std::chrono::system_clock::time_point
 			std::chrono::system_clock::time_point time = std::chrono::system_clock::from_time_t(last_modified_time);
-
+			cout << "debug: " << time << " and " << file.createdTime << endl;
 			if (time != file.createdTime) {
 				return fetchFile(pathName);
 			}
