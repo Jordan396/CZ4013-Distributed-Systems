@@ -96,7 +96,7 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
   // cout << "length is " << length << endl; 
 
   // overwrite with toWrite + [offset:] of original file 
-  int originalFileSize = lsize - offset + length + 1;
+  int originalFileSize = lsize - offset + length;
   int tempSize = lsize - offset;
   char originalFile [originalFileSize]; // allocate length of string to be written + filesize to ensure capacity
   fseek(pFile, offset, SEEK_SET);
@@ -112,7 +112,6 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
     originalFile[charIdx] = temp[i]; 
     charIdx++;
   }
-  originalFile[originalFileSize] = '\0';
   fseek(pFile, offset, SEEK_SET);
 
   int written = fwrite(originalFile, 1, originalFileSize, pFile);
