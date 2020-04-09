@@ -113,11 +113,10 @@ int FileHandler::WriteFile(const char* filepath, const char* toWrite, int offset
     originalFile[charIdx] = temp[i]; 
     charIdx++;
   }
-  originalFile[originalFileSize] = '\0';
   fseek(pFile, offset, SEEK_SET);
-
-  int written = fwrite(originalFile, 1, originalFileSize, pFile);
-  if (written != originalFileSize) {
+  originalFile[originalFileSize] = '\0';
+  int written = fwrite(originalFile, 1, originalFileSize+1, pFile);
+  if (written != originalFileSize+1) {
     return ERR_WRITE;
   } 
 
