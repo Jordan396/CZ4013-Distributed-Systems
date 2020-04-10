@@ -155,8 +155,6 @@ void FileCLI::fetchFile() {
     cout << "File is fetched and cached" << endl; // line is never hit
   } else {
     cout << "Failed to fetch and cache file" << endl;
-  }else {
-      cout << "That is not a valid file ID" << endl;
   }
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
