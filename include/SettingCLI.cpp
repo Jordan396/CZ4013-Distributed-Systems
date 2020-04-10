@@ -4,8 +4,19 @@ using namespace std;
 
 void SettingCLI::editSetting() {
   displayCurrentSetting();
+
+  string selectionID;
   cin >> selectionID;
-  switch (selectionID) {
+
+  if (!isNumber(selectionID)) {
+      return;
+  }
+  
+  if (stoi(selectionID) < 1 && stoi(selectionID) > 5) {
+      return;
+  }
+
+  switch (stoi(selectionID)) {
   case 1: {
     cout << "Input a new Freshness Interval: ";
     cin >> freshnessInterval;
@@ -39,9 +50,6 @@ void SettingCLI::editSetting() {
     system("clear");
     editSetting();
   }
-  case -1: {
-    return;
-  }
   }
   return;
 }
@@ -53,8 +61,8 @@ void SettingCLI::displayCurrentSetting() {
   }
   cout << "\u2513" << endl;
   cout << "\u2503"
-       << "Current Simulation Setting (Select ID to set or -1 to exit to main "
-          "menu)     "
+       << "Current Simulation Setting (Select ID to set or any character to ex"
+          "it)       "
        << "\u2503" << endl;
   // sample for testing
   cout << "\u2523";
@@ -149,3 +157,12 @@ void SettingCLI::displayCurrentSetting() {
 }
 
 SettingCLI::~SettingCLI() {}
+
+bool SettingCLI::isNumber(string s)
+{
+    for (int i = 0; i < s.length(); i++)
+        if (isdigit(s[i]) == false)
+            return false;
+
+    return true;
+}

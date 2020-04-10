@@ -9,5 +9,4 @@ public:
 
 private:
   void displayCurrentSetting();
-  int selectionID;
 };
