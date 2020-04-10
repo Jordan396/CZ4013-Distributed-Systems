@@ -22,9 +22,10 @@ public:
 
 private:
   void listFile();
-  bool checkValidity(int fileID);
+  bool checkValidity(string fileID);
   int cacheSize;
   CacheService cv;
   std::map<int, std::string> cacheReference;
   std::vector<std::string> cacheKeys;
+  bool isNumber(std::string s);
 };

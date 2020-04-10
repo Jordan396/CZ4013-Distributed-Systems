@@ -9,7 +9,7 @@ FileCLI::FileCLI() { cv.restoreHashMap(); }
  * @return void
  **/
 void FileCLI::readFile() {
-  int fileID;
+  string fileID;
 
   listFile();
   cin >> fileID;
@@ -18,7 +18,7 @@ void FileCLI::readFile() {
   if (checkValidity(fileID)) {
     int offSet;
     int numBytes;
-
+    string end;
     cout << "Offset: ";
     cin >> offSet;
     cout << "Number of bytes: ";
@@ -26,14 +26,15 @@ void FileCLI::readFile() {
 
     // translate fileID to real remote file path
     map<int, string>::iterator it;
-    it = cacheReference.find(fileID);
+    it = cacheReference.find(stoi(fileID));
     string remoteFilePath = it->second;
 
     cout << cv.readFile(remoteFilePath, offSet, numBytes) << endl;
 
     // this one is just a blocking call to display the text until something is
     // keyed by user
-    cin >> offSet;
+    cout << "End of request: Please key in any character to exit to menu" << endl;
+    cin >> end;
   } else {
     cout << "That is not a valid file ID" << endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -53,7 +54,7 @@ void FileCLI::monitorFile(){
     if (checkValidity(fileID)) {
         // translate fileID to real remote file path
         map<int, string>::iterator it;
-        it = cacheReference.find(fileID);
+        it = cacheReference.find(stoi(fileID));
         string remoteFilePath = it->second;
 
         // input the monitoring duration
@@ -81,7 +82,7 @@ void FileCLI::clearFile() {
 
     // translate fileID to real remote file path
     map<int, string>::iterator it;
-    it = cacheReference.find(fileID);
+    it = cacheReference.find(stoi(fileID));
     string remoteFilePath = it->second;
 
     if (cv.clearFile(remoteFilePath)) {
@@ -122,7 +123,7 @@ void FileCLI::writeFile() {
 
     // translate fileID to real remote file path
     map<int, string>::iterator it;
-    it = cacheReference.find(fileID);
+    it = cacheReference.find(stoi(fileID));
     string remoteFilePath = it->second;
 
     if (cv.writeFile(remoteFilePath, textAppend, offSet)) {
@@ -166,7 +167,7 @@ void FileCLI::clearContent() {
 
     // translate fileID to real remote file path
     map<int, string>::iterator it;
-    it = cacheReference.find(fileID);
+    it = cacheReference.find(stoi(fileID));
     string remoteFilePath = it->second;
 
     if (cv.clearContent(remoteFilePath)) {
@@ -256,8 +257,13 @@ void FileCLI::listFile() {
   return;
 }
 
-bool FileCLI::checkValidity(int fileID) {
-  if (fileID >= 1 && fileID <= cacheSize) {
+bool FileCLI::checkValidity(string fileID) {
+  if (!isNumber(fileID)) {
+      return false;
+  }
+  int res = stoi(fileID);
+
+  if (res >= 1 && res <= cacheSize) {
     return true;
   } else {
     return false;
@@ -265,3 +271,12 @@ bool FileCLI::checkValidity(int fileID) {
 }
 
 FileCLI::~FileCLI() { cv.saveHashMap(); }
+
+bool FileCLI::isNumber(string s)
+{
+    for (int i = 0; i < s.length(); i++)
+        if (isdigit(s[i]) == false)
+            return false;
+
+    return true;
+}
