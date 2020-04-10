@@ -9,4 +9,5 @@ public:
 
 private:
   void displayCurrentSetting();
+  bool isNumber(std::string s);
 };
