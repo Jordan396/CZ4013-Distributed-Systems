@@ -460,8 +460,6 @@ void execute_register_command(string destAddress, string destPort,
 
   // Extract parameters from message
   pseudo_filepath = get_filepath(jobjReceived);
-  int offset = get_offset(jobjReceived);
-  int nBytes = get_nBytes(jobjReceived);
   monitor_duration = get_monitor_duration(jobjReceived);
   actual_filepath = translate_filepath(pseudo_filepath);
 
