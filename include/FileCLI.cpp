@@ -36,8 +36,8 @@ void FileCLI::readFile() {
     cout << "End of request: Please key in any character to exit to menu" << endl;
     cin >> end;
   } else {
-    cout << "That is not a valid file ID" << endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      cout << "That is not a valid file ID" << endl;
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 
   return;
@@ -67,8 +67,10 @@ void FileCLI::monitorFile(){
         else {
             cout << "Monitoring has ended with failure" << endl;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }else {
+        cout << "That is not a valid file ID" << endl;
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     return;
 }
 void FileCLI::clearFile() {
@@ -80,19 +82,22 @@ void FileCLI::clearFile() {
   // check if the fileID input is within bounds
   if (checkValidity(fileID)) {
 
-    // translate fileID to real remote file path
-    map<int, string>::iterator it;
-    it = cacheReference.find(stoi(fileID));
-    string remoteFilePath = it->second;
+      // translate fileID to real remote file path
+      map<int, string>::iterator it;
+      it = cacheReference.find(stoi(fileID));
+      string remoteFilePath = it->second;
 
-    if (cv.clearFile(remoteFilePath)) {
-      cout << "File is removed" << endl;
-    } else {
-      cout << "Failed to remove file" << endl;
-    }
+      if (cv.clearFile(remoteFilePath)) {
+          cout << "File is removed" << endl;
+      }
+      else {
+          cout << "Failed to remove file" << endl;
+      }
+  }
+  else {
+      cout << "That is not a valid file ID" << endl;
   }
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
   return;
 }
 
@@ -131,6 +136,8 @@ void FileCLI::writeFile() {
     } else {
       cout << "Failed to write to file" << endl;
     }
+  }else {
+      cout << "That is not a valid file ID" << endl;
   }
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
@@ -148,6 +155,8 @@ void FileCLI::fetchFile() {
     cout << "File is fetched and cached" << endl; // line is never hit
   } else {
     cout << "Failed to fetch and cache file" << endl;
+  }else {
+      cout << "That is not a valid file ID" << endl;
   }
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
@@ -175,6 +184,8 @@ void FileCLI::clearContent() {
     } else {
       cout << "Failed to clear file content" << endl;
     }
+  }else {
+      cout << "That is not a valid file ID" << endl;
   }
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
