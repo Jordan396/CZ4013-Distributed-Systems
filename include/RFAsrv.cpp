@@ -169,7 +169,7 @@ void init_sockets() {
 
 void *monitor_registered_clients(void *ptr) {
   while (true) {
-    cout << "Checking for expired clients..." << endl;
+    // cout << "Checking for expired clients..." << endl;
     // Get current time
     auto time_now = std::chrono::system_clock::now();
     time_t currentTime = std::chrono::system_clock::to_time_t(time_now);
@@ -177,37 +177,50 @@ void *monitor_registered_clients(void *ptr) {
     // Stack to track expired clients to remove
     std::stack<int> s;
 
+    int debug_counter = 0;
+
     // Iterate over the map using Iterator till end.
     for (std::map<std::string, std::list<struct RegisteredClient>>::iterator
              filepathIterator = monitorMap.begin();
          filepathIterator != monitorMap.end(); ++filepathIterator) {
+           // Get last modified time of filepath, which is the key of the iterator
       time_t last_modified_time =
           get_last_modified_time((filepathIterator->first).c_str());
+      // DEBUG from here onwards
       // Iterate over all registered clients for file
       for (std::list<struct RegisteredClient>::iterator it =
                (filepathIterator->second).begin();
            it != (filepathIterator->second).end(); ++it) {
         // Monitor duration expired
+        // cout << "debug_counter: " << debug_counter << endl;
+        debug_counter++;
         if (comparetime(currentTime, it->expirationTime) == 1) {
+          cout << it->address << ":" << it->port << " monitor duration expired." << endl;
+          expire_registered_client(it->address, it->port);
           s.push(std::distance((filepathIterator->second).begin(), it));
         } else { // Monitor duration not expired
           // Last modified time greater that register time
           if (comparetime(last_modified_time, it->registerTime) == 1) {
             // Update registered client
+            // cout << it->address << ":" << it->port << " monitor duration NOT expired." << endl;
             update_registered_client(it->address, it->port);
+            (it->registerTime) = last_modified_time + 1;
           }
         }
       }
-      // Remove expired clients
+      // Remove expired clients from list of registered clients
+      std::list<struct RegisteredClient>::iterator it_to_erase = (filepathIterator->second).begin();
       while (!s.empty()) {
-        std::list<struct RegisteredClient>::iterator it_to_erase;
+        // cout << "Iterating over expired registered clients stack..." << endl;
+        // cout << "Iterator index to remove: " << s.top() << endl;
         std::advance(it_to_erase, s.top());
         (filepathIterator->second).erase(it_to_erase);
         s.pop();
+        // cout << "Iterating over expired registered clients stack done." << endl;
       }
     }
-    // Sleep for 10,000 milliseconds
-    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+    // // Sleep for 10,000 milliseconds
+    // std::this_thread::sleep_for(std::chrono::milliseconds(10000));
   }
 }
 
@@ -552,6 +565,16 @@ void update_registered_client(string sourceAddress, string destPort) {
   return;
 }
 
+void expire_registered_client(string sourceAddress, string destPort) {
+  cJSON *jobjToSend;
+  jobjToSend = cJSON_CreateObject();
+  cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE",
+                        cJSON_CreateNumber(MONITOR_EXPIRED));
+  send_message(sourceAddress, destPort, cJSON_Print(jobjToSend));
+  cJSON_Delete(jobjToSend);
+  return;
+}
+
 bool is_request_exists(string sourceAddress, string destPort, string message) {
   std::hash<std::string> str_hash;
   string requestMapKey = sourceAddress + ":" + destPort;
@@ -656,7 +679,7 @@ int get_response_id(cJSON *jobjReceived) {
 time_t get_last_modified_time(const char *path) {
   struct stat attr;
   stat(path, &attr);
-  printf("Last modified time: %s", ctime(&attr.st_mtime));
+  // printf("Last modified time: %s", ctime(&attr.st_mtime));
   return attr.st_mtime;
 }
 

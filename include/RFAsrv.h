@@ -95,6 +95,7 @@ void execute_register_command(string destAddress, string destPort,
 void execute_clear_file_command(string destAddress, string destPort,
                                 cJSON *jobjReceived);
 void update_registered_client(string sourceAddress, string destPort);
+void expire_registered_client(string sourceAddress, string destPort);
 bool is_request_exists(string destAddress, string destPort, string message);
 void store_request(string destAddress, string destPort, string message);
 void store_response(string destAddress, string destPort, string message);
