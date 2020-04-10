@@ -19,6 +19,12 @@ bool CacheService::clearFile(std::string pathName) {
   }
 }
 
+bool CacheService::monitorFile(std::string pathName, int monitorDuration)
+{
+    int res = client.register_client(pathName, getLocalPathToFile(pathName), monitorDuration);
+    return res == 1;
+}
+
 bool CacheService::clearCache() {
   try {
     // remove all files in directory recursively

@@ -95,10 +95,14 @@ int main(int argc, char *argv[]) {
       break;
     }
     case 7: {
-      settingCLI.editSetting();
+      fileCLI.monitorFile();
       break;
     }
     case 8: {
+      settingCLI.editSetting();
+      break;
+    }
+    case 9: {
       goto endloop;
     }
     }
@@ -225,7 +229,21 @@ void displayClientMenu() {
   }
   cout << "\u252b" << endl;
   cout << "\u2503"
-       << "8.  "
+      << "8.  "
+      << "\u2503"
+      << "Settings                           "
+      << "\u2503" << endl;
+  cout << "\u2523";
+  for (int i = 0; i < 4; i++) {
+      cout << "\u2501";
+  }
+  cout << "\u254b";
+  for (int i = 0; i < 35; i++) {
+      cout << "\u2501";
+  }
+  cout << "\u252b" << endl;
+  cout << "\u2503"
+       << "9.  "
        << "\u2503"
        << "Exit Program                       "
        << "\u2503" << endl;

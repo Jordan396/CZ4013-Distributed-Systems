@@ -42,6 +42,34 @@ void FileCLI::readFile() {
   return;
 }
 
+
+void FileCLI::monitorFile(){
+    int fileID;
+
+    listFile();
+    cin >> fileID;
+
+    // check if the fileID input is within bounds
+    if (checkValidity(fileID)) {
+        // translate fileID to real remote file path
+        map<int, string>::iterator it;
+        it = cacheReference.find(fileID);
+        string remoteFilePath = it->second;
+
+        // input the monitoring duration
+        int monitorDuration;
+        cout << "Input the monitoring duration: ";
+        cin >> monitorDuration;
+        if (cv.monitorFile(remoteFilePath, monitorDuration)) {
+            cout << "Monitoring has ended with success" << endl;
+        }
+        else {
+            cout << "Monitoring has ended with failure" << endl;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+    return;
+}
 void FileCLI::clearFile() {
   int fileID;
 

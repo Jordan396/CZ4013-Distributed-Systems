@@ -26,6 +26,9 @@ public:
   // entry
   bool clearFile(std::string pathName);
 
+  // this method will be called when the user wants to monitor the file for updates
+  bool monitorFile(std::string pathName, int monitorDuration);
+
   // thid method will be called when client wants to clear the content of the
   // file
   bool clearContent(std::string pathName);

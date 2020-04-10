@@ -16,6 +16,7 @@ public:
   void writeFile();
   void fetchFile();
   void clearCache();
+  void monitorFile();
   ~FileCLI();
   FileCLI();
 
