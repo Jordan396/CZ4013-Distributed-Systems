@@ -1,5 +1,5 @@
 #include <cstdlib>
 
-namespace utils { 
-    int loss(int lossRate);
+namespace utils {
+int loss(int lossRate);
 }

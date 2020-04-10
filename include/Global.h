@@ -1,10 +1,10 @@
 #pragma once
 #ifndef __externs_h__
 #define __global_h__
-#include <string>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/ip.h> /* superset of previous */
+#include <string>
+#include <sys/socket.h>
 
 #ifndef __MAIN_C__
 extern int freshnessInterval;

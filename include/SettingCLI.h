@@ -1,14 +1,13 @@
 #pragma once
 #include "Global.h"
-#include <string>
 #include <iostream>
-class SettingCLI
-{
+#include <string>
+class SettingCLI {
 public:
-	void editSetting();
-	~SettingCLI();
-private:
-	void displayCurrentSetting();
-	int selectionID;
-};
+  void editSetting();
+  ~SettingCLI();
 
+private:
+  void displayCurrentSetting();
+  int selectionID;
+};
