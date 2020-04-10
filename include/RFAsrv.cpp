@@ -68,7 +68,8 @@ struct RegisteredClient
 {
   string address;
   string port;
-  string expiration;
+  time_t expirationTime;
+  time_t registerTime;
 } RegisteredClient;
 
 std::map<std::string, std::list<struct RegisteredClient> > monitorMap;
@@ -183,18 +184,19 @@ void *monitor_registered_clients( void *ptr ){
 
     // Iterate over the map using Iterator till end.
     for (std::map<std::string, std::list <struct RegisteredClient>>::iterator filepathIterator = monitorMap.begin(); filepathIterator != monitorMap.end(); ++filepathIterator){
+      time_t last_modified_time = get_last_modified_time((filepathIterator->first).c_str());
       // Iterate over all registered clients for file
       for (std::list<struct RegisteredClient>::iterator it = (filepathIterator->second).begin(); it != (filepathIterator->second).end(); ++it){
-        struct tm tm;
-        strptime((it->expiration).c_str(), "%H:%M:%S", &tm);
-        time_t expirationTime = mktime(&tm);
-        if (comparetime(expirationTime, currentTime) == -1)
+        // Monitor duration expired
+        if (comparetime(currentTime, it->expirationTime) == 1)
         {
           s.push(std::distance((filepathIterator->second).begin(), it));
-        }
-        else{
-          // Update registered client
-          update_registered_client(it->address, it->port);
+        } else { // Monitor duration not expired
+          // Last modified time greater that register time
+          if (comparetime(last_modified_time, it->registerTime) == 1){
+            // Update registered client
+            update_registered_client(it->address, it->port);
+          }
         }
       }
       // Remove expired clients
@@ -432,16 +434,21 @@ void execute_register_command(string destAddress, string destPort, cJSON *jobjRe
   monitor_duration = get_monitor_duration(jobjReceived);
   actual_filepath = translate_filepath(pseudo_filepath); 
 
-  // Assign registeredClient attributes
+  // Get current and expiration time
+  time_t time_now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  time_t expiration_time = time_now + stoi(monitor_duration);
+
   registeredClient.address = destAddress;
   registeredClient.port = destPort;
-  registeredClient.expiration = monitor_duration;
+  registeredClient.registerTime = time_now;
+  registeredClient.expirationTime = expiration_time;
 
   if (actual_filepath != "") {
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
     if (std::experimental::filesystem::exists(actual_filepath)){
       cout << "File exists." << endl;
+
       (monitorMap[actual_filepath]).push_back(registeredClient);
 
       cJSON *jobjToSend;
