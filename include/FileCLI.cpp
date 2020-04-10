@@ -206,7 +206,7 @@ void FileCLI::listFile() {
   }
   cout << "\u2513" << endl;
   cout << "\u2503"
-       << "Key in the FileID or -1 for manual input"
+       << "Key in the FileID                       "
        << "\u2503" << endl;
 
   // no entries
