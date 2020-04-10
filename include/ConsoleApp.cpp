@@ -217,7 +217,7 @@ void displayClientMenu() {
   cout << "\u2503"
        << "7.  "
        << "\u2503"
-       << "Monitor File                "
+       << "Monitor File                      "
        << "\u2503" << endl;
   cout << "\u2523";
   for (int i = 0; i < 4; i++) {
