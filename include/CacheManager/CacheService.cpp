@@ -21,7 +21,7 @@ bool CacheService::clearFile(std::string pathName) {
 
 bool CacheService::monitorFile(std::string pathName, int monitorDuration)
 {
-    int res = client.register_client(pathName, getLocalPathToFile(pathName), monitorDuration);
+    int res = client.register_client(pathName, getLocalPathToFile(pathName), to_string(monitorDuration));
     return res == 1;
 }
 
