@@ -45,7 +45,7 @@ void FileCLI::readFile() {
 
 
 void FileCLI::monitorFile(){
-    int fileID;
+    string fileID;
 
     listFile();
     cin >> fileID;
@@ -72,7 +72,7 @@ void FileCLI::monitorFile(){
     return;
 }
 void FileCLI::clearFile() {
-  int fileID;
+  string fileID;
 
   listFile();
   cin >> fileID;
@@ -105,7 +105,7 @@ void FileCLI::clearCache() {
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 void FileCLI::writeFile() {
-  int fileID;
+  string fileID;
 
   listFile();
   cin >> fileID;
@@ -155,7 +155,7 @@ void FileCLI::fetchFile() {
 }
 
 void FileCLI::clearContent() {
-  int fileID;
+  string fileID;
 
   listFile();
   cin >> fileID;
