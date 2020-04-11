@@ -67,6 +67,7 @@ void FileCLI::monitorFile(){
         else {
             cout << "Monitoring has ended with failure" << endl;
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     }else {
         cout << "That is not a valid file ID" << endl;
     }

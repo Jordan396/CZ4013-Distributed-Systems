@@ -459,7 +459,7 @@ int RFAcli::register_client(string remote_filepath, string local_filepath,
   display_progress(-1);
   cJSON_Delete(jobjReceived);
   cout << "LOGS: Unknown response received.";
-  return 0;
+  return 1;
 }
 
 void RFAcli::clear_file(string remote_filepath) {
