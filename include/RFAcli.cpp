@@ -87,16 +87,7 @@ RFAcli::RFAcli(void) {
   destAddr.sin_port =
       htons((unsigned short)strtoul(serverPortNo.c_str(), NULL, 0));
 
-  // set timeout
-  struct timeval timeout_val;
-  timeout_val.tv_sec = 5;
-  timeout_val.tv_usec = 0;
-  // timeout_val.tv_usec = timeOut * 1000;
-  if (setsockopt(inboundSockFD, SOL_SOCKET, SO_RCVTIMEO, &timeout_val,
-                 sizeof(timeout_val)) < 0) {
-    perror("failed to set timeout");
-    exit(EXIT_FAILURE);
-  }
+  init_socket(false);
 
   // Bind the socket with the source address
   socklen_t len = sizeof(sourceAddr);
@@ -114,18 +105,46 @@ RFAcli::RFAcli(void) {
 
 RFAcli::~RFAcli() {}
 
+
+void RFAcli::init_socket(bool monitorFlag) {
+    // set timeout
+    struct timeval timeout_val;
+    if (monitorFlag) {
+        timeout_val.tv_sec = monitorDuration;
+        timeout_val.tv_usec = 0;
+    }
+    else {
+        timeout_val.tv_sec = (int)timeOut/1000;
+        timeout_val.tv_usec = (int)((timeOut%1000)*1000);
+    }
+
+    // timeout_val.tv_usec = timeOut * 1000;
+    if (setsockopt(inboundSockFD, SOL_SOCKET, SO_RCVTIMEO, &timeout_val,
+        sizeof(timeout_val)) < 0) {
+        perror("failed to set timeout");
+        exit(EXIT_FAILURE);
+    }
+}
 /****************************************************************************
  *                                                                          *
  *                    Network Methods                                       *
  *                                                                          *
  ****************************************************************************/
-string RFAcli::receive_message() {
+string RFAcli::receive_message(bool monitorFlag) {
   cout << "Listening..." << endl;
   char clientBuffer[udpDatagramSize + 1];
-
+  if (monitorFlag) {
+      cout << "left how much time: " << monitorDuration << endl;
+      if (monitorDuration == 0) return "";
+      init_socket(true);
+  }
   int len = sizeof(destAddr);
   int n = recvfrom(inboundSockFD, clientBuffer, udpDatagramSize, MSG_WAITALL,
                    (struct sockaddr *)&destAddr, (socklen_t *)&len);
+  if (monitorFlag) {
+      cout << "left how much time: " << monitorDuration << endl;
+      init_socket(false);
+  }
   if (n == -1) {
     return "";
   }
@@ -145,6 +164,7 @@ string RFAcli::receive_message() {
   string s = clientBuffer;
   clientBuffer[0] = '\0';
   cout << "Received message:\n" + s << endl;
+
   return s;
 }
 
@@ -187,7 +207,7 @@ string RFAcli::non_blocking_send_receive(string request) {
     send_message(request);
 
     // Receive response
-    response = receive_message();
+    response = receive_message(false);
     while (response.compare("") != 0) { // messege at socket
       jobjReceived = cJSON_Parse(response.c_str());
       response_identifier = get_response_id(jobjReceived);
@@ -196,20 +216,40 @@ string RFAcli::non_blocking_send_receive(string request) {
         cJSON_Delete(jobjReceived);
         return response;
       }
-      response = receive_message();
+      response = receive_message(false);
     }
   }
 }
 
-string RFAcli::blocking_receive() {
+string RFAcli::blocking_receive(int monitor_duration) {
   // Wait for response...
   string response;
-  response = receive_message();
-  while (response.compare("") == 0) {
-    response = receive_message();
-  }
+  int time_left = monitorDuration - (int)difftime(time(0), registerTime);
+  time_left = max(time_left, 0);
+  monitorDuration = time_left;
+  display_progress(monitor_duration);
+  response = receive_message(true);
+  
   return response;
 }
+
+void RFAcli::display_progress(int monitor_duration) {
+    double progress = (double)(monitor_duration-monitorDuration)/(double)(monitor_duration);
+    int barWidth = 50;
+    if (monitor_duration == -1) progress = 1.0;
+    std::cout << "[";
+    int pos = barWidth * progress;
+    for (int i = 0; i < barWidth; ++i) {
+        if (i < pos) std::cout << "=";
+        else if (i == pos) std::cout << ">";
+        else std::cout << " ";
+    }
+    std::cout << "] " << int(progress * 100.0) << " %\r";
+    std::cout.flush();
+
+    std::cout << std::endl;
+}
+
 
 /****************************************************************************
  *                                                                          *
@@ -354,7 +394,8 @@ int RFAcli::register_client(string remote_filepath, string local_filepath,
                             string monitor_duration) {
   // Response
   std::string response;
-
+  registerTime = time(0);
+  monitorDuration = stoi(monitor_duration);
   // Send request
   cJSON *jobjToSend;
   jobjToSend = cJSON_CreateObject();
@@ -377,33 +418,32 @@ int RFAcli::register_client(string remote_filepath, string local_filepath,
 
   // Failed to register
   if (get_response_code(jobjReceived) == MONITOR_FAILURE) {
-    cout << "LOGS: Monitor failed.";
+      cout << "LOGS: Monitor failed." << endl;
     cJSON_Delete(jobjReceived);
     return 0;
   }
-
   // Successfully registered
   if (get_response_code(jobjReceived) == MONITOR_SUCCESS) {
-    cout << "LOGS: Monitor success.";
+      cout << "LOGS: Monitor success." << endl;
     cJSON_Delete(jobjReceived);
 
     // Enter monitoring loop...
     while (true) {
-      response = blocking_receive();
+      response = blocking_receive(stoi(monitor_duration));
 
       // Parse response message
       cJSON *jobjReceived;
       jobjReceived = cJSON_CreateObject();
       jobjReceived = cJSON_Parse(response.c_str());
-
+      if (response == "") break;
       // monitor duration expired
       if (get_response_code(jobjReceived) == MONITOR_EXPIRED) {
-        cout << "LOGS: Monitor expired.";
+          cout << "LOGS: Monitor expired." << endl;
         cJSON_Delete(jobjReceived);
         return 1;
       } else if (get_response_code(jobjReceived) ==
                  MONITOR_UPDATE) { // changes encountered
-        cout << "LOGS: Changes detected. Redownloading file...";
+          cout << "LOGS: Changes detected. Redownloading file..." << endl;
         cJSON_Delete(jobjReceived);
         // Redownload file
         if (download_file(remote_filepath, local_filepath) != 1) {
@@ -416,7 +456,7 @@ int RFAcli::register_client(string remote_filepath, string local_filepath,
       }
     }
   }
-
+  display_progress(-1);
   cJSON_Delete(jobjReceived);
   cout << "LOGS: Unknown response received.";
   return 0;

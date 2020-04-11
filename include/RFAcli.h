@@ -78,7 +78,7 @@ public:
   int register_client(string remote_filepath, string local_filepath,
                       string monitor_duration);
   void clear_file(string remote_filepath);
-  string receive_message();
+  string receive_message(bool monitorFlag);
   int send_message(string message);
   int get_response_code(cJSON *jobjReceived);
   int get_nBytes(cJSON *jobjReceived);
@@ -87,13 +87,17 @@ public:
   string non_blocking_send_receive(string request);
   string get_content(cJSON *jobjReceived);
   int get_response_id(cJSON *jobjReceived);
-  string blocking_receive();
+  string blocking_receive(int monitor_duration);
   void reset_destAddr();
   ~RFAcli();
 
 private:
   FileHandler fh;
   int inboundSockFD, outboundSockFD;
+  int monitorDuration;
+  time_t registerTime;
   sockaddr_in destAddr = {0};   // Address and port of server
   sockaddr_in sourceAddr = {0}; // Address and port of client
+  void init_socket(bool monitorFlag);
+  void display_progress(int monitor_duration);
 };
