@@ -23,7 +23,6 @@
 
 #include "RFAcli.h"
 
-// Interface for Chong Yan's reference
 // /**
 //  * @brief Download file from remote to cache in local.
 //  *

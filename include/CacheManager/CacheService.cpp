@@ -5,12 +5,17 @@ using namespace std;
 
 CacheService::CacheService() {}
 
+// /**
+//  * @brief clear the copy of file in local directory
+//  * Method will remove the the file in the local directory and update the hashmap accordingly
+//  * @param pathName remote pathName
+//  * @return true if clear copy of file is successful, false if it fails
+//  */
 bool CacheService::clearFile(std::string pathName) {
   try {
-    // first try removing, if removing fails then cacheMap will not have the key
-    // as well
+    // first try removing, if removing fails then cacheMap will not have the key as well
     fs::remove(getLocalPathToFile(pathName));
-    // update hashing map
+    // update hashmap
     cacheMap.erase(pathName);
     return true;
   } catch (const fs::filesystem_error &e) {
@@ -19,12 +24,23 @@ bool CacheService::clearFile(std::string pathName) {
   }
 }
 
+// /**
+//  * @brief register the client with the server and listen for new update to the file
+//  * @param pathName remote pathName
+//  * @param monitorDuration the time period for monitoring
+//  * @return true if success, false if failure
+//  */
 bool CacheService::monitorFile(std::string pathName, int monitorDuration)
 {
     int res = client.register_client(pathName, getLocalPathToFile(pathName), to_string(monitorDuration));
     return res == 1;
 }
 
+// /**
+//  * @brief clear all the files stored in the local cache directory
+//  * @param void
+//  * @return true if success, false if failure
+//  */
 bool CacheService::clearCache() {
   try {
     // remove all files in directory recursively
@@ -40,6 +56,11 @@ bool CacheService::clearCache() {
   }
 }
 
+// /**
+//  * @brief list all the files in the local cache directory and recorded in the cache hashmap
+//  * @param void
+//  * @return vector<string> vector of the different types of file names
+//  */
 vector<std::string> CacheService::listCache() {
   vector<string> v;
   for (map<string, File>::iterator it = cacheMap.begin(); it != cacheMap.end();
@@ -55,83 +76,43 @@ CacheService::~CacheService() {
     it = cacheMap.erase(it);
 }
 
-// // this method will just write to the cache file
-// bool CacheService::write(std::string pathName, char* text, int offset)
-// {
-// 	string fileName = getLocalPathToFile(pathName)
 
-// 	// guarantee of existence of file pointed to by pathName
-// 	fh.WriteFile(fileName.c_str(), text, )
-// 	// FILE* pFile;
-// 	// pFile = fopen(getLocalPathToFile(pathName).c_str(), );
-// 	// Check for file object (detecting the stream state)
-
-// 	// TODO: create somewhere else
-// 	// fs::create_directory("../client/CacheManager/TempFiles");
-// 	if (!fp) {
-// 		fp.open(pathName);
-// 	}
-
-// 	// TODO (Chin to provide me the method)
-
-// }
-
+// /**
+//  * @brief clear the content in the specified file
+//  * Method will update both the local and remote copies of the file
+//  * @param pathName remote pathName
+//  * @return true if success, false if failure
+//  */
 bool CacheService::clearContent(std::string pathName) {
   // does not have to do validity check as is simply clear file content
 
-  // if (client.clearFileContent(pathName)) {
-  //	// if manage to clear server file content the clear cache file content
   if (fh.ClearFile(getLocalPathToFile(pathName).c_str()) == 1) {
-    cout << "Local file cleared." << endl;
+      client.clear_file(pathName);
+      return true;
   }
-  client.clear_file(pathName);
-  return true;
-  //	else {
-  //		cout << "Cannot clear file content in client cache" << endl;
-  //		return false;
-  //	}
-  //}
-  // else {
-  //	cout << "Cannot clear file content in server" << endl;
-  //	return false;
-  //}
-  return true;
+  return false;
 }
 
-// this method will call the server and transfer text chunk by chunk to the
-// cache file
+// /**
+//  * @brief download the remote file into the local file directory
+//  * Method will call RFAcli's download_file method 
+//  * @param remotePath remote pathName
+//  * @param cachePath local pathName
+//  * @return true if success, false if failure
+//  */
 bool CacheService::downloadFile(std::string remotePath, std::string cachePath) {
-  // TODO (include Jordan's method)
   int result = client.download_file(remotePath, cachePath);
   return result == 1;
 }
 
-// std::string CacheService::read(std::string pathName, int offset, int bytes)
-// {
-// 	// TODO (Chin to provide me the method) (added my previous code, pls
-// replace if needed)f 	FILE* pFile; 	char* buffer; 	size_t result;
-
-// 	pFile = fopen(getLocalPathToFile(pathName), "rb");
-// 	if (pFile == NULL) { return ""; }
-
-// 	// obtain file size:
-// 	fseek(pFile, offset, SEEK_SET);
-
-// 	// allocate memory to contain the whole file:
-// 	buffer = (char*)malloc(sizeof(char) * bytes);
-
-// 	// copy the file into the buffer:
-// 	fread(buffer, 1, bytes, pFile);
-
-// 	string s(buffer);
-
-// 	// terminate
-// 	fclose(pFile);
-// 	free(buffer);
-
-// 	return s;
-// }
-
+// /**
+//  * @brief write the file
+//  * Method will first update the file in the local file directory and then update the server of the new file copy
+//  * @param pathName remote pathName
+//  * @param text text to be written into the file
+//  * @param offset the offset of the file at which the append should start
+//  * @return true if success, false if failure
+//  */
 bool CacheService::writeFile(std::string pathName, std::string text,
                              int offset) {
   if (checkValidityFetch(pathName)) {
@@ -149,28 +130,31 @@ bool CacheService::writeFile(std::string pathName, std::string text,
   return false;
 }
 
+// /**
+//  * @brief read the file based on the offset and the number of bytes to be read
+//  * @param pathName remote pathName
+//  * @param offset the offset of the file where reading should start
+//  * @param bytes the number of bytes from the offset to be read
+//  * @return string of text which is read, or error message if the reading fails
+//  */
 std::string CacheService::readFile(std::string pathName, int offset,
                                    int bytes) {
   char echoBuffer[bufferSize];
   if (checkValidityFetch(pathName)) {
-    cout << "Debug cv.readFile pathName: " + pathName << endl;
     fh.ReadFile(getLocalPathToFile(pathName).c_str(), echoBuffer, bytes,
                 offset);
-    cout << getLocalPathToFile(pathName).c_str() << endl;
-    cout << bufferSize << endl;
-    cout << "offset: " << offset << endl;
-    cout << "bytes: " << bytes << endl;
-    // force utf-8 intepretation
-    cout << echoBuffer << endl;
     string s(echoBuffer);
-    cout << "string is: " << s << endl;
     return s;
   } else {
     return "File does not exist in current directory";
   }
 }
 
-// make sure the file requested is placed in cache
+// /**
+//  * @brief check whether the file in the local directory is valid, if not fetch the file again from the server to ensure validity
+//  * @param pathName remote pathName
+//  * @return true if the validity check and its operations are successful, false if any of them fails
+//  */
 bool CacheService::checkValidityFetch(std::string pathName) {
   map<string, File>::iterator it;
   it = cacheMap.find(pathName);
@@ -192,17 +176,6 @@ bool CacheService::checkValidityFetch(std::string pathName) {
       // check if server side last modified is the same
       time_t last_modified_time = client.fetch_last_modified_time(pathName);
 
-      // Debugging
-      char last_modified_time_string[80];
-      strftime(last_modified_time_string, 20, "%Y-%m-%d %H:%M:%S",
-               gmtime(&last_modified_time));
-      string s = last_modified_time_string;
-      cout << "Last modified time in CacheService.cpp checkValidityFetch: " + s
-           << endl;
-
-      //// Convert std::time_t to std::chrono::system_clock::time_point
-      // std::chrono::system_clock::time_point time =
-      // std::chrono::system_clock::from_time_t(last_modified_time);
       if (difftime(last_modified_time, file.createdTime) != 0) {
         return fetchFile(pathName);
       } else {
@@ -212,6 +185,12 @@ bool CacheService::checkValidityFetch(std::string pathName) {
   }
 }
 
+// /**
+//  * @brief update the entry in the cache hashmap
+//  * @param pathName remote pathName
+//  * @param time last_modified_time of the file
+//  * @return void
+//  */
 void CacheService::updateCacheMap(std::string pathName, time_t time) {
   if (cacheMap.find(pathName) == cacheMap.end()) {
     // does not exist in map
@@ -224,6 +203,11 @@ void CacheService::updateCacheMap(std::string pathName, time_t time) {
   }
 }
 
+// /**
+//  * @brief fetch the file from the remote server to the local file directory and update the last_modified_time record in hashmap
+//  * @param pathName remote pathName
+//  * @return true if fetch succeed, false if fetch fails
+//  */
 bool CacheService::fetchFile(std::string pathName) {
   // convert to current directory cache file name
   string cachepath = getLocalPathToFile(pathName);
@@ -237,10 +221,6 @@ bool CacheService::fetchFile(std::string pathName) {
   string s = last_modified_time_string;
   cout << "Last modified time in CacheService.cpp fetchFile: " + s << endl;
 
-  // Convert std::time_t to std::chrono::system_clock::time_point
-  /*std::chrono::system_clock::time_point time =
-   * std::chrono::system_clock::from_time_t(last_modified_time);*/
-
   // write from the server to the cache
   if (downloadFile(pathName, cachepath)) {
     // update the hashing table
@@ -251,7 +231,11 @@ bool CacheService::fetchFile(std::string pathName) {
   }
 }
 
-// For file name parsing
+// /**
+//  * @brief extract the file name from the remote file path
+//  * @param remoteFilePath remote pathName
+//  * @return string of the file name
+//  */
 string CacheService::extractFileName(string remoteFilePath) {
   // to be configured depending on how user keys in
   const size_t last_slash_idx = remoteFilePath.find_last_of("\\/");
@@ -260,33 +244,11 @@ string CacheService::extractFileName(string remoteFilePath) {
   }
 }
 
-bool CacheService::saveHashMap() {
-  // if (cacheMap.empty())
-  //	return false;
-  // string filePath = getAbsoluteFilePathToMainFolder() +
-  // "/ClientCache/cacheHistory.vtx"; std::ofstream ofs(filePath);
-  // boost::archive::text_oarchive oa(ofs);
-  // oa << cacheMap;
-  // ofs.close();
-  // return true;
-  return true;
-}
-
-bool CacheService::restoreHashMap() {
-  // string filePath = getAbsoluteFilePathToMainFolder() +
-  // "/ClientCache/cacheHistory.vtx";
-
-  // FILE* fp = fopen(filePath.c_str(), "r");
-
-  // if (!fp) return false;
-  // cacheMap.clear();
-  // std::ifstream ifs(filePath, std::ios::binary);
-  // boost::archive::text_iarchive ia(ifs);
-  // ia >> cacheMap;
-  // ifs.close();
-  return true;
-}
-
+// /**
+//  * @brief get the local file path 
+//  * @param fileName remote pathName
+//  * @return string of the local file path
+//  */
 std::string CacheService::getLocalPathToFile(std::string fileName) {
   string localPath = getAbsoluteFilePathToMainFolder() + "/ClientCache/" +
                      extractFileName(fileName);
@@ -294,17 +256,11 @@ std::string CacheService::getLocalPathToFile(std::string fileName) {
   return localPath;
 }
 
+// /**
+//  * @brief get the absolute file path to main folder 
+//  * @param void
+//  * @return string of the absolute file path
+//  */
 std::string CacheService::getAbsoluteFilePathToMainFolder() {
-  // string absolutePathForWorkingDirectory = fs::current_path();
-  // cout << absolutePathForWorkingDirectory << endl;
-  // const size_t last_slash_idx =
-  // absolutePathForWorkingDirectory.find_last_of("\\/"); if (std::string::npos
-  // != last_slash_idx)
-  // {
-  // 	absolutePathForWorkingDirectory.erase(last_slash_idx + 1,
-  // absolutePathForWorkingDirectory.length());
-  // }
-  // cout << absolutePathForWorkingDirectory << endl;
-  // return absolutePathForWorkingDirectory;
   return fs::current_path();
 }

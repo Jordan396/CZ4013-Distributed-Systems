@@ -45,9 +45,6 @@ public:
   // cache and whether it is valid first)
   bool checkValidityFetch(std::string pathName);
 
-  bool saveHashMap();
-  bool restoreHashMap();
-
   CacheService();
   ~CacheService();
 
@@ -55,15 +52,6 @@ private:
   FileHandler fh;
   RFAcli client;
   std::map<std::string, File> cacheMap;
-
-  // write the file to the cache and update the server as well
-  bool write(std::string pathName, char *text, int offset);
-
-  // write the file from server to the cache whole
-  bool writeAll(std::string pathName);
-
-  // read the file from cache
-  std::string read(std::string pathName, int offset, int bytes);
 
   // this method will call writeAll and also update the cacheMap to include the
   // time of creation of file
