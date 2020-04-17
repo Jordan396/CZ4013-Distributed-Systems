@@ -1,29 +1,16 @@
-/****************************************************************************
- * @author:                                                                 *
- * - Jordan396 <https://github.com/Jordan396/>                              *
- * - leechongyan <https://github.com/leechongyan/>                          *
- * - seaerchin <https://github.com/seaerchin/>                              *
- *                                                                          *
- *                                                                          *
- ****************************************************************************/
-
 /**
- * @file ttweet_common.h
+ * @file RFAcli.h
  * @author Jordan396, leechongyan, seaerchin
- * @date 13 April 2019
- * @brief Documentation for functions in ttweet_common.h.
- *
- * This header file has been created to xxx
- *
+ * @date 13 April 2020
+ * @brief Documentation for functions in RFAcli.h.
  *
  * Code is documented according to GNOME and Doxygen standards.
  * <https://developer.gnome.org/programming-guidelines/stable/c-coding-style.html.en>
  * <http://www.doxygen.nl/manual/docblocks.html>
  */
 
-#pragma once
-/* SERVER STATUS CODES */
-// Check with Jia Chin
+#ifndef RFA_CLI_H
+#define RFA_CLI_H
 
 /* Standard libraries */
 #include <arpa/inet.h> /* for sockaddr_in and inet_ntoa() */
@@ -70,7 +57,8 @@
 #define CLEAR_FILE_SUCCESS 140
 #define CLEAR_FILE_FAILURE 141
 
-class RFAcli {
+class RFAcli
+{
 public:
   RFAcli();
   int download_file(string remote_filepath, string local_filepath);
@@ -101,3 +89,5 @@ private:
   void init_socket(bool monitorFlag);
   void display_progress(int monitor_duration);
 };
+
+#endif

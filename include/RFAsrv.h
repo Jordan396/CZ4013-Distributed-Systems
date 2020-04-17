@@ -1,25 +1,16 @@
-/****************************************************************************
- * @author:                                                                 *
- * - Jordan396 <https://github.com/Jordan396/>                              *
- * - leechongyan <https://github.com/leechongyan/>                          *
- * - seaerchin <https://github.com/seaerchin/>                              *
- *                                                                          *
- *                                                                          *
- ****************************************************************************/
-
 /**
- * @file ttweet_common.h
+ * @file RFAsrv.h
  * @author Jordan396, leechongyan, seaerchin
- * @date 13 April 2019
- * @brief Documentation for functions in ttweet_common.h.
- *
- * This header file has been created to xxx
- *
+ * @date 13 April 2020
+ * @brief Documentation for functions in RFAsrv.h.
  *
  * Code is documented according to GNOME and Doxygen standards.
  * <https://developer.gnome.org/programming-guidelines/stable/c-coding-style.html.en>
  * <http://www.doxygen.nl/manual/docblocks.html>
  */
+
+#ifndef RFA_SRV_H
+#define RFA_SRV_H
 
 /* CLIENT COMMAND CODES */
 #define FETCH_LAST_MODIFIED_TIME_CMD 0
@@ -157,3 +148,5 @@ int fh_write_status(int result);
 //  * @return void
 //  */
 // void wait_for(unsigned int secs);
+
+#endif

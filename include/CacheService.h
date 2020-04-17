@@ -1,4 +1,17 @@
-#pragma once
+/**
+ * @file CacheService.h
+ * @author Jordan396, leechongyan, seaerchin
+ * @date 13 April 2020
+ * @brief Documentation for functions in CacheService.h.
+ *
+ * Code is documented according to GNOME and Doxygen standards.
+ * <https://developer.gnome.org/programming-guidelines/stable/c-coding-style.html.en>
+ * <http://www.doxygen.nl/manual/docblocks.html>
+ */
+
+#ifndef CACHE_SERVICE_H
+#define CACHE_SERVICE_H
+
 #include "FileHandler.h"
 #include "Global.h"
 #include "RFAcli.h"
@@ -12,11 +25,8 @@
 #include <string>
 #include <vector>
 
-//#include <boost/archive/text_oarchive.hpp>
-//#include <boost/archive/text_iarchive.hpp>
-//#include <boost/serialization/map.hpp>
-
-class CacheService {
+class CacheService
+{
 public:
   // this method will be called when client wants to write a file
   bool writeFile(std::string pathName, std::string text, int offset);
@@ -67,3 +77,5 @@ private:
   // Chong Yan comment
   void updateCacheMap(std::string pathName, time_t time);
 };
+
+#endif

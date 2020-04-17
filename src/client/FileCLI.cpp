@@ -1,3 +1,10 @@
+/**
+ * @file FileCLI.cpp
+ * @author Jordan396, leechongyan, seaerchin
+ * @date 13 April 2020
+ * @brief Implementation code for FileCLI.cpp
+ */
+
 #include "FileCLI.h"
 
 using namespace std;

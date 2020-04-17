@@ -1,3 +1,10 @@
+/**
+ * @file utils.cpp
+ * @author Jordan396, leechongyan, seaerchin
+ * @date 13 April 2020
+ * @brief Implementation code for utils.cpp
+ */
+
 #include "utils.h"
 
 #include <iostream>

@@ -1,3 +1,10 @@
+/**
+ * @file FileHandler.cpp
+ * @author Jordan396, leechongyan, seaerchin
+ * @date 13 April 2020
+ * @brief Implementation code for FileHandler.cpp
+ */
+
 #include "FileHandler.h"
 
 /** readfile reads from a given file into the buffer and returns an error code.
@@ -7,9 +14,9 @@
  * @param startPos starting position to read at
  * @return an error code if reading unsuccessful
  **/
-
 int FileHandler::ReadFile(const char *fileName, char echoBuffer[], int nBytes,
-                          int startPos = 0) { // we write to a buffer
+                          int startPos = 0)
+{ // we write to a buffer
   // file opening logic can be abstracted away for reuse
   // first we check if file exists
   FILE *pFile;
@@ -24,7 +31,8 @@ int FileHandler::ReadFile(const char *fileName, char echoBuffer[], int nBytes,
   cout << "nbytes" << nBytes << endl;
   pFile = fopen(fileName, "rb");
   if (pFile ==
-      NULL) { // file requested does not exist, we return error back to client
+      NULL)
+  { // file requested does not exist, we return error back to client
     sprintf(echoBuffer, "%s", "File does not exist");
     return ERR_FILE_NOT_EXIST; // server calling this function has to check err
                                // code
@@ -43,19 +51,22 @@ int FileHandler::ReadFile(const char *fileName, char echoBuffer[], int nBytes,
   // }
 
   // check whether >= 0
-  if (startPos < 0) {
+  if (startPos < 0)
+  {
     sprintf(echoBuffer, "%s", "The required starting position is less than 0");
     return ERR_NEGATIVE_OFFSET;
   }
 
   // check whether startPos > maxlength
-  if (startPos > lsize) {
+  if (startPos > lsize)
+  {
     sprintf(echoBuffer, "%s",
             "The specified offset is greater than the length of the file");
     return ERR_OFFSET_OVERFLOW;
   }
   // check whether startPos > maxlength
-  if (startPos == lsize) {
+  if (startPos == lsize)
+  {
     echoBuffer[0] = '\0';
     return 0;
   }
@@ -65,8 +76,10 @@ int FileHandler::ReadFile(const char *fileName, char echoBuffer[], int nBytes,
 
   // no checking of nBytes
   result = fread(echoBuffer, 1, nBytes, pFile); // pFile advanced to startPos
-  if (result != nBytes) {
-    if (ferror(pFile)) {
+  if (result != nBytes)
+  {
+    if (ferror(pFile))
+    {
       sprintf(echoBuffer, "%s", "Reading error");
       return ERR_READ;
     }
@@ -78,13 +91,15 @@ int FileHandler::ReadFile(const char *fileName, char echoBuffer[], int nBytes,
 
 // writefile will write to a file pointed at by filepath at offset 0
 int FileHandler::WriteFile(const char *filepath, const char *toWrite,
-                           int offset = 0) {
+                           int offset = 0)
+{
   // first we check if file exists
   FILE *pFile;
 
   pFile = fopen(filepath, "r+");
   if (pFile ==
-      NULL) { // file requested does not exist, we return error back to client
+      NULL)
+  {                            // file requested does not exist, we return error back to client
     return ERR_FILE_NOT_EXIST; // server calling this function has to check err
                                // code
   }
@@ -95,12 +110,14 @@ int FileHandler::WriteFile(const char *filepath, const char *toWrite,
   // cout << "Size of the file is " << lsize << endl;
 
   // check whether startPos > maxlength
-  if (offset > lsize) {
+  if (offset > lsize)
+  {
     return ERR_OFFSET_OVERFLOW;
   }
 
   // check whether >= 0
-  if (offset < 0) {
+  if (offset < 0)
+  {
     offset = offset + lsize + 1;
   }
 
@@ -118,17 +135,20 @@ int FileHandler::WriteFile(const char *filepath, const char *toWrite,
 
   // Transfer toWrite and remaining segment to originalFile
   int charIdx;
-  for (charIdx = 0; charIdx < length; charIdx++) {
+  for (charIdx = 0; charIdx < length; charIdx++)
+  {
     originalFile[charIdx] = toWrite[charIdx];
   }
-  for (int i = 0; i < tempSize; i++) {
+  for (int i = 0; i < tempSize; i++)
+  {
     originalFile[charIdx] = temp[i];
     charIdx++;
   }
   fseek(pFile, offset, SEEK_SET);
 
   int written = fwrite(originalFile, 1, originalFileSize, pFile);
-  if (written != originalFileSize) {
+  if (written != originalFileSize)
+  {
     return ERR_WRITE;
   }
 
@@ -137,12 +157,14 @@ int FileHandler::WriteFile(const char *filepath, const char *toWrite,
 }
 
 // check if file exists - if yes, overwrite else return error
-int FileHandler::ClearFile(const char *filepath) {
+int FileHandler::ClearFile(const char *filepath)
+{
   FILE *pFile;
 
   pFile = fopen(filepath, "r");
   if (pFile ==
-      NULL) { // file requested does not exist, we return error back to client
+      NULL)
+  {                            // file requested does not exist, we return error back to client
     return ERR_FILE_NOT_EXIST; // server calling this function has to check err
                                // code
   }
@@ -155,25 +177,30 @@ int FileHandler::ClearFile(const char *filepath) {
 }
 
 // wrapper around remove provided by cpp
-int FileHandler::DeleteFile(const char *filename) {
+int FileHandler::DeleteFile(const char *filename)
+{
   int a = remove(filename);
   // file deletion unsucessful
-  if (a != 0) {
+  if (a != 0)
+  {
     return ERR_FILE_NOT_EXIST;
   }
   return a; // 0
 }
 
 // wrapper around rename provided by cpp
-int FileHandler::Rename(char *oldname, char *newname) {
+int FileHandler::Rename(char *oldname, char *newname)
+{
   int a = rename(oldname, newname);
-  if (a != 0) {
+  if (a != 0)
+  {
     return ERR_FILE_NOT_EXIST;
   }
   return a; // 0
 }
 
-int FileHandler::CreateFile(const char *filename) {
+int FileHandler::CreateFile(const char *filename)
+{
   std::ofstream output(filename);
   output.close();
   return FILE_CREATE_SUCCESS;

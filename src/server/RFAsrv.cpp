@@ -1,36 +1,11 @@
-
-/****************************************************************************
- * @author:                                                                 *
- * - Jordan396 <https://github.com/Jordan396/>                              *
- * - leechongyan <https://github.com/leechongyan/>                          *
- * - seaerchin <https://github.com/seaerchin/>                              *
- *                                                                          *
- * This file was heavily adapted from the source code in:                   *
- *   "TCP/IP Sockets in C: Practical Guide for Programmers"                 *
- *   by Michael J. Donahoo and Kenneth L. Calvert                           *
- *   <http://cs.baylor.edu/~donahoo/practical/CSockets/textcode.html>       *
- *                                                                          *
- ****************************************************************************/
-
 /**
- * @file server.cpp
+ * @file RFAsrv.cpp
  * @author Jordan396, leechongyan, seaerchin
- * @date xxx 2020
- * @brief .
+ * @date 13 April 2020
+ * @brief Implementation code for RFAsrv.cpp
  */
 
 #include "RFAsrv.h"
-
-/* Function declarations */
-// int get_client_command_code(cJSON *jobjReceived);
-// void readFile(char* filepath, int offset, int nBytes, char* responseContent);
-// void writeFile(char* filepath, int offset, int nBytes, char
-// *responseContent); int get_client_command_code(cJSON *jobjReceived); int
-// get_offset(cJSON *jobjReceived); int get_nBytes(cJSON *jobjReceived); void
-// get_filepath(cJSON *jobjReceived, char *filepath); char* get_toWrite(cJSON
-// *jobjReceived); int ReadFile(char* fileName, char echoBuffer[], int nBytes,
-// int startPos); int WriteFile(char* filepath, char* toWrite, char
-// *responseContent, int offset);
 
 // Global variables
 int freshnessInterval = 100;
@@ -62,7 +37,8 @@ std::map<std::string, size_t> requestMap;
 std::map<std::string, std::string> responseMap;
 
 /* Variables to store registered clients */
-struct RegisteredClient {
+struct RegisteredClient
+{
   string address;
   string port;
   time_t expirationTime;
@@ -71,19 +47,29 @@ struct RegisteredClient {
 
 std::map<std::string, std::list<struct RegisteredClient>> monitorMap;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   // initialization of cli arguments
-  if (argc < 7) {
+  if (argc < 7)
+  {
     perror("insufficient arguments");
     exit(EXIT_FAILURE);
-  } else {
-    for (int i = 1; i < argc; i += 2) {
+  }
+  else
+  {
+    for (int i = 1; i < argc; i += 2)
+    {
       string s1(argv[i]);
-      if (s1 == "-rmi") {
+      if (s1 == "-rmi")
+      {
         RMIScheme = atoi(argv[i + 1]);
-      } else if (s1 == "-lr") {
+      }
+      else if (s1 == "-lr")
+      {
         lossRate = atoi(argv[i + 1]);
-      } else if (s1 == "-sp") {
+      }
+      else if (s1 == "-sp")
+      {
         string s2(argv[i + 1]);
         serverPortNo = s2;
       }
@@ -109,7 +95,8 @@ int main(int argc, char *argv[]) {
   init_sockets();
   int len = sizeof(destAddr);
 
-  for (;;) { // Run forever
+  for (;;)
+  { // Run forever
     // Block until receive message from a client
     cout << "Listening..." << endl;
     int n = recvfrom(inboundSockFD, serverBuffer, udpDatagramSize, MSG_WAITALL,
@@ -120,7 +107,8 @@ int main(int argc, char *argv[]) {
     sourcePort = ntohs(destAddr.sin_port);
 
     // process only if succeed
-    if (utils::loss(lossRate)) {
+    if (utils::loss(lossRate))
+    {
       cout << "Received packet from " << sourceAddress << ":" << sourcePort
            << endl;
       request = serverBuffer;
@@ -131,13 +119,16 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void init_sockets() {
+void init_sockets()
+{
   // Creating socket file descriptor
-  if ((inboundSockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+  if ((inboundSockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+  {
     perror("socket creation failed");
     exit(EXIT_FAILURE);
   }
-  if ((outboundSockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+  if ((outboundSockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+  {
     perror("socket creation failed");
     exit(EXIT_FAILURE);
   }
@@ -155,20 +146,26 @@ void init_sockets() {
 
   // Bind the socket with the source address
   socklen_t len = sizeof(sourceAddr);
-  if (bind(inboundSockFD, (const struct sockaddr *)&sourceAddr, len) < 0) {
+  if (bind(inboundSockFD, (const struct sockaddr *)&sourceAddr, len) < 0)
+  {
     perror("bind failed");
     exit(EXIT_FAILURE);
   }
-  if (getsockname(inboundSockFD, (struct sockaddr *)&sourceAddr, &len) == -1) {
+  if (getsockname(inboundSockFD, (struct sockaddr *)&sourceAddr, &len) == -1)
+  {
     perror("getsockname");
-  } else {
+  }
+  else
+  {
     serverPortNo = std::to_string(ntohs(sourceAddr.sin_port));
     cout << "Source port number: " + serverPortNo << endl;
   }
 }
 
-void *monitor_registered_clients(void *ptr) {
-  while (true) {
+void *monitor_registered_clients(void *ptr)
+{
+  while (true)
+  {
     // cout << "Checking for expired clients..." << endl;
     // Get current time
     auto time_now = std::chrono::system_clock::now();
@@ -182,25 +179,31 @@ void *monitor_registered_clients(void *ptr) {
     // Iterate over the map using Iterator till end.
     for (std::map<std::string, std::list<struct RegisteredClient>>::iterator
              filepathIterator = monitorMap.begin();
-         filepathIterator != monitorMap.end(); ++filepathIterator) {
-           // Get last modified time of filepath, which is the key of the iterator
+         filepathIterator != monitorMap.end(); ++filepathIterator)
+    {
+      // Get last modified time of filepath, which is the key of the iterator
       time_t last_modified_time =
           get_last_modified_time((filepathIterator->first).c_str());
       // DEBUG from here onwards
       // Iterate over all registered clients for file
       for (std::list<struct RegisteredClient>::iterator it =
                (filepathIterator->second).begin();
-           it != (filepathIterator->second).end(); ++it) {
+           it != (filepathIterator->second).end(); ++it)
+      {
         // Monitor duration expired
         // cout << "debug_counter: " << debug_counter << endl;
         debug_counter++;
-        if (comparetime(currentTime, it->expirationTime) == 1) {
+        if (comparetime(currentTime, it->expirationTime) == 1)
+        {
           cout << it->address << ":" << it->port << " monitor duration expired." << endl;
           expire_registered_client(it->address, it->port);
           s.push(std::distance((filepathIterator->second).begin(), it));
-        } else { // Monitor duration not expired
+        }
+        else
+        { // Monitor duration not expired
           // Last modified time greater that register time
-          if (comparetime(last_modified_time, it->registerTime) == 1) {
+          if (comparetime(last_modified_time, it->registerTime) == 1)
+          {
             // Update registered client
             // cout << it->address << ":" << it->port << " monitor duration NOT expired." << endl;
             update_registered_client(it->address, it->port);
@@ -210,7 +213,8 @@ void *monitor_registered_clients(void *ptr) {
       }
       // Remove expired clients from list of registered clients
       std::list<struct RegisteredClient>::iterator it_to_erase = (filepathIterator->second).begin();
-      while (!s.empty()) {
+      while (!s.empty())
+      {
         // cout << "Iterating over expired registered clients stack..." << endl;
         // cout << "Iterator index to remove: " << s.top() << endl;
         std::advance(it_to_erase, s.top());
@@ -225,11 +229,13 @@ void *monitor_registered_clients(void *ptr) {
   }
 }
 
-int comparetime(time_t time1, time_t time2) {
+int comparetime(time_t time1, time_t time2)
+{
   return difftime(time1, time2) > 0.0 ? 1 : -1;
 }
 
-int send_message(string destAddress, string destPort, string message) {
+int send_message(string destAddress, string destPort, string message)
+{
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
   destAddr.sin_family = AF_INET; // IPv4
@@ -244,7 +250,8 @@ int send_message(string destAddress, string destPort, string message) {
   store_response(destAddress, destPort, message);
 }
 
-void process_request(string request) {
+void process_request(string request)
+{
   // Parse request message
   cJSON *jobjReceived;
   string sourceAddress;      // Address of datagram source
@@ -261,15 +268,19 @@ void process_request(string request) {
   // Check RMI scheme
   if (RMI_SCHEME &&
       is_request_exists(sourceAddress, destPort,
-                        request)) { // at most once - check if request exists
+                        request))
+  { // at most once - check if request exists
     response = retrieve_response(sourceAddress, destPort);
     send_message(sourceAddress, destPort, response);
-  } else {
+  }
+  else
+  {
     store_request(sourceAddress, destPort, request);
     cJSON_AddItemToObject(jobjReceived, "RESPONSE_ID",
                           cJSON_CreateNumber(request.size()));
     // Handle request accordingly
-    switch (get_request_code(jobjReceived)) {
+    switch (get_request_code(jobjReceived))
+    {
     case FETCH_LAST_MODIFIED_TIME_CMD:
       cout << "Executing get_last_modified_time command..." << endl;
       execute_fetch_last_modified_time_command(sourceAddress, destPort,
@@ -298,7 +309,8 @@ void process_request(string request) {
 
 void execute_fetch_last_modified_time_command(string destAddress,
                                               string destPort,
-                                              cJSON *jobjReceived) {
+                                              cJSON *jobjReceived)
+{
   string pseudo_filepath;
   string actual_filepath;
   time_t last_modified_time;
@@ -307,10 +319,12 @@ void execute_fetch_last_modified_time_command(string destAddress,
   // Extract parameters from message
   pseudo_filepath = get_filepath(jobjReceived);
   actual_filepath = translate_filepath(pseudo_filepath);
-  if (actual_filepath != "") {
+  if (actual_filepath != "")
+  {
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
-    if (std::experimental::filesystem::exists(actual_filepath)) {
+    if (std::experimental::filesystem::exists(actual_filepath))
+    {
       cout << "File exists." << endl;
 
       // time_t manipulation
@@ -330,7 +344,9 @@ void execute_fetch_last_modified_time_command(string destAddress,
                             cJSON_CreateString(last_modified_time_string));
       send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
-    } else {
+    }
+    else
+    {
       cJSON *jobjToSend;
       jobjToSend = cJSON_CreateObject();
       cJSON_AddItemToObject(
@@ -347,7 +363,8 @@ void execute_fetch_last_modified_time_command(string destAddress,
 }
 
 void execute_read_command(string destAddress, string destPort,
-                          cJSON *jobjReceived) {
+                          cJSON *jobjReceived)
+{
   int offset;
   int nBytes;
   int readResult;
@@ -364,10 +381,12 @@ void execute_read_command(string destAddress, string destPort,
   nBytes = get_nBytes(jobjReceived);
   actual_filepath = translate_filepath(pseudo_filepath);
 
-  if (actual_filepath != "") {
+  if (actual_filepath != "")
+  {
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
-    if (std::experimental::filesystem::exists(actual_filepath)) {
+    if (std::experimental::filesystem::exists(actual_filepath))
+    {
       cout << "File exists." << endl;
 
       // Empty buffer
@@ -381,7 +400,8 @@ void execute_read_command(string destAddress, string destPort,
 
       cout << "readResult: " + std::to_string(readResult) << endl;
 
-      if (readStatus == READ_SUCCESS) {
+      if (readStatus == READ_SUCCESS)
+      {
         // Send response
         cJSON *jobjToSend;
         jobjToSend = cJSON_CreateObject();
@@ -412,7 +432,8 @@ void execute_read_command(string destAddress, string destPort,
 }
 
 void execute_write_command(string destAddress, string destPort,
-                           cJSON *jobjReceived) {
+                           cJSON *jobjReceived)
+{
   int offset;
   int nBytes;
   int writeResult;
@@ -427,10 +448,12 @@ void execute_write_command(string destAddress, string destPort,
   actual_filepath = translate_filepath(pseudo_filepath);
   content = get_content(jobjReceived);
 
-  if (actual_filepath != "") {
+  if (actual_filepath != "")
+  {
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
-    if (std::experimental::filesystem::exists(actual_filepath)) {
+    if (std::experimental::filesystem::exists(actual_filepath))
+    {
       cout << "File exists." << endl;
 
       // WriteFile
@@ -440,7 +463,8 @@ void execute_write_command(string destAddress, string destPort,
 
       cout << "writeResult: " + std::to_string(writeResult) << endl;
 
-      if (writeStatus == WRITE_SUCCESS) {
+      if (writeStatus == WRITE_SUCCESS)
+      {
         // Send response
         cJSON *jobjToSend;
         jobjToSend = cJSON_CreateObject();
@@ -466,7 +490,8 @@ void execute_write_command(string destAddress, string destPort,
   return;
 }
 void execute_register_command(string destAddress, string destPort,
-                              cJSON *jobjReceived) {
+                              cJSON *jobjReceived)
+{
   string pseudo_filepath;
   string actual_filepath;
   string monitor_duration;
@@ -487,10 +512,12 @@ void execute_register_command(string destAddress, string destPort,
   registeredClient.registerTime = time_now;
   registeredClient.expirationTime = expiration_time;
 
-  if (actual_filepath != "") {
+  if (actual_filepath != "")
+  {
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
-    if (std::experimental::filesystem::exists(actual_filepath)) {
+    if (std::experimental::filesystem::exists(actual_filepath))
+    {
       cout << "File exists." << endl;
 
       (monitorMap[actual_filepath]).push_back(registeredClient);
@@ -518,7 +545,8 @@ void execute_register_command(string destAddress, string destPort,
 }
 
 void execute_clear_file_command(string destAddress, string destPort,
-                                cJSON *jobjReceived) {
+                                cJSON *jobjReceived)
+{
   string pseudo_filepath;
   string actual_filepath;
 
@@ -526,10 +554,12 @@ void execute_clear_file_command(string destAddress, string destPort,
   pseudo_filepath = get_filepath(jobjReceived);
   actual_filepath = translate_filepath(pseudo_filepath);
 
-  if (actual_filepath != "") {
+  if (actual_filepath != "")
+  {
     // Debugging
     cout << "Reference to file at: " << actual_filepath << endl;
-    if (std::experimental::filesystem::exists(actual_filepath)) {
+    if (std::experimental::filesystem::exists(actual_filepath))
+    {
       cout << "File exists." << endl;
 
       fh.ClearFile(actual_filepath.c_str());
@@ -556,7 +586,8 @@ void execute_clear_file_command(string destAddress, string destPort,
   return;
 }
 
-void update_registered_client(string sourceAddress, string destPort) {
+void update_registered_client(string sourceAddress, string destPort)
+{
   cJSON *jobjToSend;
   jobjToSend = cJSON_CreateObject();
   cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE",
@@ -566,7 +597,8 @@ void update_registered_client(string sourceAddress, string destPort) {
   return;
 }
 
-void expire_registered_client(string sourceAddress, string destPort) {
+void expire_registered_client(string sourceAddress, string destPort)
+{
   cJSON *jobjToSend;
   jobjToSend = cJSON_CreateObject();
   cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE",
@@ -576,14 +608,16 @@ void expire_registered_client(string sourceAddress, string destPort) {
   return;
 }
 
-bool is_request_exists(string sourceAddress, string destPort, string message) {
+bool is_request_exists(string sourceAddress, string destPort, string message)
+{
   std::hash<std::string> str_hash;
   string requestMapKey = sourceAddress + ":" + destPort;
   size_t requestMapValue = str_hash(message);
   return (requestMapValue == requestMap[requestMapKey]);
 }
 
-void store_request(string sourceAddress, string destPort, string message) {
+void store_request(string sourceAddress, string destPort, string message)
+{
   cout << "Storing request..." << endl;
   std::hash<std::string> str_hash;
   string requestMapKey = sourceAddress + ":" + destPort;
@@ -596,7 +630,8 @@ void store_request(string sourceAddress, string destPort, string message) {
   requestMap[requestMapKey] = requestMapValue;
 }
 
-void store_response(string sourceAddress, string destPort, string message) {
+void store_response(string sourceAddress, string destPort, string message)
+{
   cout << "Storing response..." << endl;
   string responseMapKey = sourceAddress + ":" + destPort;
 
@@ -607,7 +642,8 @@ void store_response(string sourceAddress, string destPort, string message) {
   responseMap[responseMapKey] = message;
 }
 
-string retrieve_response(string sourceAddress, string destPort) {
+string retrieve_response(string sourceAddress, string destPort)
+{
   cout << "Retrieving response..." << endl;
   string responseMapKey = sourceAddress + ":" + destPort;
 
@@ -617,7 +653,8 @@ string retrieve_response(string sourceAddress, string destPort) {
   return responseMap[responseMapKey];
 }
 
-string translate_filepath(string pseudo_filepath) {
+string translate_filepath(string pseudo_filepath)
+{
   char rfa_prefix[6];
   string current_path = std::experimental::filesystem::current_path();
 
@@ -625,7 +662,8 @@ string translate_filepath(string pseudo_filepath) {
   string actual_filepath = pseudo_filepath;
   strncpy(rfa_prefix, pseudo_filepath.c_str(),
           6); // Copy just the "RFA://" portion
-  if (strcmp(rfa_prefix, "RFA://") == 0) {
+  if (strcmp(rfa_prefix, "RFA://") == 0)
+  {
     // actual_filepath = actual_filepath.replace(0, 6, "../RemoteFileAccess/");
     actual_filepath =
         current_path + "/ServerRemoteFileAccess/" + actual_filepath.substr(6);
@@ -637,62 +675,76 @@ string translate_filepath(string pseudo_filepath) {
 }
 
 /** \copydoc get_request_code */
-int get_request_code(cJSON *jobjReceived) {
+int get_request_code(cJSON *jobjReceived)
+{
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "REQUEST_CODE")
       ->valueint;
 }
 
-int get_offset(cJSON *jobjReceived) {
+int get_offset(cJSON *jobjReceived)
+{
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "OFFSET")->valueint;
 }
 
-int get_nBytes(cJSON *jobjReceived) {
+int get_nBytes(cJSON *jobjReceived)
+{
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "N_BYTES")->valueint;
 }
 
-string get_filepath(cJSON *jobjReceived) {
+string get_filepath(cJSON *jobjReceived)
+{
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "RFA_PATH")
       ->valuestring;
 }
 
-string get_monitor_duration(cJSON *jobjReceived) {
+string get_monitor_duration(cJSON *jobjReceived)
+{
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "MONITOR_DURATION")
       ->valuestring;
 }
 
-string get_dest_port(cJSON *jobjReceived) {
+string get_dest_port(cJSON *jobjReceived)
+{
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "PORT")->valuestring;
 }
 
-string get_content(cJSON *jobjReceived) {
+string get_content(cJSON *jobjReceived)
+{
   return cJSON_GetObjectItem(jobjReceived, "CONTENT")->valuestring;
 }
 
-char *get_toWrite(cJSON *jobjReceived) {
+char *get_toWrite(cJSON *jobjReceived)
+{
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "toWrite")->valuestring;
 }
 
-int get_response_id(cJSON *jobjReceived) {
+int get_response_id(cJSON *jobjReceived)
+{
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "RESPONSE_ID")
       ->valueint;
 }
 
-time_t get_last_modified_time(const char *path) {
+time_t get_last_modified_time(const char *path)
+{
   struct stat attr;
   stat(path, &attr);
   // printf("Last modified time: %s", ctime(&attr.st_mtime));
   return attr.st_mtime;
 }
 
-int fh_read_status(int result) {
-  if (result >= 0) {
+int fh_read_status(int result)
+{
+  if (result >= 0)
+  {
     return READ_SUCCESS;
   }
   return READ_FAILURE;
 }
 
-int fh_write_status(int result) {
-  if (result >= 0) {
+int fh_write_status(int result)
+{
+  if (result >= 0)
+  {
     return WRITE_SUCCESS;
   }
   return WRITE_FAILURE;

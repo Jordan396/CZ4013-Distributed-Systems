@@ -1,3 +1,10 @@
+/**
+ * @file CacheService.cpp
+ * @author Jordan396, leechongyan, seaerchin
+ * @date 13 April 2020
+ * @brief Implementation code for CacheService.cpp
+ */
+
 #include "CacheService.h"
 
 namespace fs = std::experimental::filesystem;
