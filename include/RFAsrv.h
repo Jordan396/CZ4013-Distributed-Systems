@@ -34,119 +34,312 @@
 #define CLEAR_FILE_SUCCESS 140
 #define CLEAR_FILE_FAILURE 141
 
-/* Standard libraries */
-#include <arpa/inet.h> /* for sockaddr_in and inet_ntoa() */
-#include <chrono>
+/* System libraries */
 #include <cstring>
+#include <string>
+#include <string.h> /* for memset() */
 #include <ctime>
 #include <ctype.h> /* for char validation */
-#include <experimental/filesystem>
 #include <fstream>
 #include <functional>
 #include <iostream> // For cout and cerr
 #include <iterator>
 #include <list>
 #include <map>
-#include <pthread.h>
 #include <signal.h> /* for sigaction() */
 #include <stack>
-#include <stdio.h>  /* for printf() and fprintf() */
-#include <stdlib.h> /* for atoi() and exit() */
-#include <string.h> /* for memset() */
-#include <string>
+#include <stdio.h>      /* for printf() and fprintf() */
+#include <stdlib.h>     /* for atoi() and exit() */
 #include <sys/mman.h>   /* to create shared memory across child processes */
 #include <sys/socket.h> /* for socket(), bind(), and connect() */
 #include <sys/stat.h>
-#include <sys/wait.h> /* for waitpid() */
+#include <sys/wait.h>  /* for waitpid() */
+#include <arpa/inet.h> /* for sockaddr_in and inet_ntoa() */
+#include <unistd.h>    /* for close() */
+#include <experimental/filesystem>
+#include <pthread.h>
 #include <thread>
+#include <chrono>
 #include <time.h>
-#include <time.h>   /* for waitFor() */
-#include <unistd.h> /* for close() */
 
+/* Program libraries */
 #include "FileHandler.h"
 #include "Global.h"
-/* External libraries */
 #include "cJSON.h" // For message formatting
 #include "utils.h"
 
+/* RegisteredClient structure */
+struct RegisteredClient
+{
+    string address;
+    string port;
+    time_t expirationTime;
+    time_t registerTime;
+} RegisteredClient;
+
+/* 
+Network related methods 
+*/
+
+/**
+ * @brief Initializes the sockets
+ * 
+ * Initialize the socket file descriptor for receiving and sending sockets.
+ * Assigns a fixed port to the receiving socket so clients know where to send
+ * requests to.
+ */
 void init_sockets();
-void *monitor_registered_clients(void *ptr);
-int comparetime(time_t time1, time_t time2);
-int send_message(string destAddress, string destPort, string message);
+
+/**
+ * @brief Sends a response message to a destination address and port.
+ * 
+ * @param destAddress Client IP address to send response to
+ * @param destPort Client port to send response to
+ * @param message Message to be sent
+ */
+void send_message(string destAddress, string destPort, string message);
+
+/* 
+Request processing 
+*/
+
+/**
+ * @brief Decodes the request and assigns it to its handler
+ * 
+ * @param request Request received
+ */
 void process_request(string request);
+
+/**
+ * @brief Handler for fetch last modified time command
+ * 
+ * @param destAddress Client IP address to send response to
+ * @param destPort Client port to send response to
+ * @param jobjReceived CJSON representation of the request received
+ */
 void execute_fetch_last_modified_time_command(string destAddress,
                                               string destPort,
                                               cJSON *jobjReceived);
+
+/**
+ * @brief Handler for fetch last modified time command
+ * 
+ * @param destAddress Client IP address to send response to
+ * @param destPort Client port to send response to
+ * @param jobjReceived CJSON representation of the request received
+ */
 void execute_read_command(string destAddress, string destPort,
                           cJSON *jobjReceived);
+
+/**
+ * @brief Handler for write command
+ * 
+ * @param destAddress Client IP address to send response to
+ * @param destPort Client port to send response to
+ * @param jobjReceived CJSON representation of the request received
+ */
 void execute_write_command(string destAddress, string destPort,
                            cJSON *jobjReceived);
+
+/**
+ * @brief Handler for register command
+ * 
+ * @param destAddress Client IP address to send response to
+ * @param destPort Client port to send response to
+ * @param jobjReceived CJSON representation of the request received
+ */
 void execute_register_command(string destAddress, string destPort,
                               cJSON *jobjReceived);
+
+/**
+ * @brief Handler for clear file command
+ * 
+ * @param destAddress Client IP address to send response to
+ * @param destPort Client port to send response to
+ * @param jobjReceived CJSON representation of the request received
+ */
 void execute_clear_file_command(string destAddress, string destPort,
                                 cJSON *jobjReceived);
+
+/* 
+Registered client monitoring 
+*/
+
+/**
+ * @brief Monitors registered clients on a separate thread
+ * 
+ * @param ptr 
+ * @return void* 
+ */
+void *monitor_registered_clients(void *ptr);
+
+/**
+ * @brief Sends a message to inform the client that the file being monitored has been updated.
+ * 
+ * @param sourceAddress Client IP address to send response to
+ * @param destPort Client port to send response to
+ */
 void update_registered_client(string sourceAddress, string destPort);
-void expire_registered_client(string sourceAddress, string destPort);
+
+// void expire_registered_client(string sourceAddress, string destPort);
+
+/* 
+RMI scheme request and response storage 
+*/
+
+/**
+ * @brief Checks if the server has received this request previously.
+ * 
+ * @param destAddress Client IP address where request was sent from
+ * @param destPort Client port where request was sent from
+ * @param message Request message
+ * @return true Request exists
+ * @return false Request does not exist
+ */
 bool is_request_exists(string destAddress, string destPort, string message);
+
+/**
+ * @brief Stores the client's request
+ * 
+ * @param destAddress Client IP address where request was sent from
+ * @param destPort Client port where request was sent from
+ * @param message Request message
+ */
 void store_request(string destAddress, string destPort, string message);
+
+/**
+ * @brief Stores the server's response
+ * 
+ * @param destAddress Client IP address to send response to
+ * @param destPort Client port to send response to
+ * @param message Response message
+ */
 void store_response(string destAddress, string destPort, string message);
+
+/**
+ * @brief Retrieves the server's latest response to this client
+ * 
+ * @param destAddress Client IP address to send response to
+ * @param destPort Client port to send response to
+ * @return string Response message
+ */
 string retrieve_response(string destAddress, string destPort);
+
+/* 
+Getter methods for retrieving message fields 
+*/
+
+/**
+ * @brief Get the request code object
+ * 
+ * @param jobjReceived CJSON representation of request message
+ * @return int Request code
+ */
 int get_request_code(cJSON *jobjReceived);
-int get_offset(cJSON *jobjReceived);
-int get_nBytes(cJSON *jobjReceived);
-string get_filepath(cJSON *jobjReceived);
-string get_monitor_duration(cJSON *jobjReceived);
-char *get_toWrite(cJSON *jobjReceived);
-string translate_filepath(string pseudo_filepath);
-time_t get_last_modified_time(const char *path);
-string get_dest_port(cJSON *jobjReceived);
-string get_content(cJSON *jobjReceived);
+
+/**
+ * @brief Get the response id object
+ * 
+ * @param jobjReceived CJSON representation of request message
+ * @return int Response id
+ */
 int get_response_id(cJSON *jobjReceived);
+
+/**
+ * @brief Get the offset object
+ * 
+ * @param jobjReceived CJSON representation of request message
+ * @return int Byte offset
+ */
+int get_offset(cJSON *jobjReceived);
+
+/**
+ * @brief Get the nBytes object
+ * 
+ * @param jobjReceived CJSON representation of request message
+ * @return int Number of bytes
+ */
+int get_nBytes(cJSON *jobjReceived);
+
+/**
+ * @brief Get the filepath object
+ * 
+ * @param jobjReceived CJSON representation of request message
+ * @return string Filepath
+ */
+string get_filepath(cJSON *jobjReceived);
+
+/**
+ * @brief Get the monitor duration object
+ * 
+ * @param jobjReceived CJSON representation of request message
+ * @return string Monitor duration
+ */
+string get_monitor_duration(cJSON *jobjReceived);
+
+/**
+ * @brief Get the dest port object
+ * 
+ * @param jobjReceived CJSON representation of request message
+ * @return string Destination port
+ */
+string get_dest_port(cJSON *jobjReceived);
+
+/**
+ * @brief Get the content object
+ * 
+ * @param jobjReceived CJSON representation of request message
+ * @return string Message content
+ */
+string get_content(cJSON *jobjReceived);
+
+/* 
+Methods to help with value conversion 
+*/
+
+/**
+ * @brief Converts the result from FileHandler methods to a status the client understands.
+ * 
+ * @param result FileHandler method result
+ * @return int Status
+ */
 int fh_read_status(int result);
+
+/**
+ * @brief Converts the result from FileHandler methods to a status the client understands.
+ * 
+ * @param result FileHandler method result
+ * @return int Status
+ */
 int fh_write_status(int result);
 
-// /**
-//  * @brief Accepts a cJSON object and sends its string representation over a
-//  socket.
-//  *
-//  * This function converts a cJSON object to its string representation.
-//  * It then sends this string to the other party on the network.
-//  *
-//  * This payload adopts the following structure:
-//  * The first RCV_BUF_SIZE bytes indicates the size of the actual payload.
-//  * The remaining bytes contain the actual cJSON string representation
-//  payload.
-//  *
-//  * @param sock Client socket assigned to the connection.
-//  * @param jobjToSend cJSON object to be sent.
-//  * @return int 0 if error occurred, 1 otherwise.
-//  */
-// int send_message(int sock, cJSON *jobjToSend);
+/**
+ * @brief Compares two times in time_t format
+ * 
+ * @param time1 
+ * @param time2 
+ * @return int 1 if time1 > time2, -1 otherwise
+ */
+int comparetime(time_t time1, time_t time2);
 
-// /**
-//  * @brief Receives a send_payload formatted response and saves it to
-//  objReceived.
-//  *
-//  * The socket listens for a send_payload formatted response.
-//  * It then saves the response to an objReceived string.
-//  *
-//  * This reponse adopts the following structure:
-//  * The first RCV_BUF_SIZE bytes indicates the size of the actual payload.
-//  * The remaining bytes contain the actual cJSON string representation
-//  payload.
-//  *
-//  * @param sock Client socket assigned to the connection.
-//  * @param objReceived String to save the response recieved.
-//  * @return void
-//  */
-// void receive_message(int sock, char *objReceived);
+/**
+ * @brief Converts pseudo_filepath to actual filepath
+ * 
+ * @param pseudo_filepath Filepath sent by client
+ * @return string Actual filepath on server
+ */
+string translate_filepath(string pseudo_filepath);
 
-// /**
-//  * @brief Waits for secs amount of seconds.
-//  *
-//  * @param secs Number of seconds to wait for.
-//  * @return void
-//  */
-// void wait_for(unsigned int secs);
+/* 
+Methods to retrieve system attributes 
+*/
+
+/**
+ * @brief Get the last modified time object
+ * 
+ * @param path  Filepath of object to retrieve last modified time of
+ * @return time_t Last modified time
+ */
+time_t get_last_modified_time(const char *path);
 
 #endif
