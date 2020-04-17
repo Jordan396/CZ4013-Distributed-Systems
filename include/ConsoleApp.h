@@ -37,6 +37,11 @@ string serverIP = "";
 string serverPortNo = "";
 string clientPortNo = "";
 
+/** 
+ * @brief this is a driver function to display the various menu functions 
+ * @param void
+ * @return void 
+ * */
 void displayClientMenu();
 void exiting();
 

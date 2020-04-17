@@ -116,7 +116,11 @@ int main(int argc, char *argv[])
 endloop:;
 }
 
-// display client menu (main screen)
+/** 
+ * @brief this is a driver function to display the various menu functions 
+ * @param void
+ * @return void 
+ * */
 void displayClientMenu()
 {
 

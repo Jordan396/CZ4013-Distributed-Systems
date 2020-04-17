@@ -7,12 +7,13 @@
 
 #include "FileHandler.h"
 
-/** readfile reads from a given file into the buffer and returns an error code.
+/** 
+ * @brief readfile reads from a given file into the buffer and returns a response code.
  * @param fileName absolute filename of the given file
  * @param echoBuffer buffer where the data is read into
  * @param nBytes number of bytes to read
  * @param startPos starting position to read at
- * @return an error code if reading unsuccessful
+ * @return int a response code indicating success or failure
  **/
 int FileHandler::ReadFile(const char *fileName, char echoBuffer[], int nBytes,
                           int startPos = 0)
@@ -89,7 +90,13 @@ int FileHandler::ReadFile(const char *fileName, char echoBuffer[], int nBytes,
   return result;
 }
 
-// writefile will write to a file pointed at by filepath at offset 0
+/** 
+ * @brief writes a string to a specified filepath at the given offset
+ * @param filepath the filepath to write to 
+ * @param toWrite the string which has to be written
+ * @param offset the offset at which the string will be written
+ * @return int response code indicating success or otherwise, reason for failure 
+ * */
 int FileHandler::WriteFile(const char *filepath, const char *toWrite,
                            int offset = 0)
 {
@@ -156,7 +163,11 @@ int FileHandler::WriteFile(const char *filepath, const char *toWrite,
   return FILE_WRITE_SUCCESS;
 }
 
-// check if file exists - if yes, overwrite else return error
+/**
+ * @brief clears the file specified by filepath - ie, it will be an empty file
+ * @param filepath the filepath of the file to be cleared
+ * @return int response code indicating success or otherwise, the cause of failure
+ * */
 int FileHandler::ClearFile(const char *filepath)
 {
   FILE *pFile;
@@ -176,7 +187,11 @@ int FileHandler::ClearFile(const char *filepath)
   return 1;
 }
 
-// wrapper around remove provided by cpp
+/**
+ * @brief deletes the file specified by filepath
+ * @param filepath the filepath of the file to be deleted
+ * @return int response code indicating success or otherwise, the cause of failure
+ * */
 int FileHandler::DeleteFile(const char *filename)
 {
   int a = remove(filename);
@@ -188,7 +203,12 @@ int FileHandler::DeleteFile(const char *filename)
   return a; // 0
 }
 
-// wrapper around rename provided by cpp
+/**
+ * @brief this renames a given file to the new name 
+ * @param oldname the filepath of the file
+ * @param newname the new filepath of the file
+ * @return int response code indicating success or otherwise, the cause of failure
+ * */
 int FileHandler::Rename(char *oldname, char *newname)
 {
   int a = rename(oldname, newname);
@@ -199,6 +219,11 @@ int FileHandler::Rename(char *oldname, char *newname)
   return a; // 0
 }
 
+/**
+ * @brief creates a new file with the specified filename
+ * @param filename the filepath of the file to be cleared
+ * @return int response code indicating success
+ * */
 int FileHandler::CreateFile(const char *filename)
 {
   std::ofstream output(filename);

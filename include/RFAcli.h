@@ -60,33 +60,130 @@
 class RFAcli
 {
 public:
+  /**
+   * @brief this is the constructor for the client; it connects to a server port, which it handles from a global variable
+   * @param void
+   * @return void
+   * */
   RFAcli();
+
+  /** 
+   * @brief this method downloads a file from the given remote filepath to the local filepath
+   * @param remote_filepath the address of the specified file on the server
+   * @param local_filepath the local address to save the file to 
+   * @return integer the response code 
+   * */
   int download_file(string remote_filepath, string local_filepath);
+
+  /**
+   * get last modified time of file on server
+   * @param remote_filepath filepath that we want to query
+   * @param last_modified_time local last modified time of requested file
+   * @return time_t last modified time
+   **/
   time_t fetch_last_modified_time(string remote_filepath);
+
+  /** 
+   * @brief this registers a client on the server and notifies the server that they would wish to be notified for any changes to a specified file
+   * @param remote_filepath the file which the client wishes to monitor
+   * @param local_filepath the local file to write any changes to
+   * @param monitor_duration the duration that the client wishes to monitor the specified remote file
+   * @return int the response code of the register 
+   * */
   int register_client(string remote_filepath, string local_filepath,
                       string monitor_duration);
+
+  /** 
+   * @brief this method clears a remote file of its content - ie, it will become an empty file
+   * @param remote_filepath the remote file which the client wishes to clear
+   * @return void
+   * */
   void clear_file(string remote_filepath);
+
+  /** 
+   * @brief this method receives a message across from the server
+   * @param monitorFlag a boolean that indicates whether there should be monitoring on the client 
+   * @return string the message the server sent 
+   * */
   string receive_message(bool monitorFlag);
+
+  /** 
+   * @brief this method sends a message from the client across to the server 
+   * @param message the string indicating the message the client wishes to send
+   * @return int an integer indicating the success code 
+   * */
   int send_message(string message);
+
+  /** 
+   * @brief this method gets the response code of the server from a specified cJSON struct
+   * @param jobjReceived the pointer to the specific cJSON struct 
+   * @return int the integer response code, obtained from the cJSON struct
+   * */
   int get_response_code(cJSON *jobjReceived);
+
+  /**
+   * @brief this returns the number of bytes written from a specific cJSON struct
+   * @param jobjReceived the pointer to the cJSON struct
+   * @return int the number of bytes written 
+   * */
   int get_nBytes(cJSON *jobjReceived);
+
+  /** 
+   * @brief this method writes a string to the remote file at the specified offset
+   * @param toWrite this is the string to write to the remote file
+   * @param nOffset the index that the string will be written at
+   * @param remote_filepath the remote file to be written to 
+   * @return void 
+   * */
   void write_file(string remote_filepath, string toWrite, int nOffset);
+
+  /** 
+   * @brief this method returns the last modified time of a file from the cJSON struct
+   * @param jobjReceived the pointer to the specific cJSON struct
+   * @return time_t the last modified time of the file wrapped in a time_t struct 
+   * */
   time_t get_last_modified_time(cJSON *jobjReceived);
-  string non_blocking_send_receive(string request);
+
+  /** 
+   * @brief this method gets the content from a specified cJSON struct 
+   * @param jobjReceived the pointer to the specified cJSON struct
+   * @return string content of the cJSON struct 
+   * */
   string get_content(cJSON *jobjReceived);
+
+  /**
+   * @brief this returns the response id from a specific cJSON struct
+   * @param jobjReceived the pointer to the cJSON struct
+   * @return int response id
+   * */
   int get_response_id(cJSON *jobjReceived);
+
+  string non_blocking_send_receive(string request);
   string blocking_receive(int monitor_duration);
   void reset_destAddr();
   ~RFAcli();
 
 private:
+
   FileHandler fh;
   int inboundSockFD, outboundSockFD;
   int monitorDuration;
   time_t registerTime;
   sockaddr_in destAddr = {0};   // Address and port of server
   sockaddr_in sourceAddr = {0}; // Address and port of client
+
+  /**
+   * @brief this initialises the socket on the client to connect to the server
+   * @param monitorFlag a boolean that indicates whether there should be monitoring on the client 
+   * @return void 
+   * */
   void init_socket(bool monitorFlag);
+
+  /** 
+   * @brief this method displays the progress for the monitor duration
+   * @param monitor_duration the specified duration to monitor for 
+   * @return void
+   * */
   void display_progress(int monitor_duration);
 };
 

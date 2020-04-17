@@ -20,11 +20,30 @@
 class SettingCLI
 {
 public:
+
+  /**
+   * @brief Executed when the user wants to edit the setting
+   * Method will display all the current settings and allow users to input new setting
+   * @param void
+   * @return void
+   */
   void editSetting();
   ~SettingCLI();
 
 private:
+
+  /**
+   * @brief Display all the current setting
+   * @param void
+   * @return void
+   */
   void displayCurrentSetting();
+
+  /**
+   * @brief Check whether the string is numerical
+   * @param s a string
+   * @return bool true if is numerical, false if it contains other non-numerical characters
+   */
   bool isNumber(std::string s);
 };
 

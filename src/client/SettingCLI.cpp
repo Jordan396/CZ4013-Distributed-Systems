@@ -9,12 +9,12 @@
 
 using namespace std;
 
-// /**
-//  * @brief Executed when the user wants to edit the setting
-//  * Method will display all the current settings and allow users to input new setting
-//  * @param void
-//  * @return void
-//  */
+/**
+ * @brief Executed when the user wants to edit the setting
+ * Method will display all the current settings and allow users to input new setting
+ * @param void
+ * @return void
+ */
 void SettingCLI::editSetting()
 {
   displayCurrentSetting();
@@ -76,11 +76,11 @@ void SettingCLI::editSetting()
   return;
 }
 
-// /**
-//  * @brief Display all the current setting
-//  * @param void
-//  * @return void
-//  */
+/**
+ * @brief Display all the current setting
+ * @param void
+ * @return void
+ */
 void SettingCLI::displayCurrentSetting()
 {
   cout << "\u250f";
@@ -204,11 +204,11 @@ void SettingCLI::displayCurrentSetting()
 
 SettingCLI::~SettingCLI() {}
 
-// /**
-//  * @brief Check whether the string is numerical
-//  * @param s a string
-//  * @return true if is numerical, false if it contains other non-numerical characters
-//  */
+/**
+ * @brief Check whether the string is numerical
+ * @param s a string
+ * @return bool true if is numerical, false if it contains other non-numerical characters
+ */
 bool SettingCLI::isNumber(string s)
 {
   for (int i = 0; i < s.length(); i++)

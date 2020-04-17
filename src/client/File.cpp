@@ -9,6 +9,11 @@
 
 File::File(std::string lfp, time_t ct) : localFilePath(lfp), createdTime(ct) {}
 
+/** 
+ * @brief computes the time elapsed betweeen the current time and the time since the file struct was first created 
+ * @param void
+ * @return void 
+ * */
 double File::computeTimeElapsed() {
   time_t now;
   time(&now);
@@ -16,3 +21,4 @@ double File::computeTimeElapsed() {
 }
 
 File::~File() {}
+  

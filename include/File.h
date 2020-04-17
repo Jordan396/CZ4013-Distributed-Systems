@@ -19,9 +19,20 @@
 class File
 {
 public:
-  File(std::string lfp, time_t ct);
+  /* variables describing the file object */ 
   std::string localFilePath;
   time_t createdTime;
+
+  /** 
+   * the constructor for the file object 
+   * */
+  File(std::string lfp, time_t ct);
+  
+  /** 
+   * @brief computes the time elapsed betweeen the current time and the time since the file struct was first created 
+   * @param void
+   * @return void 
+  * */
   double computeTimeElapsed();
   ~File();
 };
