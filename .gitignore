@@ -2,6 +2,7 @@
 build
 lib/*
 output/*
+.vscode
 
 # Ignore any executables
 bin/*

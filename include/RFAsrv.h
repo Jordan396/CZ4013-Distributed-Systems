@@ -72,11 +72,11 @@
 #include <time.h>   /* for waitFor() */
 #include <unistd.h> /* for close() */
 
-#include "./FileHandler.h"
-#include "./Global.h"
+#include "FileHandler.h"
+#include "Global.h"
 /* External libraries */
-#include "./cJSON.h" // For message formatting
-#include "./utils.h"
+#include "cJSON.h" // For message formatting
+#include "utils.h"
 
 void init_sockets();
 void *monitor_registered_clients(void *ptr);

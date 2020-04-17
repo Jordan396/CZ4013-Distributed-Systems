@@ -1,8 +1,9 @@
 #pragma once
-#include "./../FileHandler.h"
-#include "./../Global.h"
-#include "./../RFAcli.h"
+#include "FileHandler.h"
+#include "Global.h"
+#include "RFAcli.h"
 #include "File.h"
+
 #include <chrono>
 #include <experimental/filesystem>
 #include <fstream>
@@ -10,6 +11,7 @@
 #include <map>
 #include <string>
 #include <vector>
+
 //#include <boost/archive/text_oarchive.hpp>
 //#include <boost/archive/text_iarchive.hpp>
 //#include <boost/serialization/map.hpp>

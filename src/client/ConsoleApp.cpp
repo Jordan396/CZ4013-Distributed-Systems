@@ -1,7 +1,7 @@
 // ConsoleApp.cpp : This file contains the 'main' function. Program execution
 // begins and ends there.
 #define __MAIN_C__
-#include "CacheManager/CacheService.h"
+#include "CacheService.h"
 #include "FileCLI.h"
 #include "Global.h"
 #include "SettingCLI.h"

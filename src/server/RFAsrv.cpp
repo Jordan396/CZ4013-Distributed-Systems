@@ -19,7 +19,7 @@
  * @brief .
  */
 
-#include "./RFAsrv.h"
+#include "RFAsrv.h"
 
 /* Function declarations */
 // int get_client_command_code(cJSON *jobjReceived);
