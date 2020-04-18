@@ -20,7 +20,7 @@
 #include <string>
 #include <thread>
 #include <vector>
-
+#include "Debug.h"
 class FileCLI
 {
 public:

@@ -89,7 +89,7 @@ RFAcli::RFAcli(void)
   else
   {
     clientPortNo = std::to_string(ntohs(sourceAddr.sin_port));
-    cout << "Source port number: " + clientPortNo << endl;
+    Debug::msg("Source port number: " + clientPortNo);
   }
 }
 
@@ -104,19 +104,18 @@ int RFAcli::send_message(string message)
 
   sendto(outboundSockFD, message.c_str(), strlen(message.c_str()), 0,
          (const struct sockaddr *)&destAddr, sizeof(destAddr));
-  cout << "Sending message: " + message + " : to " +
-              (char *)inet_ntoa((struct in_addr)destAddr.sin_addr)
-       << endl;
+  Debug::msg("Sending message: " + message + " : to " +
+      (char*)inet_ntoa((struct in_addr)destAddr.sin_addr));
   return 0;
 }
 
 string RFAcli::receive_message(bool monitorFlag)
 {
-  cout << "Listening..." << endl;
+    Debug::msg("Listening...");
   char clientBuffer[udpDatagramSize + 1];
   if (monitorFlag)
   {
-    cout << "left how much time: " << monitorDuration << endl;
+      Debug::msg("left how much time: " + to_string(monitorDuration));
     if (monitorDuration == 0)
       return "";
     init_socket(true);
@@ -126,7 +125,7 @@ string RFAcli::receive_message(bool monitorFlag)
                    (struct sockaddr *)&destAddr, (socklen_t *)&len);
   if (monitorFlag)
   {
-    cout << "left how much time: " << monitorDuration << endl;
+      Debug::msg("left how much time: " + to_string(monitorDuration));
     init_socket(false);
   }
   if (n == -1)
@@ -139,16 +138,14 @@ string RFAcli::receive_message(bool monitorFlag)
   unsigned short sourcePort; // Port of datagram source
   sourceAddress = inet_ntoa(destAddr.sin_addr);
   sourcePort = ntohs(destAddr.sin_port);
-  cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
+  Debug::msg("Received packet from " + sourceAddress + ":" + to_string(sourcePort));
 
   // Reset destAddr
   reset_destAddr();
 
-  // cout << "Received packet to " << sourceAddress << ":" << sourcePort <<
-  // endl;
   string s = clientBuffer;
   clientBuffer[0] = '\0';
-  cout << "Received message:\n" + s << endl;
+  Debug::msg("Received message:\n" + s);
 
   return s;
 }
@@ -264,7 +261,7 @@ int RFAcli::download_file(string remote_filepath, string local_filepath)
       }
 
       // Write content to local
-      cout << "Writing to local path: " + local_filepath << endl;
+      Debug::msg("Writing to local path: " + local_filepath);
       fh.WriteFile(local_filepath.c_str(), content.c_str(), offset);
       // Increase offset
       offset += nBytes;
@@ -272,7 +269,7 @@ int RFAcli::download_file(string remote_filepath, string local_filepath)
     }
     else
     {
-      cout << "ERROR: File cannot be read." << endl;
+      Debug::msg("ERROR: File cannot be read.");
       cJSON_Delete(jobjReceived);
       return 0;
     }
@@ -310,7 +307,7 @@ time_t RFAcli::fetch_last_modified_time(string remote_filepath)
     return last_modified_time;
   }
   cJSON_Delete(jobjReceived);
-  cout << "Unable to retrieve last modified time." << endl;
+  Debug::msg("Unable to retrieve last modified time.");
   return last_modified_time;
 }
 
@@ -346,11 +343,11 @@ void RFAcli::write_file(string remote_filepath, string toWrite, int nOffset)
   }
   if (get_response_code(jobjReceived) == WRITE_FAILURE)
   {
-    cout << "ERROR: Clear file operation failed." << endl;
+      Debug::msg("ERROR: Clear file operation failed.");
     cJSON_Delete(jobjReceived);
     return;
   }
-  cout << "ERROR: Unknown response received." << endl;
+  Debug::msg("ERROR: Unknown response received.");
   cJSON_Delete(jobjReceived);
   return;
 }
@@ -385,14 +382,14 @@ int RFAcli::register_client(string remote_filepath, string local_filepath,
   // Failed to register
   if (get_response_code(jobjReceived) == MONITOR_FAILURE)
   {
-    cout << "LOGS: Monitor failed." << endl;
+      Debug::msg("LOGS: Monitor failed.");
     cJSON_Delete(jobjReceived);
     return 0;
   }
   // Successfully registered
   if (get_response_code(jobjReceived) == MONITOR_SUCCESS)
   {
-    cout << "LOGS: Monitor success." << endl;
+      Debug::msg("LOGS: Monitor success.");
     cJSON_Delete(jobjReceived);
 
     // Enter monitoring loop...
@@ -409,32 +406,32 @@ int RFAcli::register_client(string remote_filepath, string local_filepath,
       // monitor duration expired
       if (get_response_code(jobjReceived) == MONITOR_EXPIRED)
       {
-        cout << "LOGS: Monitor expired." << endl;
+          Debug::msg("LOGS: Monitor expired.");
         cJSON_Delete(jobjReceived);
         return 1;
       }
       else if (get_response_code(jobjReceived) ==
                MONITOR_UPDATE)
       { // changes encountered
-        cout << "LOGS: Changes detected. Redownloading file..." << endl;
+          Debug::msg("LOGS: Changes detected. Redownloading file...");
         cJSON_Delete(jobjReceived);
         // Redownload file
         if (download_file(remote_filepath, local_filepath) != 1)
         {
-          cout << "ERROR: Cannot download file. Exiting...";
+            Debug::msg("ERROR: Cannot download file. Exiting...");
           return 0;
         }
       }
       else
       {
         cJSON_Delete(jobjReceived);
-        cout << "LOGS: Unknown response received.";
+        Debug::msg("LOGS: Unknown response received.");
       }
     }
   }
   display_progress(-1);
   cJSON_Delete(jobjReceived);
-  cout << "LOGS: Unknown response received.";
+  Debug::msg("LOGS: Unknown response received.");
   return 1;
 }
 
@@ -468,11 +465,11 @@ void RFAcli::clear_file(string remote_filepath)
   }
   if (get_response_code(jobjReceived) == CLEAR_FILE_FAILURE)
   {
-    cout << "ERROR: Clear file operation failed." << endl;
+      Debug::msg("ERROR: Clear file operation failed.");
     cJSON_Delete(jobjReceived);
     return;
   }
-  cout << "ERROR: Unknown response received." << endl;
+  Debug::msg("ERROR: Unknown response received.");
   cJSON_Delete(jobjReceived);
   return;
 }
@@ -539,19 +536,19 @@ void RFAcli::display_progress(int monitor_duration)
   int barWidth = 50;
   if (monitor_duration == -1)
     progress = 1.0;
-  std::cout << "[";
+  cout << "[";
   int pos = barWidth * progress;
   for (int i = 0; i < barWidth; ++i)
   {
     if (i < pos)
-      std::cout << "=";
+      cout << "=";
     else if (i == pos)
-      std::cout << ">";
+      cout << ">";
     else
-      std::cout << " ";
+      cout << " ";
   }
-  std::cout << "] " << int(progress * 100.0) << " %\r";
-  std::cout.flush();
+  cout << "] " << int(progress * 100.0) << " %\r";
+  cout.flush();
 
-  std::cout << std::endl;
+  cout << std::endl;
 }

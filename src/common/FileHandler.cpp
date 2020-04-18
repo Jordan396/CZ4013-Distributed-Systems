@@ -20,8 +20,8 @@ int FileHandler::ReadFile(const char *fileName, char echoBuffer[], int nBytes,
   strcpy(char_array, fileName.c_str());
   pFile = fopen(char_array, "rb");
   */
-  cout << "startpos: " << startPos << endl;
-  cout << "nbytes" << nBytes << endl;
+  Debug::msg("startpos: " + startPos);
+  Debug::msg("nbytes" + nBytes);
   pFile = fopen(fileName, "rb");
   if (pFile ==
       NULL)

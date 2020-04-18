@@ -17,7 +17,7 @@ int loss(int lossRate)
 {
   srand(time(NULL));
   int a = rand() % 100;
-  cout << "random number is: " << a << endl;
+  Debug::msg("random number is: " + a);
   return (a > lossRate);
 }
 } // namespace utils

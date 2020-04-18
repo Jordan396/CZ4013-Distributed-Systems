@@ -34,6 +34,7 @@
 #include "FileHandler.h"
 #include "Global.h"
 #include "cJSON.h" // For message formatting
+#include "Debug.h"
 
 /* CLIENT COMMAND CODES */
 #define FETCH_LAST_MODIFIED_TIME_CMD 0

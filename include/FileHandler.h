@@ -18,7 +18,7 @@
 #include <fstream>
 #include <iostream>
 #include <string.h>
-
+#include "Debug.h"
 /* response codes for the various situations which might occur in the process of doing i/o operations */
 #define ERR_FILE_NOT_EXIST -1;
 #define ERR_MEMORY_INSUFFICIENT -2;

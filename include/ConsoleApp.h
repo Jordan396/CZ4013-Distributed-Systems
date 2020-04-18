@@ -26,13 +26,14 @@
 #include <sys/socket.h> /* for socket(), bind(), and connect() */
 #include <sys/wait.h>   /* for waitpid() */
 #include <thread>
-
+#include "Debug.h"
 int freshnessInterval = 100;
 int lossRate = 0;
 int timeOut = 1000;
 int bufferSize = 1024;
 int udpDatagramSize = 4096;
 int sel;
+int debugMode = 1;
 string serverIP = "";
 string serverPortNo = "";
 string clientPortNo = "";

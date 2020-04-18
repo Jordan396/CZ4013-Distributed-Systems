@@ -67,6 +67,7 @@
 #include "Global.h"
 #include "cJSON.h" // For message formatting
 #include "utils.h"
+#include "Debug.h"
 
 /* RegisteredClient structure */
 struct RegisteredClient

@@ -156,7 +156,7 @@ void FileCLI::fetchFile() {
   cout << "filepath is: " + filePathModified
        << endl; // filepath = RFA://documents/test.txt
   if (cv.checkValidityFetch(filePathModified)) {
-    cout << "File is fetched and cached" << endl; // line is never hit
+    cout << "File is fetched and cached" << endl; 
   } else {
     cout << "Failed to fetch and cache file" << endl;
   }

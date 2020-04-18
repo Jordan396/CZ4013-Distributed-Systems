@@ -24,6 +24,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "Debug.h"
 
 class CacheService
 {

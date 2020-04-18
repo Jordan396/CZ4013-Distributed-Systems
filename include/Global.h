@@ -28,6 +28,7 @@ extern int udpDatagramSize;
 extern std::string serverIP;
 extern std::string serverPortNo;
 extern std::string clientPortNo;
+extern int debugMode;
 #endif
 
 #endif

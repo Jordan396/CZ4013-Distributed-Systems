@@ -13,6 +13,7 @@
 #define UTILS_H
 
 #include <cstdlib>
+#include "Debug.h"
 
 namespace utils
 {

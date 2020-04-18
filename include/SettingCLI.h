@@ -16,7 +16,7 @@
 
 #include <iostream>
 #include <string>
-
+#include "Debug.h"
 class SettingCLI
 {
 public:
