@@ -13,11 +13,6 @@ using namespace std;
 
 namespace utils
 {
-/**
- * @brief determines if a packet has been artificially dropped
- * @param lossRate the desired loss rate
- * @return int 1 if the packet has not been dropped 0 otherwise 
- * */
 int loss(int lossRate)
 {
   srand(time(NULL));

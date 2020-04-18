@@ -9,12 +9,6 @@
 
 using namespace std;
 
-/**
- * @brief Executed when the user wants to edit the setting
- * Method will display all the current settings and allow users to input new setting
- * @param void
- * @return void
- */
 void SettingCLI::editSetting()
 {
   displayCurrentSetting();
@@ -76,11 +70,6 @@ void SettingCLI::editSetting()
   return;
 }
 
-/**
- * @brief Display all the current setting
- * @param void
- * @return void
- */
 void SettingCLI::displayCurrentSetting()
 {
   cout << "\u250f";

@@ -43,6 +43,11 @@ string clientPortNo = "";
  * @return void 
  * */
 void displayClientMenu();
+
+/**
+ * @brief Exits the program
+ * 
+ */
 void exiting();
 
 #endif

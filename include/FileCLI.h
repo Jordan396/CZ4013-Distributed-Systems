@@ -79,7 +79,17 @@ public:
    * @return void
    */
   void monitorFile();
+
+  /**
+   * @brief Destroy the FileCLI object
+   * 
+   */
   ~FileCLI();
+
+  /**
+   * @brief Construct a new FileCLI object
+   * 
+   */
   FileCLI();
 
 private:

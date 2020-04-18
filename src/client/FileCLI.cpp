@@ -11,12 +11,6 @@ using namespace std;
 
 FileCLI::FileCLI() {}
 
-/**
- * @brief Executed when the user wants to read the file, method will read the users' input for file name, offset and number of bytes to be read
- * Method will call CacheService readFile method 
- * @param void
- * @return void
- */
 void FileCLI::readFile() {
   string fileID;
 
@@ -51,12 +45,6 @@ void FileCLI::readFile() {
   return;
 }
 
-/**
- * @brief Executed when the user wants to monitor the file, method will read the users' input for file name and monitoring duration
- * Method will call CacheService monitorFile method 
- * @param void
- * @return void
- */
 void FileCLI::monitorFile(){
     string fileID;
 
@@ -88,12 +76,6 @@ void FileCLI::monitorFile(){
     return;
 }
 
-/**
- * @brief Executed when the user wants to clear the file in the cache, method will read the users' input for file name
- * Method will call CacheService clearFile method 
- * @param void
- * @return void
- */
 void FileCLI::clearFile() {
   string fileID;
 
@@ -122,13 +104,6 @@ void FileCLI::clearFile() {
   return;
 }
 
-
-/**
- * @brief Executed when the user wants to clear the cache
- * Method will call CacheService clearCache method 
- * @param void
- * @return void
- */
 void FileCLI::clearCache() {
   if (cv.clearCache()) {
     cout << "Cache is cleared successfully" << endl;
@@ -138,12 +113,6 @@ void FileCLI::clearCache() {
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
-/**
- * @brief Executed when the user wants to write the file, method will read the users' input for file name, the offset and the string to be appended
- * Method will call CacheService writeFile method 
- * @param void
- * @return void
- */
 void FileCLI::writeFile() {
   string fileID;
 
@@ -179,13 +148,6 @@ void FileCLI::writeFile() {
   return;
 }
 
-
-/**
- * @brief Executed when the user wants to fetch the file from the remote source, method will read the users' input for file path
- * Method will call CacheService checkValidityCheck method 
- * @param void
- * @return void
- */
 void FileCLI::fetchFile() {
   string filePath;
   cout << "Please input a file path: RFA://"; // line hit
@@ -203,13 +165,6 @@ void FileCLI::fetchFile() {
   return;
 }
 
-
-/**
- * @brief Executed when the user wants to clear the content of the file, method will read the users' input for file name
- * Method will call CacheService clearContent method 
- * @param void
- * @return void
- */
 void FileCLI::clearContent() {
   string fileID;
 
@@ -239,11 +194,6 @@ void FileCLI::clearContent() {
   return;
 }
 
-/**
- * @brief Called by methods which require selection of files in cache, method will display all the files in the local cache, and map them to their fileIDs
- * @param void
- * @return void
- */
 void FileCLI::listFile() {
   int j;
   cacheKeys = cv.listCache();
@@ -320,11 +270,6 @@ void FileCLI::listFile() {
   return;
 }
 
-/**
- * @brief Called when the user inputs a fileID to check whether the fileID is valid
- * @param fileID
- * @return true if is valid, false if is invalid
- */
 bool FileCLI::checkValidity(string fileID) {
   if (!isNumber(fileID)) {
       return false;
@@ -340,11 +285,6 @@ bool FileCLI::checkValidity(string fileID) {
 
 FileCLI::~FileCLI() {}
 
-/**
- * @brief Check whether the string is numerical
- * @param s string
- * @return true if is numerical, false if it contains other non-numerical characters
- */
 bool FileCLI::isNumber(string s)
 {
     for (int i = 0; i < s.length(); i++)

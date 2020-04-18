@@ -45,11 +45,6 @@
 //  */
 // void write_file(string remote_filepath, string toWrite, int nOffset);
 
-/**
- * @brief this is the constructor for the client; it connects to a server port, which it handles from a global variable
- * @param void
- * @return void
- * */
 RFAcli::RFAcli(void)
 {
   // Creating socket file descriptor
@@ -100,44 +95,21 @@ RFAcli::RFAcli(void)
 
 RFAcli::~RFAcli() {}
 
-/**
- * @brief this initialises the socket on the client to connect to the server
- * @param monitorFlag a boolean that indicates whether there should be monitoring on the client 
- * @return void 
- * */
-void RFAcli::init_socket(bool monitorFlag)
+int RFAcli::send_message(string message)
 {
-  // set timeout
-  struct timeval timeout_val;
-  if (monitorFlag)
-  {
-    timeout_val.tv_sec = monitorDuration;
-    timeout_val.tv_usec = 0;
-  }
-  else
-  {
-    timeout_val.tv_sec = (int)timeOut / 1000;
-    timeout_val.tv_usec = (int)((timeOut % 1000) * 1000);
-  }
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-  // timeout_val.tv_usec = timeOut * 1000;
-  if (setsockopt(inboundSockFD, SOL_SOCKET, SO_RCVTIMEO, &timeout_val,
-                 sizeof(timeout_val)) < 0)
-  {
-    perror("failed to set timeout");
-    exit(EXIT_FAILURE);
-  }
+  // Reset destAddr
+  reset_destAddr();
+
+  sendto(outboundSockFD, message.c_str(), strlen(message.c_str()), 0,
+         (const struct sockaddr *)&destAddr, sizeof(destAddr));
+  cout << "Sending message: " + message + " : to " +
+              (char *)inet_ntoa((struct in_addr)destAddr.sin_addr)
+       << endl;
+  return 0;
 }
-/****************************************************************************
- *                                                                          *
- *                    Network Methods                                       *
- *                                                                          *
- ****************************************************************************/
-/** 
- * @brief this methods receives a message across from the server
- * @param monitorFlag a boolean that indicates whether there should be monitoring on the client 
- * @return string the message the server sent 
- * */
+
 string RFAcli::receive_message(bool monitorFlag)
 {
   cout << "Listening..." << endl;
@@ -181,38 +153,12 @@ string RFAcli::receive_message(bool monitorFlag)
   return s;
 }
 
-/** 
- * @brief this method sends a message from the client across to the server 
- * @param message the string indicating the message the client wishes to send
- * @return int an integer indicating the success code 
- * */
-int RFAcli::send_message(string message)
-{
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-  // Reset destAddr
-  reset_destAddr();
-
-  sendto(outboundSockFD, message.c_str(), strlen(message.c_str()), 0,
-         (const struct sockaddr *)&destAddr, sizeof(destAddr));
-  cout << "Sending message: " + message + " : to " +
-              (char *)inet_ntoa((struct in_addr)destAddr.sin_addr)
-       << endl;
-  return 0;
-}
-
-/** 
+/**
  * @brief 
- * */
-void RFAcli::reset_destAddr()
-{
-  // Filling destination information
-  destAddr.sin_family = AF_INET; // IPv4
-  destAddr.sin_addr.s_addr = inet_addr(serverIP.c_str());
-  destAddr.sin_port =
-      htons((unsigned short)strtoul(serverPortNo.c_str(), NULL, 0));
-}
-
+ * 
+ * @param request 
+ * @return string 
+ */
 string RFAcli::non_blocking_send_receive(string request)
 {
   int request_identifier;
@@ -261,46 +207,15 @@ string RFAcli::blocking_receive(int monitor_duration)
   return response;
 }
 
-/** 
- * @brief this method displays the progress for the monitor duration
- * @param monitor_duration the specified duration to monitor for 
- * @return void
- * */
-void RFAcli::display_progress(int monitor_duration)
+void RFAcli::reset_destAddr()
 {
-  double progress = (double)(monitor_duration - monitorDuration) / (double)(monitor_duration);
-  int barWidth = 50;
-  if (monitor_duration == -1)
-    progress = 1.0;
-  std::cout << "[";
-  int pos = barWidth * progress;
-  for (int i = 0; i < barWidth; ++i)
-  {
-    if (i < pos)
-      std::cout << "=";
-    else if (i == pos)
-      std::cout << ">";
-    else
-      std::cout << " ";
-  }
-  std::cout << "] " << int(progress * 100.0) << " %\r";
-  std::cout.flush();
-
-  std::cout << std::endl;
+  // Filling destination information
+  destAddr.sin_family = AF_INET; // IPv4
+  destAddr.sin_addr.s_addr = inet_addr(serverIP.c_str());
+  destAddr.sin_port =
+      htons((unsigned short)strtoul(serverPortNo.c_str(), NULL, 0));
 }
 
-/****************************************************************************
- *                                                                          *
- *                    Program Features                                      *
- *                                                                          *
- ****************************************************************************/
-
-/** 
- * @brief this method downloads a file from the given remote filepath to the local filepath
- * @param remote_filepath the address of the specified file on the server
- * @param local_filepath the local address to save the file to 
- * @return integer the response code 
- * */
 int RFAcli::download_file(string remote_filepath, string local_filepath)
 {
   int offset = 0;
@@ -365,12 +280,6 @@ int RFAcli::download_file(string remote_filepath, string local_filepath)
   return 1;
 }
 
-/**
- * get last modified time of file on server
- * @param remote_filepath filepath that we want to query
- * @param last_modified_time local last modified time of requested file
- * @return time_t last modified time
- **/
 time_t RFAcli::fetch_last_modified_time(string remote_filepath)
 {
   // Response
@@ -405,13 +314,6 @@ time_t RFAcli::fetch_last_modified_time(string remote_filepath)
   return last_modified_time;
 }
 
-/** 
- * @brief this method writes a string to the remote file at the specified offset
- * @param toWrite this is the string to write to the remote file
- * @param nOffset the index that the string will be written at
- * @param remote_filepath the remote file to be written to 
- * @return void 
- * */
 void RFAcli::write_file(string remote_filepath, string toWrite, int nOffset)
 {
   // Response
@@ -453,13 +355,6 @@ void RFAcli::write_file(string remote_filepath, string toWrite, int nOffset)
   return;
 }
 
-/** 
- * @brief this registers a client on the server and notifies the server that they would wish to be notified for any changes to a specified file
- * @param remote_filepath the file which the client wishes to monitor
- * @param local_filepath the local file to write any changes to
- * @param monitor_duration the duration that the client wishes to monitor the specified remote file
- * @return int the response code of the register 
- * */
 int RFAcli::register_client(string remote_filepath, string local_filepath,
                             string monitor_duration)
 {
@@ -543,11 +438,6 @@ int RFAcli::register_client(string remote_filepath, string local_filepath,
   return 1;
 }
 
-/** 
- * @brief this method clears a remote file of its content - ie, it will become an empty file
- * @param remote_filepath the remote file which the client wishes to clear
- * @return void
- * */
 void RFAcli::clear_file(string remote_filepath)
 {
   // Response
@@ -587,28 +477,12 @@ void RFAcli::clear_file(string remote_filepath)
   return;
 }
 
-/****************************************************************************
- *                                                                          *
- *                    Getter methods to parse response                      *
- *                                                                          *
- ****************************************************************************/
-
-/** 
- * @brief this method gets the response code of the server from a specified cJSON struct
- * @param jobjReceived the pointer to the specific cJSON struct 
- * @return int the integer response code, obtained from the cJSON struct
- * */
 int RFAcli::get_response_code(cJSON *jobjReceived)
 {
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "RESPONSE_CODE")
       ->valueint;
 }
 
-/** 
- * @brief this method returns the last modified time of a file from the cJSON struct
- * @param jobjReceived the pointer to the specific cJSON struct
- * @return time_t the last modified time of the file wrapped in a time_t struct 
- * */
 time_t RFAcli::get_last_modified_time(cJSON *jobjReceived)
 {
   struct tm tm;
@@ -619,33 +493,65 @@ time_t RFAcli::get_last_modified_time(cJSON *jobjReceived)
   return mktime(&tm);
 }
 
-/**
- * @brief this returns the number of bytes written from a specific cJSON struct
- * @param jobjReceived the pointer to the cJSON struct
- * @return int the number of bytes written 
- * */
 int RFAcli::get_nBytes(cJSON *jobjReceived)
 {
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "N_BYTES")->valueint;
 }
 
-/** 
- * @brief this method gets the content from a specified cJSON struct 
- * @param jobjReceived the pointer to the specified cJSON struct
- * @return string content of the cJSON struct 
- * */
 string RFAcli::get_content(cJSON *jobjReceived)
 {
   return cJSON_GetObjectItem(jobjReceived, "CONTENT")->valuestring;
 }
 
-/**
- * @brief this returns the response id from a specific cJSON struct
- * @param jobjReceived the pointer to the cJSON struct
- * @return int response id
- * */
 int RFAcli::get_response_id(cJSON *jobjReceived)
 {
   return cJSON_GetObjectItemCaseSensitive(jobjReceived, "RESPONSE_ID")
       ->valueint;
+}
+
+void RFAcli::init_socket(bool monitorFlag)
+{
+  // set timeout
+  struct timeval timeout_val;
+  if (monitorFlag)
+  {
+    timeout_val.tv_sec = monitorDuration;
+    timeout_val.tv_usec = 0;
+  }
+  else
+  {
+    timeout_val.tv_sec = (int)timeOut / 1000;
+    timeout_val.tv_usec = (int)((timeOut % 1000) * 1000);
+  }
+
+  // timeout_val.tv_usec = timeOut * 1000;
+  if (setsockopt(inboundSockFD, SOL_SOCKET, SO_RCVTIMEO, &timeout_val,
+                 sizeof(timeout_val)) < 0)
+  {
+    perror("failed to set timeout");
+    exit(EXIT_FAILURE);
+  }
+}
+
+void RFAcli::display_progress(int monitor_duration)
+{
+  double progress = (double)(monitor_duration - monitorDuration) / (double)(monitor_duration);
+  int barWidth = 50;
+  if (monitor_duration == -1)
+    progress = 1.0;
+  std::cout << "[";
+  int pos = barWidth * progress;
+  for (int i = 0; i < barWidth; ++i)
+  {
+    if (i < pos)
+      std::cout << "=";
+    else if (i == pos)
+      std::cout << ">";
+    else
+      std::cout << " ";
+  }
+  std::cout << "] " << int(progress * 100.0) << " %\r";
+  std::cout.flush();
+
+  std::cout << std::endl;
 }

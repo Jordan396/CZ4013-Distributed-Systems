@@ -19,21 +19,29 @@
 class File
 {
 public:
-  /* variables describing the file object */ 
+  /* variables describing the file object */
   std::string localFilePath;
   time_t createdTime;
 
-  /** 
-   * the constructor for the file object 
-   * */
+  /**
+   * @brief Construct a new File:: File object
+   * 
+   * @param lfp Local file path
+   * @param ct  Time created
+   */
   File(std::string lfp, time_t ct);
-  
+
   /** 
    * @brief computes the time elapsed betweeen the current time and the time since the file struct was first created 
    * @param void
    * @return void 
   * */
   double computeTimeElapsed();
+
+  /**
+   * @brief Destroy the File object
+   * 
+   */
   ~File();
 };
 

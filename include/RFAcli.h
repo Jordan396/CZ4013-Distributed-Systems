@@ -57,15 +57,84 @@
 #define CLEAR_FILE_SUCCESS 140
 #define CLEAR_FILE_FAILURE 141
 
+/**
+ * @brief Network interface on the client side
+ * 
+ */
 class RFAcli
 {
 public:
   /**
-   * @brief this is the constructor for the client; it connects to a server port, which it handles from a global variable
+   * @brief Constructor for the client; it initializes the socket file descriptor for sending and receiving sockets.
+   * 
+   * This constructor initializes the socket file descriptor for the sending and receiving sockets. It also performs
+   * binding on the receiving socket port, so that the machine knows which process to forward UDP datagrams arriving 
+   * at port clientPortNo to.
+   * 
    * @param void
    * @return void
    * */
   RFAcli();
+
+  /**
+   * @brief Destroy the RFAcli::RFAcli object
+   * 
+   */
+  ~RFAcli();
+
+  /****************************************************************************
+   *                                                                          *
+   *         Methods related to transferring messages over network            *
+   *                                                                          *
+   ****************************************************************************/
+
+  /** 
+   * @brief this method sends a message from the client across to the server 
+   * @param message the string indicating the message the client wishes to send
+   * @return int an integer indicating the success code 
+   * */
+  int send_message(string message);
+
+  /** 
+   * @brief this method receives a message across from the server
+   * @param monitorFlag a boolean that indicates whether there should be monitoring on the client 
+   * @return string the message the server sent 
+   * */
+  string receive_message(bool monitorFlag);
+
+  /**
+   * @brief Performs a non blocking send and receive loop
+   * 
+   * This method sends a message to the server and transitions into a blocking
+   * receive state for a specified amount of time. If no messages are received
+   * upon the expiration of this timeout, or if the message received does not 
+   * corresponding to the request identifier of the message the client sent, this 
+   * method will resend the message. This process repeats until the response
+   * with a correct response id is received.
+   * 
+   * @param request Message to be sent
+   * @return string Response received
+   */
+  string non_blocking_send_receive(string request);
+
+  /**
+   * @brief Sets the receiving socket to blocking receive mode for monitor_duration
+   * 
+   * @param monitor_duration Time to be in the blocking receive state
+   * @return string Response received
+   */
+  string blocking_receive(int monitor_duration);
+
+  /** 
+ * @brief Resets the fields in the sockaddr destination address 
+ * */
+  void reset_destAddr();
+
+  /****************************************************************************
+   *                                                                          *
+   *                    Methods to perform client requests                    *
+   *                                                                          *
+   ****************************************************************************/
 
   /** 
    * @brief this method downloads a file from the given remote filepath to the local filepath
@@ -84,6 +153,15 @@ public:
   time_t fetch_last_modified_time(string remote_filepath);
 
   /** 
+   * @brief this method writes a string to the remote file at the specified offset
+   * @param toWrite this is the string to write to the remote file
+   * @param nOffset the index that the string will be written at
+   * @param remote_filepath the remote file to be written to 
+   * @return void 
+   * */
+  void write_file(string remote_filepath, string toWrite, int nOffset);
+
+  /** 
    * @brief this registers a client on the server and notifies the server that they would wish to be notified for any changes to a specified file
    * @param remote_filepath the file which the client wishes to monitor
    * @param local_filepath the local file to write any changes to
@@ -100,19 +178,11 @@ public:
    * */
   void clear_file(string remote_filepath);
 
-  /** 
-   * @brief this method receives a message across from the server
-   * @param monitorFlag a boolean that indicates whether there should be monitoring on the client 
-   * @return string the message the server sent 
-   * */
-  string receive_message(bool monitorFlag);
-
-  /** 
-   * @brief this method sends a message from the client across to the server 
-   * @param message the string indicating the message the client wishes to send
-   * @return int an integer indicating the success code 
-   * */
-  int send_message(string message);
+  /****************************************************************************
+   *                                                                          *
+   *                    Getter methods to parse response                      *
+   *                                                                          *
+   ****************************************************************************/
 
   /** 
    * @brief this method gets the response code of the server from a specified cJSON struct
@@ -127,15 +197,6 @@ public:
    * @return int the number of bytes written 
    * */
   int get_nBytes(cJSON *jobjReceived);
-
-  /** 
-   * @brief this method writes a string to the remote file at the specified offset
-   * @param toWrite this is the string to write to the remote file
-   * @param nOffset the index that the string will be written at
-   * @param remote_filepath the remote file to be written to 
-   * @return void 
-   * */
-  void write_file(string remote_filepath, string toWrite, int nOffset);
 
   /** 
    * @brief this method returns the last modified time of a file from the cJSON struct
@@ -158,13 +219,7 @@ public:
    * */
   int get_response_id(cJSON *jobjReceived);
 
-  string non_blocking_send_receive(string request);
-  string blocking_receive(int monitor_duration);
-  void reset_destAddr();
-  ~RFAcli();
-
 private:
-
   FileHandler fh;
   int inboundSockFD, outboundSockFD;
   int monitorDuration;

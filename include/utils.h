@@ -23,6 +23,6 @@ namespace utils
  * @return int 1 if the packet has not been dropped 0 otherwise 
  * */
 int loss(int lossRate);
-}
+} // namespace utils
 
 #endif
