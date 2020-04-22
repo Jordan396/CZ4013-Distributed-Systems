@@ -14,8 +14,6 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-
-  std::atexit(exiting);
   setlocale(LC_CTYPE, "");
   // read in command line arguments
   // -f for freshness interval, -s for server IP, -sp for server port number, -cp for client port number, -l for loss rate
@@ -289,7 +287,4 @@ void displayClientMenu()
   cout << "\u251b" << endl;
 }
 
-void exiting()
-{
-  // cv.saveHashMap();
-}
+
