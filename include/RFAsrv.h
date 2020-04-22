@@ -62,12 +62,12 @@
 #include <chrono>
 #include <time.h>
 
+
 /* Program libraries */
 #include "FileHandler.h"
 #include "Global.h"
 #include "cJSON.h" // For message formatting
 #include "utils.h"
-#include "Debug.h"
 
 /* RegisteredClient structure */
 struct RegisteredClient

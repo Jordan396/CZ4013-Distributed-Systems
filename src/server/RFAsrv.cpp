@@ -16,7 +16,6 @@ int udpDatagramSize = 4096;
 int sel;
 int lossRate;
 int debugMode = 1;
-
 // Variables to handle data transfer
 int inboundSockFD, outboundSockFD;
 sockaddr_in destAddr, sourceAddr;
@@ -48,7 +47,7 @@ int main(int argc, char *argv[])
   unsigned short sourcePort;          // Port of datagram source
 
   // Initialization of cli arguments
-  if (argc < 9)
+  if (argc < 7)
   {
     perror("Insufficient arguments entered.");
     exit(EXIT_FAILURE);
@@ -71,10 +70,6 @@ int main(int argc, char *argv[])
         string s2(argv[i + 1]);
         serverPortNo = s2;
       }
-      else if (s1 == "-debug")
-      {
-        debugMode = atoi(argv[i + 1]);
-      }
     }
   }
 
@@ -90,7 +85,7 @@ int main(int argc, char *argv[])
   for (;;)
   { // Run forever
     // Block until receive message from a client
-    Debug::msg("Listening...");
+      cout << "Listening..." << endl;
     int n = recvfrom(inboundSockFD, serverBuffer, udpDatagramSize, MSG_WAITALL,
                      (struct sockaddr *)&destAddr, (socklen_t *)&len);
     serverBuffer[n] = '\0';
@@ -98,18 +93,18 @@ int main(int argc, char *argv[])
     sourceAddress = inet_ntoa(destAddr.sin_addr);
     sourcePort = ntohs(destAddr.sin_port);
 
-    Debug::msg("Received packet from " + sourceAddress + ":" + to_string(sourcePort));
+    cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
     request = serverBuffer;
 
     // Process only if true
     if (utils::loss(lossRate))
     {
-        Debug::msg("Packet loss simulation: Accepting packet.");
+        cout << "Packet loss simulation: Accepting packet." << endl;
       process_request(request);
     }
     else
     {
-        Debug::msg("Packet loss simulation: Dropping packet.");
+        cout << "Packet loss simulation: Dropping packet." << endl;
     }
   }
   return 0;
@@ -201,24 +196,24 @@ void process_request(string request)
     switch (get_request_code(jobjReceived))
     {
     case FETCH_LAST_MODIFIED_TIME_CMD:
-        Debug::msg("Executing get_last_modified_time command...");
+        cout << "Executing get_last_modified_time command..." << endl;
       execute_fetch_last_modified_time_command(sourceAddress, destPort,
                                                jobjReceived);
       break;
     case READ_CMD:
-        Debug::msg("Executing read command...");
+        cout << "Executing read command..." << endl;
       execute_read_command(sourceAddress, destPort, jobjReceived);
       break;
     case WRITE_CMD:
-        Debug::msg("Executing write command...");
+        cout << "Executing write command..." << endl;
       execute_write_command(sourceAddress, destPort, jobjReceived);
       break;
     case REGISTER_CMD:
-        Debug::msg("Executing register command...");
+        cout << "Executing register command..." << endl;
       execute_register_command(sourceAddress, destPort, jobjReceived);
       break;
     case CLEAR_FILE_CMD:
-        Debug::msg("Executing clear file command...");
+        cout << "Executing clear file command..." << endl;
       execute_clear_file_command(sourceAddress, destPort, jobjReceived);
       break;
     }
@@ -517,7 +512,7 @@ void *monitor_registered_clients(void *ptr)
         // Monitor duration expired
         if (comparetime(currentTime, it->expirationTime) == 1)
         {
-            Debug::msg(it->address + ":" + it->port + " monitor duration expired.");
+            cout << it->address << ":" << it->port << " monitor duration expired." << endl;
           // expire_registered_client(it->address, it->port);
           s.push(std::distance((filepathIterator->second).begin(), it));
         }
@@ -578,36 +573,38 @@ bool is_request_exists(string sourceAddress, string destPort, string message)
 
 void store_request(string sourceAddress, string destPort, string message)
 {
-    Debug::msg("Storing request...");
+    cout << "Storing request..." << endl;
   std::hash<std::string> str_hash;
   string requestMapKey = sourceAddress + ":" + destPort;
   size_t requestMapValue = str_hash(message);
 
-  Debug::msg("requestMapKey: " + requestMapKey);
-  Debug::msg("requestMapValue: " + requestMapValue);
+
+
+  cout << "requestMapKey: " << requestMapKey << endl;
+  cout << "requestMapValue: " << requestMapValue << endl;
 
   requestMap[requestMapKey] = requestMapValue;
 }
 
 void store_response(string sourceAddress, string destPort, string message)
 {
-    Debug::msg("Storing response...");
+    cout << "Storing response..." << endl;
   string responseMapKey = sourceAddress + ":" + destPort;
 
-  Debug::msg("responseMapKey: " + responseMapKey);
-  Debug::msg("responseMapValue: " + message);
+  cout << "responseMapKey: " << responseMapKey << endl;
+  cout << "responseMapValue: " << message << endl;
 
   responseMap[responseMapKey] = message;
 }
 
 string retrieve_response(string sourceAddress, string destPort)
 {
-    Debug::msg("Retrieving response...");
+    cout << "Retrieving response..." << endl;
   string responseMapKey = sourceAddress + ":" + destPort;
 
   // Debugging
-  Debug::msg("responseMapKey: " + responseMapKey);
-  Debug::msg("responseMapValue: " + responseMap[responseMapKey]);
+  cout << "responseMapKey: " << responseMapKey << endl;
+  cout << "responseMapValue: " << responseMap[responseMapKey] << endl;
   return responseMap[responseMapKey];
 }
 
@@ -691,10 +688,10 @@ string translate_filepath(string pseudo_filepath)
   {
     actual_filepath =
         current_path + "/ServerRemoteFileAccess/" + actual_filepath.substr(6);
-    Debug::msg("actual_filepath: " + actual_filepath);
+    cout << "actual_filepath: " << actual_filepath << endl;
     return actual_filepath;
   }
-  Debug::msg("pseudo_filepath: " + pseudo_filepath);
+  cout << "pseudo_filepath: " << pseudo_filepath << endl;
   return "";
 }
 
