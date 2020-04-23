@@ -17,7 +17,7 @@ int loss(int lossRate)
 {
   srand(time(NULL));
   int a = rand() % 100;
-  Debug::msg("random number is: " + a);
+  Debug::msg("random number is: " + to_string(a));
   return (a > lossRate);
 }
 } // namespace utils
