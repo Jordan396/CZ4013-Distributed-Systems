@@ -148,6 +148,40 @@ void FileCLI::writeFile() {
   return;
 }
 
+void FileCLI::appendFile() {
+    string fileID;
+
+    listFile();
+    cin >> fileID;
+
+    // check if the fileID input is within bounds
+    if (checkValidity(fileID)) {
+        string textAppend;
+        string dumb;
+        cout << "Input the text to be appended: ";
+        getchar();
+        getline(cin, textAppend);
+
+        // translate fileID to real remote file path
+        map<int, string>::iterator it;
+        it = cacheReference.find(stoi(fileID));
+        string remoteFilePath = it->second;
+
+        if (cv.appendFile(remoteFilePath, textAppend)) {
+            cout << "Written into File Successfully" << endl;
+        }
+        else {
+            cout << "Failed to write to file" << endl;
+        }
+    }
+    else {
+        cout << "That is not a valid file ID" << endl;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    return;
+}
+
 void FileCLI::fetchFile() {
   string filePath;
   cout << "Please input a file path: RFA://"; // line hit

@@ -40,6 +40,15 @@ public:
   bool writeFile(std::string pathName, std::string text, int offset);
 
   /**
+   * @brief append a string to the end of the file
+   * Method will first update the file in the local file directory and then update the server of the new file copy
+   * @param pathName remote pathName
+   * @param text text to be written into the end of the file
+   * @return true if success, false if failure
+   */
+  bool appendFile(std::string pathName, std::string text);
+
+  /**
    * @brief read the file based on the offset and the number of bytes to be read
    * @param pathName remote pathName
    * @param offset the offset of the file where reading should start

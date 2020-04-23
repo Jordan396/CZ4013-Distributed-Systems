@@ -56,6 +56,15 @@ public:
    */
   void writeFile();
 
+
+  /**
+   * @brief Executed when the user wants to append the file, method will read the users' input for file name and the string to be appended
+   * Method will call CacheService appendFile method
+   * @param void
+   * @return void
+   */
+  void appendFile();
+
   /**
    * @brief Executed when the user wants to fetch the file from the remote source, method will read the users' input for file path
    * Method will call CacheService checkValidityCheck method 

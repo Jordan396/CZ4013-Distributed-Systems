@@ -86,30 +86,35 @@ int main(int argc, char *argv[])
     }
     case 4:
     {
-      fileCLI.clearContent();
+      fileCLI.appendFile();
       break;
     }
     case 5:
     {
-      fileCLI.clearFile();
+      fileCLI.clearContent();
       break;
     }
     case 6:
     {
-      fileCLI.clearCache();
+      fileCLI.clearFile();
       break;
     }
     case 7:
     {
-      fileCLI.monitorFile();
+      fileCLI.clearCache();
       break;
     }
     case 8:
     {
-      settingCLI.editSetting();
+      fileCLI.monitorFile();
       break;
     }
     case 9:
+    {
+      settingCLI.editSetting();
+      break;
+    }
+    case 10:
     {
       goto endloop;
     }
@@ -173,6 +178,7 @@ void displayClientMenu()
     cout << "\u2501";
   }
   cout << "\u252b" << endl;
+
   cout << "\u2503"
        << "3.  "
        << "\u2503"
@@ -189,8 +195,27 @@ void displayClientMenu()
     cout << "\u2501";
   }
   cout << "\u252b" << endl;
+  
   cout << "\u2503"
-       << "4.  "
+      << "4.  "
+      << "\u2503"
+      << "Append File                        "
+      << "\u2503" << endl;
+  cout << "\u2523";
+  for (int i = 0; i < 4; i++)
+  {
+      cout << "\u2501";
+  }
+  cout << "\u254b";
+  for (int i = 0; i < 35; i++)
+  {
+      cout << "\u2501";
+  }
+  cout << "\u252b" << endl;
+  
+  
+  cout << "\u2503"
+       << "5.  "
        << "\u2503"
        << "Clear Content in File              "
        << "\u2503" << endl;
@@ -206,7 +231,7 @@ void displayClientMenu()
   }
   cout << "\u252b" << endl;
   cout << "\u2503"
-       << "5.  "
+       << "6.  "
        << "\u2503"
        << "Remove File in Cache               "
        << "\u2503" << endl;
@@ -222,7 +247,7 @@ void displayClientMenu()
   }
   cout << "\u252b" << endl;
   cout << "\u2503"
-       << "6.  "
+       << "7.  "
        << "\u2503"
        << "Clear Cache                        "
        << "\u2503" << endl;
@@ -238,7 +263,7 @@ void displayClientMenu()
   }
   cout << "\u252b" << endl;
   cout << "\u2503"
-       << "7.  "
+       << "8.  "
        << "\u2503"
        << "Monitor File                       "
        << "\u2503" << endl;
@@ -254,7 +279,7 @@ void displayClientMenu()
   }
   cout << "\u252b" << endl;
   cout << "\u2503"
-       << "8.  "
+       << "9.  "
        << "\u2503"
        << "Settings                           "
        << "\u2503" << endl;
@@ -270,7 +295,7 @@ void displayClientMenu()
   }
   cout << "\u252b" << endl;
   cout << "\u2503"
-       << "9.  "
+       << "10. "
        << "\u2503"
        << "Exit Program                       "
        << "\u2503" << endl;

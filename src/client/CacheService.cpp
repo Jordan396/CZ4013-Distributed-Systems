@@ -34,6 +34,12 @@ bool CacheService::monitorFile(std::string pathName, int monitorDuration)
 {
     Debug::msg("Now monitoring the file");
   int res = client.register_client(pathName, getLocalPathToFile(pathName), to_string(monitorDuration));
+
+  if (res == 1) {
+      // fetch the last modified time and update the hashmap
+      time_t servertime = client.fetch_last_modified_time(pathName);
+      updateCacheMap(pathName, servertime);
+  }
   return res == 1;
 }
 
@@ -124,6 +130,29 @@ bool CacheService::writeFile(std::string pathName, std::string text,
   return false;
 }
 
+bool CacheService::appendFile(std::string pathName, std::string text)
+{
+    Debug::msg("Now writing file");
+    Debug::msg("The text which will be written over is: " + text);
+    if (checkValidityFetch(pathName))
+    {
+        Debug::msg("File in cache is now valid");
+        // now perform write to the cache file
+        if (fh.WriteFile(getLocalPathToFile(pathName).c_str(), text.c_str(),-1))
+        {
+            // inform the server about the change
+            Debug::msg("Local write success");
+ 
+            client.write_file(pathName, text.c_str(), -1);
+            time_t servertime = client.fetch_last_modified_time(pathName);
+            updateCacheMap(pathName, servertime);
+            return true;
+        }
+        Debug::msg("Local write failure");
+    }
+    return false;
+}
+
 std::string CacheService::readFile(std::string pathName, int offset,
                                    int bytes)
 {
@@ -163,7 +192,7 @@ bool CacheService::checkValidityFetch(std::string pathName)
     File file = it->second;
     // check if exceed the freshness interval
     // if does not exceed, then is valid
-    if (file.computeTimeElapsed() <= freshnessInterval)
+    if (file.computeTimeElapsed() <= freshnessInterval*1.0/(1000*1.0))
     {
         Debug::msg("File time elapsed is within freshness interval");
       return true;
