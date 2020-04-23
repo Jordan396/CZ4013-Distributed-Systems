@@ -90,10 +90,10 @@ int main(int argc, char *argv[]) {
 
     // Process only if true
     if (utils::loss(receivingLossRate)) {
-      cout << "Packet loss simulation: Accepting packet." << endl;
+      cout << "Receive packet loss simulation: Accepting packet." << endl;
       process_request(request);
     } else {
-      cout << "Packet loss simulation: Dropping packet." << endl;
+      cout << "Receive packet loss simulation: Dropping packet." << endl;
     }
   }
   return 0;
@@ -136,7 +136,7 @@ void init_sockets() {
 
 void send_message(string destAddress, string destPort, string message) {
   if (utils::loss(sendingLossRate)) {
-    cout << "Loss above threshold. Simulating successful sending..." << endl;
+    cout << "Sending packet loss simulation: Sending packet." << endl;
     destAddr.sin_family = AF_INET; // IPv4
     destAddr.sin_addr.s_addr = inet_addr(destAddress.c_str());
     destAddr.sin_port =
@@ -151,7 +151,7 @@ void send_message(string destAddress, string destPort, string message) {
     }
   }
   else {
-    cout << "Loss below threshold. Simulating failed sending..." << endl;
+    cout << "Sending packet loss simulation: Dropping packet." << endl;
   }
 }
 
