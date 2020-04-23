@@ -14,7 +14,8 @@ int timeOut = 300;
 int bufferSize = 1024;
 int udpDatagramSize = 4096;
 int sel;
-int lossRate;
+int receivingLossRate;
+int sendingLossRate;
 int debugMode = 1;
 // Variables to handle data transfer
 int inboundSockFD, outboundSockFD;
@@ -46,7 +47,7 @@ int main(int argc, char *argv[]) {
   unsigned short sourcePort;          // Port of datagram source
 
   // Initialization of cli arguments
-  if (argc < 7) {
+  if (argc < 9) {
     perror("Insufficient arguments entered.");
     exit(EXIT_FAILURE);
   } else {
@@ -54,8 +55,10 @@ int main(int argc, char *argv[]) {
       string s1(argv[i]);
       if (s1 == "-rmi") {
         RMI_SCHEME = atoi(argv[i + 1]);
-      } else if (s1 == "-lr") {
-        lossRate = atoi(argv[i + 1]);
+      } else if (s1 == "-rlr") {
+        receivingLossRate = atoi(argv[i + 1]);
+      } else if (s1 == "-slr") {
+        sendingLossRate = atoi(argv[i + 1]);
       } else if (s1 == "-sp") {
         string s2(argv[i + 1]);
         serverPortNo = s2;
@@ -86,7 +89,7 @@ int main(int argc, char *argv[]) {
     request = serverBuffer;
 
     // Process only if true
-    if (utils::loss(lossRate)) {
+    if (utils::loss(receivingLossRate)) {
       cout << "Packet loss simulation: Accepting packet." << endl;
       process_request(request);
     } else {
@@ -132,7 +135,7 @@ void init_sockets() {
 }
 
 void send_message(string destAddress, string destPort, string message) {
-  if (utils::loss(lossRate)) {
+  if (utils::loss(sendingLossRate)) {
     cout << "Loss above threshold. Simulating successful sending..." << endl;
     destAddr.sin_family = AF_INET; // IPv4
     destAddr.sin_addr.s_addr = inet_addr(destAddress.c_str());
