@@ -234,8 +234,6 @@ void execute_fetch_last_modified_time_command(string destAddress,
       cJSON_AddItemToObject(
           jobjToSend, "RESPONSE_CODE",
           cJSON_CreateNumber(FETCH_LAST_MODIFIED_TIME_FAILURE));
-      cJSON_AddItemToObject(jobjToSend, "LAST_MODIFIED",
-                            cJSON_CreateString("Error reading file."));
       cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID",
                             cJSON_CreateNumber(get_response_id(jobjReceived)));
       send_message(destAddress, destPort, cJSON_Print(jobjToSend));
