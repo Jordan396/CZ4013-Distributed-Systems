@@ -128,7 +128,7 @@ void displayClientMenu()
   }
   cout << "\u2513" << endl;
   cout << "\u2503"
-       << "CZ4031 Distributed System Main Menu     "
+       << "CZ4013 Distributed System Main Menu     "
        << "\u2503" << endl;
   cout << "\u2523";
   for (int i = 0; i < 4; i++)
