@@ -133,7 +133,7 @@ void init_sockets() {
 
 void send_message(string destAddress, string destPort, string message) {
   if (utils::loss(lossRate)) {
-    cout << "loss below threshold, sending message" << endl;
+    cout << "Loss above threshold. Simulating successful sending..." << endl;
     destAddr.sin_family = AF_INET; // IPv4
     destAddr.sin_addr.s_addr = inet_addr(destAddress.c_str());
     destAddr.sin_port =
@@ -146,6 +146,9 @@ void send_message(string destAddress, string destPort, string message) {
     if (RMI_SCHEME == 1) {
       store_response(destAddress, destPort, message);
     }
+  }
+  else {
+    cout << "Loss below threshold. Simulating failed sending..." << endl;
   }
 }
 
