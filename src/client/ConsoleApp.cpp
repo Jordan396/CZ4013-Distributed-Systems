@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
 {
   setlocale(LC_CTYPE, "");
   // read in command line arguments
-  // -f for freshness interval, -s for server IP, -sp for server port number, -cp for client port number, -l for loss rate
-  if (argc == 13)
+  // -f for freshness interval, -s for server IP, -sp for server port number, -cp for client port number
+  if (argc == 11)
   {
     for (int i = 1; i < argc; i += 2)
     {
@@ -40,10 +40,6 @@ int main(int argc, char *argv[])
       {
         string s2(argv[i + 1]);
         clientPortNo = s2;
-      }
-      else if (s1 == "-l")
-      {
-        lossRate = atoi(argv[i + 1]);
       }
       else if (s1 == "-debug")
       {
