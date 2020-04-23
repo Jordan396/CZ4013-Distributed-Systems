@@ -154,15 +154,18 @@ void init_sockets()
 
 void send_message(string destAddress, string destPort, string message)
 {
-  destAddr.sin_family = AF_INET; // IPv4
-  destAddr.sin_addr.s_addr = inet_addr(destAddress.c_str());
-  destAddr.sin_port = htons((unsigned short)strtoul(destPort.c_str(), NULL, 0));
-  sendto(outboundSockFD, message.c_str(), strlen(message.c_str()), 0,
-         (const struct sockaddr *)&destAddr, sizeof(destAddr));
-  // cout << "Sending message: " + message + " : to " +
-  //             (char *)inet_ntoa((struct in_addr)destAddr.sin_addr)
-  //      << endl;
-  store_response(destAddress, destPort, message);
+  if (utils::loss(lossRate)) {
+    cout << "loss below threshold, sending message" << endl; 
+    destAddr.sin_family = AF_INET; // IPv4
+    destAddr.sin_addr.s_addr = inet_addr(destAddress.c_str());
+    destAddr.sin_port = htons((unsigned short)strtoul(destPort.c_str(), NULL, 0));
+    sendto(outboundSockFD, message.c_str(), strlen(message.c_str()), 0,
+          (const struct sockaddr *)&destAddr, sizeof(destAddr));
+    // cout << "Sending message: " + message + " : to " +
+    //             (char *)inet_ntoa((struct in_addr)destAddr.sin_addr)
+    //      << endl;
+    store_response(destAddress, destPort, message);
+  }
 }
 
 void process_request(string request)
