@@ -200,6 +200,15 @@ RMI scheme request and response storage
 bool is_request_exists(string destAddress, string destPort, string message);
 
 /**
+ * @brief Retrieves the client's request hash
+ * 
+ * @param sourceAddress Client IP address where request was sent from
+ * @param destPort Client port where request was sent from
+ * @return size_t Request hash
+ */
+size_t retrieve_request(string sourceAddress, string destPort);
+
+/**
  * @brief Stores the client's request
  * 
  * @param destAddress Client IP address where request was sent from
@@ -224,7 +233,9 @@ void store_response(string destAddress, string destPort, string message);
  * @param destPort Client port to send response to
  * @return string Response message
  */
-string retrieve_response(string destAddress, string destPort);
+string retrieve_response(string destAddress, string destPort, string request);
+
+
 
 /* 
 Getter methods for retrieving message fields 

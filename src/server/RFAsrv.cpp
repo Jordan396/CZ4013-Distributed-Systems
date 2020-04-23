@@ -171,7 +171,7 @@ void process_request(string request) {
   // Check RMI scheme
   if (RMI_SCHEME == 1) { // At most once
     if (is_request_exists(sourceAddress, destPort, request)) {
-      response = retrieve_response(sourceAddress, destPort);
+      response = retrieve_response(sourceAddress, destPort, request);
       send_message(sourceAddress, destPort, response);
       cJSON_Delete(jobjReceived);
       return;
@@ -531,6 +531,11 @@ bool is_request_exists(string sourceAddress, string destPort, string message) {
   return (requestMapValue == requestMap[requestMapKey]);
 }
 
+size_t retrieve_request(string sourceAddress, string destPort) {
+  string requestMapKey = sourceAddress + ":" + destPort;
+  return requestMap[requestMapKey];
+}
+
 void store_request(string sourceAddress, string destPort, string message) {
   cout << "Storing request..." << endl;
   std::hash<std::string> str_hash;
@@ -545,7 +550,7 @@ void store_request(string sourceAddress, string destPort, string message) {
 
 void store_response(string sourceAddress, string destPort, string message) {
   cout << "Storing response..." << endl;
-  string responseMapKey = sourceAddress + ":" + destPort;
+  string responseMapKey = sourceAddress + ":" + destPort + ":" + to_string(retrieve_request(sourceAddress, destPort));
 
   cout << "responseMapKey: " << responseMapKey << endl;
   cout << "responseMapValue: " << message << endl;
@@ -553,9 +558,11 @@ void store_response(string sourceAddress, string destPort, string message) {
   responseMap[responseMapKey] = message;
 }
 
-string retrieve_response(string sourceAddress, string destPort) {
+string retrieve_response(string sourceAddress, string destPort, string request) {
   cout << "Retrieving response..." << endl;
-  string responseMapKey = sourceAddress + ":" + destPort;
+  std::hash<std::string> str_hash;
+  size_t responseMapRequestHash = str_hash(request);
+  string responseMapKey = sourceAddress + ":" + destPort + ":" + to_string(responseMapRequestHash);
 
   // Debugging
   cout << "responseMapKey: " << responseMapKey << endl;
