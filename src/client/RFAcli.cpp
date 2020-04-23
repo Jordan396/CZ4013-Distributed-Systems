@@ -138,7 +138,7 @@ string RFAcli::receive_message(bool monitorFlag)
   unsigned short sourcePort; // Port of datagram source
   sourceAddress = inet_ntoa(destAddr.sin_addr);
   sourcePort = ntohs(destAddr.sin_port);
-  Debug::msg("Received packet from " + sourceAddress + ":" + to_string(sourcePort));
+  Debug::msg("Received packet from " + sourceAddress);
 
   // Reset destAddr
   reset_destAddr();
