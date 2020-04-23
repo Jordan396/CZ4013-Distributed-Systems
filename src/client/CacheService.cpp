@@ -91,6 +91,9 @@ bool CacheService::clearContent(std::string pathName)
       Debug::msg("Local clear success");
 
     client.clear_file(pathName);
+    time_t servertime = client.fetch_last_modified_time(pathName);
+    updateCacheMap(pathName, servertime);
+
     return true;
   }
   Debug::msg("Local clear failure");
