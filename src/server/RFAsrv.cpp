@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     sourceAddress = inet_ntoa(destAddr.sin_addr);
     sourcePort = ntohs(destAddr.sin_port);
 
-    cout << "Received packet from " << sourceAddress << ":" << sourcePort << endl;
+    cout << "Received packet from " << sourceAddress  << endl;
     request = serverBuffer;
 
     // Process only if true
