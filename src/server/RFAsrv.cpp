@@ -173,6 +173,8 @@ void process_request(string request) {
     if (is_request_exists(sourceAddress, destPort, request)) {
       response = retrieve_response(sourceAddress, destPort);
       send_message(sourceAddress, destPort, response);
+      cJSON_Delete(jobjReceived);
+      return;
     } else {
       store_request(sourceAddress, destPort, request);
     }
