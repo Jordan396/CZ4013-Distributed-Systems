@@ -135,6 +135,9 @@ void init_sockets() {
 }
 
 void send_message(string destAddress, string destPort, string message) {
+  if (RMI_SCHEME == 1) {
+    store_response(destAddress, destPort, message);
+  }
   if (utils::loss(sendingLossRate)) {
     cout << "Sending packet loss simulation: Sending packet." << endl;
     destAddr.sin_family = AF_INET; // IPv4
@@ -146,11 +149,8 @@ void send_message(string destAddress, string destPort, string message) {
     // cout << "Sending message: " + message + " : to " +
     //             (char *)inet_ntoa((struct in_addr)destAddr.sin_addr)
     //      << endl;
-    if (RMI_SCHEME == 1) {
-      store_response(destAddress, destPort, message);
-    }
-  }
-  else {
+
+  } else {
     cout << "Sending packet loss simulation: Dropping packet." << endl;
   }
 }
@@ -550,7 +550,8 @@ void store_request(string sourceAddress, string destPort, string message) {
 
 void store_response(string sourceAddress, string destPort, string message) {
   cout << "Storing response..." << endl;
-  string responseMapKey = sourceAddress + ":" + destPort + ":" + to_string(retrieve_request(sourceAddress, destPort));
+  string responseMapKey = sourceAddress + ":" + destPort + ":" +
+                          to_string(retrieve_request(sourceAddress, destPort));
 
   cout << "responseMapKey: " << responseMapKey << endl;
   cout << "responseMapValue: " << message << endl;
@@ -558,11 +559,13 @@ void store_response(string sourceAddress, string destPort, string message) {
   responseMap[responseMapKey] = message;
 }
 
-string retrieve_response(string sourceAddress, string destPort, string request) {
+string retrieve_response(string sourceAddress, string destPort,
+                         string request) {
   cout << "Retrieving response..." << endl;
   std::hash<std::string> str_hash;
   size_t responseMapRequestHash = str_hash(request);
-  string responseMapKey = sourceAddress + ":" + destPort + ":" + to_string(responseMapRequestHash);
+  string responseMapKey =
+      sourceAddress + ":" + destPort + ":" + to_string(responseMapRequestHash);
 
   // Debugging
   cout << "responseMapKey: " << responseMapKey << endl;
