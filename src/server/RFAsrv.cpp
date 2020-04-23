@@ -143,7 +143,9 @@ void send_message(string destAddress, string destPort, string message) {
     // cout << "Sending message: " + message + " : to " +
     //             (char *)inet_ntoa((struct in_addr)destAddr.sin_addr)
     //      << endl;
-    store_response(destAddress, destPort, message);
+    if (RMI_SCHEME == 1) {
+      store_response(destAddress, destPort, message);
+    }
   }
 }
 
@@ -161,39 +163,41 @@ void process_request(string request) {
   destPort = get_dest_port(jobjReceived);
 
   // Check RMI scheme
-  if ((RMI_SCHEME == 1) &&
-      is_request_exists(sourceAddress, destPort,
-                        request)) { // at most once - check if request exists
-    response = retrieve_response(sourceAddress, destPort);
-    send_message(sourceAddress, destPort, response);
-  } else {
-    store_request(sourceAddress, destPort, request);
-    cJSON_AddItemToObject(jobjReceived, "RESPONSE_ID",
-                          cJSON_CreateNumber(request.size()));
-    // Handle request accordingly
-    switch (get_request_code(jobjReceived)) {
-    case FETCH_LAST_MODIFIED_TIME_CMD:
-      cout << "Executing get_last_modified_time command..." << endl;
-      execute_fetch_last_modified_time_command(sourceAddress, destPort,
-                                               jobjReceived);
-      break;
-    case READ_CMD:
-      cout << "Executing read command..." << endl;
-      execute_read_command(sourceAddress, destPort, jobjReceived);
-      break;
-    case WRITE_CMD:
-      cout << "Executing write command..." << endl;
-      execute_write_command(sourceAddress, destPort, jobjReceived);
-      break;
-    case REGISTER_CMD:
-      cout << "Executing register command..." << endl;
-      execute_register_command(sourceAddress, destPort, jobjReceived);
-      break;
-    case CLEAR_FILE_CMD:
-      cout << "Executing clear file command..." << endl;
-      execute_clear_file_command(sourceAddress, destPort, jobjReceived);
-      break;
+  if (RMI_SCHEME == 1) { // At most once
+    if (is_request_exists(sourceAddress, destPort, request)) {
+      response = retrieve_response(sourceAddress, destPort);
+      send_message(sourceAddress, destPort, response);
+    } else {
+      store_request(sourceAddress, destPort, request);
     }
+  }
+
+  cJSON_AddItemToObject(jobjReceived, "RESPONSE_ID",
+                        cJSON_CreateNumber(request.size()));
+
+  // Handle request accordingly
+  switch (get_request_code(jobjReceived)) {
+  case FETCH_LAST_MODIFIED_TIME_CMD:
+    cout << "Executing get_last_modified_time command..." << endl;
+    execute_fetch_last_modified_time_command(sourceAddress, destPort,
+                                             jobjReceived);
+    break;
+  case READ_CMD:
+    cout << "Executing read command..." << endl;
+    execute_read_command(sourceAddress, destPort, jobjReceived);
+    break;
+  case WRITE_CMD:
+    cout << "Executing write command..." << endl;
+    execute_write_command(sourceAddress, destPort, jobjReceived);
+    break;
+  case REGISTER_CMD:
+    cout << "Executing register command..." << endl;
+    execute_register_command(sourceAddress, destPort, jobjReceived);
+    break;
+  case CLEAR_FILE_CMD:
+    cout << "Executing clear file command..." << endl;
+    execute_clear_file_command(sourceAddress, destPort, jobjReceived);
+    break;
   }
   cJSON_Delete(jobjReceived);
 }
