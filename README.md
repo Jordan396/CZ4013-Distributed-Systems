@@ -50,10 +50,11 @@ The client program requires several flags:
 - s: IPv4 address of server to send requests to
 - sp: Port of server to send requests to
 - cp: Port of client to receive responses from
+- debug: Option to print out debugging output (1 for yes, 0 for no) 
 
 To run the program:
 ```
-./bin/ConsoleApp -f xxx -s xxx.xxx.xxx.xxx -sp xxxx -cp xxxx
+./bin/ConsoleApp -f xxx -s xxx.xxx.xxx.xxx -sp xxxx -cp xxxx -debug x
 ```
 
 #### Server-side
