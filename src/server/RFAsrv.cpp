@@ -242,18 +242,18 @@ void execute_fetch_last_modified_time_command(string destAddress,
                             cJSON_CreateString(last_modified_time_string));
       send_message(destAddress, destPort, cJSON_Print(jobjToSend));
       cJSON_Delete(jobjToSend);
-    } else {
-      cJSON *jobjToSend;
-      jobjToSend = cJSON_CreateObject();
-      cJSON_AddItemToObject(
-          jobjToSend, "RESPONSE_CODE",
-          cJSON_CreateNumber(FETCH_LAST_MODIFIED_TIME_FAILURE));
-      cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID",
-                            cJSON_CreateNumber(get_response_id(jobjReceived)));
-      send_message(destAddress, destPort, cJSON_Print(jobjToSend));
-      cJSON_Delete(jobjToSend);
+      return;
     }
   }
+  cJSON *jobjToSend;
+  jobjToSend = cJSON_CreateObject();
+  cJSON_AddItemToObject(jobjToSend, "RESPONSE_CODE",
+                        cJSON_CreateNumber(FETCH_LAST_MODIFIED_TIME_FAILURE));
+  cJSON_AddItemToObject(jobjToSend, "RESPONSE_ID",
+                        cJSON_CreateNumber(get_response_id(jobjReceived)));
+  send_message(destAddress, destPort, cJSON_Print(jobjToSend));
+  cJSON_Delete(jobjToSend);
+  return;
 }
 
 void execute_read_command(string destAddress, string destPort,
