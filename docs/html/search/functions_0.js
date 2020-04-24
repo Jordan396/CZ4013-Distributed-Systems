@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['blocking_5freceive',['blocking_receive',['../classRFAcli.html#a75de3c88838161ec61c187890833ce8a',1,'RFAcli']]]
+  ['appendfile',['appendFile',['../classCacheService.html#adc0364b61f9ae849356f3a63ab4eb050',1,'CacheService::appendFile()'],['../classFileCLI.html#abdf2c094f5a568b988d6bc52795342d4',1,'FileCLI::appendFile()']]]
 ];

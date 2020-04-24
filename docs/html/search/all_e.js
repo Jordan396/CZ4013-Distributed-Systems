@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['update_5fregistered_5fclient',['update_registered_client',['../RFAsrv_8cpp.html#ac5b1c95177e842254fe00177ead786e8',1,'update_registered_client(string sourceAddress, string destPort):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#ac5b1c95177e842254fe00177ead786e8',1,'update_registered_client(string sourceAddress, string destPort):&#160;RFAsrv.cpp']]],
-  ['utils_2ecpp',['utils.cpp',['../utils_8cpp.html',1,'']]],
-  ['utils_2eh',['utils.h',['../utils_8h.html',1,'']]]
+  ['translate_5ffilepath',['translate_filepath',['../RFAsrv_8cpp.html#afb23d2165949e549d6576dff35d6b18d',1,'translate_filepath(string pseudo_filepath):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#afb23d2165949e549d6576dff35d6b18d',1,'translate_filepath(string pseudo_filepath):&#160;RFAsrv.cpp']]]
 ];

@@ -73,6 +73,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa3081c7e7d6907955dd4fe3e07410ceb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCacheService.html#aa3081c7e7d6907955dd4fe3e07410ceb">writeFile</a> (std::string pathName, std::string text, int offset)</td></tr>
 <tr class="memdesc:aa3081c7e7d6907955dd4fe3e07410ceb"><td class="mdescLeft">&#160;</td><td class="mdescRight">write the file Method will first update the file in the local file directory and then update the server of the new file copy  <a href="#aa3081c7e7d6907955dd4fe3e07410ceb">More...</a><br /></td></tr>
 <tr class="separator:aa3081c7e7d6907955dd4fe3e07410ceb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc0364b61f9ae849356f3a63ab4eb050"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCacheService.html#adc0364b61f9ae849356f3a63ab4eb050">appendFile</a> (std::string pathName, std::string text)</td></tr>
+<tr class="memdesc:adc0364b61f9ae849356f3a63ab4eb050"><td class="mdescLeft">&#160;</td><td class="mdescRight">append a string to the end of the file Method will first update the file in the local file directory and then update the server of the new file copy  <a href="#adc0364b61f9ae849356f3a63ab4eb050">More...</a><br /></td></tr>
+<tr class="separator:adc0364b61f9ae849356f3a63ab4eb050"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5e012e9a5f3b16179a88320840808257"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCacheService.html#a5e012e9a5f3b16179a88320840808257">readFile</a> (std::string pathName, int offset, int bytes)</td></tr>
 <tr class="memdesc:a5e012e9a5f3b16179a88320840808257"><td class="mdescLeft">&#160;</td><td class="mdescRight">read the file based on the offset and the number of bytes to be read  <a href="#a5e012e9a5f3b16179a88320840808257">More...</a><br /></td></tr>
 <tr class="separator:a5e012e9a5f3b16179a88320840808257"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -99,6 +102,44 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae5e73247b2711066ca5266d6ff7335fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="adc0364b61f9ae849356f3a63ab4eb050"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc0364b61f9ae849356f3a63ab4eb050">&#9670;&nbsp;</a></span>appendFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CacheService::appendFile </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>pathName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>text</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>append a string to the end of the file Method will first update the file in the local file directory and then update the server of the new file copy </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pathName</td><td>remote pathName </td></tr>
+    <tr><td class="paramname">text</td><td>text to be written into the end of the file </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if success, false if failure </dd></dl>
+
+</div>
+</div>
 <a id="ae5e73247b2711066ca5266d6ff7335fa"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae5e73247b2711066ca5266d6ff7335fa">&#9670;&nbsp;</a></span>checkValidityFetch()</h2>
 
@@ -399,8 +440,8 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/home/jordan396/Documents/Github/CZ4013-Distributed-Systems/include/<a class="el" href="CacheService_8h_source.html">CacheService.h</a></li>
-<li>/home/jordan396/Documents/Github/CZ4013-Distributed-Systems/src/client/<a class="el" href="CacheService_8cpp.html">CacheService.cpp</a></li>
+<li>/home/jordan396/Documents/GitHub/CZ4013-Distributed-Systems/include/<a class="el" href="CacheService_8h_source.html">CacheService.h</a></li>
+<li>/home/jordan396/Documents/GitHub/CZ4013-Distributed-Systems/src/client/<a class="el" href="CacheService_8cpp.html">CacheService.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['write_5ffile',['write_file',['../classRFAcli.html#a0d563c74ce84a205396eb5a833ec986a',1,'RFAcli']]],
-  ['writefile',['writeFile',['../classCacheService.html#aa3081c7e7d6907955dd4fe3e07410ceb',1,'CacheService::writeFile()'],['../classFileCLI.html#adf02a650fdabf869a8db029c77f7947b',1,'FileCLI::writeFile()'],['../classFileHandler.html#a9a8077b5cfe869c0902304205990230b',1,'FileHandler::WriteFile()']]]
+  ['update_5fregistered_5fclient',['update_registered_client',['../RFAsrv_8cpp.html#ac5b1c95177e842254fe00177ead786e8',1,'update_registered_client(string sourceAddress, string destPort):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#ac5b1c95177e842254fe00177ead786e8',1,'update_registered_client(string sourceAddress, string destPort):&#160;RFAsrv.cpp']]],
+  ['utils_2ecpp',['utils.cpp',['../utils_8cpp.html',1,'']]],
+  ['utils_2eh',['utils.h',['../utils_8h.html',1,'']]]
 ];

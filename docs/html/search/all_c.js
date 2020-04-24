@@ -1,9 +1,16 @@
 var searchData=
 [
-  ['send_5fmessage',['send_message',['../classRFAcli.html#a9e9bb43e1985cdd0958ca592753c49a7',1,'RFAcli::send_message()'],['../RFAsrv_8cpp.html#a6f15e8651890dd35d45479885a4fc7be',1,'send_message(string destAddress, string destPort, string message):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#a6f15e8651890dd35d45479885a4fc7be',1,'send_message(string destAddress, string destPort, string message):&#160;RFAsrv.cpp']]],
-  ['settingcli',['SettingCLI',['../classSettingCLI.html',1,'']]],
-  ['settingcli_2ecpp',['SettingCLI.cpp',['../SettingCLI_8cpp.html',1,'']]],
-  ['settingcli_2eh',['SettingCLI.h',['../SettingCLI_8h.html',1,'']]],
-  ['store_5frequest',['store_request',['../RFAsrv_8cpp.html#af3f3f2ece5430b3d53c93c20ea1b4d34',1,'store_request(string sourceAddress, string destPort, string message):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#a58912618bf02156b842478b3192020e2',1,'store_request(string destAddress, string destPort, string message):&#160;RFAsrv.cpp']]],
-  ['store_5fresponse',['store_response',['../RFAsrv_8cpp.html#aead505155a14ef42b608a90bd0a09a73',1,'store_response(string sourceAddress, string destPort, string message):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#a0da64379ec8d32c063c928f120b46a54',1,'store_response(string destAddress, string destPort, string message):&#160;RFAsrv.cpp']]]
+  ['readfile',['ReadFile',['../classFileHandler.html#a83ebc1dd8018b8b20dcd788c94fc12d8',1,'FileHandler::ReadFile()'],['../classCacheService.html#a5e012e9a5f3b16179a88320840808257',1,'CacheService::readFile()'],['../classFileCLI.html#a7e0afb4fb4daaf7216d93153b0c65db6',1,'FileCLI::readFile()']]],
+  ['receive_5fmessage',['receive_message',['../classRFAcli.html#a65a8f6032877cfa3a990378aa957b8de',1,'RFAcli']]],
+  ['register_5fclient',['register_client',['../classRFAcli.html#af540feb66132c40ffff049e7a6d6380e',1,'RFAcli']]],
+  ['registeredclient',['RegisteredClient',['../structRegisteredClient.html',1,'']]],
+  ['rename',['Rename',['../classFileHandler.html#ad6ed41183b018970de1a60f5d1b14faf',1,'FileHandler']]],
+  ['reset_5fdestaddr',['reset_destAddr',['../classRFAcli.html#a9f4aaf4c09af730ef7c14a8bc1890875',1,'RFAcli']]],
+  ['retrieve_5frequest',['retrieve_request',['../RFAsrv_8cpp.html#ac96c0b47196ac6073e9f6ea70e84ee02',1,'retrieve_request(string sourceAddress, string destPort):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#ac96c0b47196ac6073e9f6ea70e84ee02',1,'retrieve_request(string sourceAddress, string destPort):&#160;RFAsrv.cpp']]],
+  ['retrieve_5fresponse',['retrieve_response',['../RFAsrv_8cpp.html#ac4f945a318b9af9c2d95c5ed2107a233',1,'retrieve_response(string sourceAddress, string destPort, string request):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#a84592ae70852089196bcc30a31b189a8',1,'retrieve_response(string destAddress, string destPort, string request):&#160;RFAsrv.cpp']]],
+  ['rfacli',['RFAcli',['../classRFAcli.html',1,'RFAcli'],['../classRFAcli.html#a6fe18726a3cd91fbcef8673e89221db3',1,'RFAcli::RFAcli()']]],
+  ['rfacli_2ecpp',['RFAcli.cpp',['../RFAcli_8cpp.html',1,'']]],
+  ['rfacli_2eh',['RFAcli.h',['../RFAcli_8h.html',1,'']]],
+  ['rfasrv_2ecpp',['RFAsrv.cpp',['../RFAsrv_8cpp.html',1,'']]],
+  ['rfasrv_2eh',['RFAsrv.h',['../RFAsrv_8h.html',1,'']]]
 ];

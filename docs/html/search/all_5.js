@@ -1,14 +1,16 @@
 var searchData=
 [
-  ['get_5fcontent',['get_content',['../classRFAcli.html#a227686a62dfa9032d3ef640282e63b42',1,'RFAcli::get_content()'],['../RFAsrv_8cpp.html#ab1edcaae1a06adfb8fd3c051d895206c',1,'get_content(cJSON *jobjReceived):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#ab1edcaae1a06adfb8fd3c051d895206c',1,'get_content(cJSON *jobjReceived):&#160;RFAsrv.cpp']]],
-  ['get_5fdest_5fport',['get_dest_port',['../RFAsrv_8cpp.html#a0e86aaab3aa43e247ae039b1678a4d24',1,'get_dest_port(cJSON *jobjReceived):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#a0e86aaab3aa43e247ae039b1678a4d24',1,'get_dest_port(cJSON *jobjReceived):&#160;RFAsrv.cpp']]],
-  ['get_5ffilepath',['get_filepath',['../RFAsrv_8cpp.html#a69c420dd00e37e2dbde7a6ee1190fbca',1,'get_filepath(cJSON *jobjReceived):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#a69c420dd00e37e2dbde7a6ee1190fbca',1,'get_filepath(cJSON *jobjReceived):&#160;RFAsrv.cpp']]],
-  ['get_5flast_5fmodified_5ftime',['get_last_modified_time',['../classRFAcli.html#a67aeb9ac739f539528a8220dd55a4b90',1,'RFAcli::get_last_modified_time()'],['../RFAsrv_8cpp.html#ad9b1f5a9d94c9f2c1b4c5996b01a3a92',1,'get_last_modified_time(const char *path):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#ad9b1f5a9d94c9f2c1b4c5996b01a3a92',1,'get_last_modified_time(const char *path):&#160;RFAsrv.cpp']]],
-  ['get_5fmonitor_5fduration',['get_monitor_duration',['../RFAsrv_8cpp.html#adc8967e4252690d6c13ce7a03bc79215',1,'get_monitor_duration(cJSON *jobjReceived):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#adc8967e4252690d6c13ce7a03bc79215',1,'get_monitor_duration(cJSON *jobjReceived):&#160;RFAsrv.cpp']]],
-  ['get_5fnbytes',['get_nBytes',['../classRFAcli.html#a479832850a0d2fc8358027d55dccb2f9',1,'RFAcli::get_nBytes()'],['../RFAsrv_8cpp.html#aab5fbd5b10a83262e0422e9febcf32d3',1,'get_nBytes(cJSON *jobjReceived):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#aab5fbd5b10a83262e0422e9febcf32d3',1,'get_nBytes(cJSON *jobjReceived):&#160;RFAsrv.cpp']]],
-  ['get_5foffset',['get_offset',['../RFAsrv_8cpp.html#a7b8feb658ca4081523a6480b3eb01fc6',1,'get_offset(cJSON *jobjReceived):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#a7b8feb658ca4081523a6480b3eb01fc6',1,'get_offset(cJSON *jobjReceived):&#160;RFAsrv.cpp']]],
-  ['get_5frequest_5fcode',['get_request_code',['../RFAsrv_8cpp.html#a73e40dcefd311270a807c08a827ca57c',1,'get_request_code(cJSON *jobjReceived):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#a73e40dcefd311270a807c08a827ca57c',1,'get_request_code(cJSON *jobjReceived):&#160;RFAsrv.cpp']]],
-  ['get_5fresponse_5fcode',['get_response_code',['../classRFAcli.html#a31a0efa1f58d18416a714a5b5ff78764',1,'RFAcli']]],
-  ['get_5fresponse_5fid',['get_response_id',['../classRFAcli.html#a2314ddd0c761150723e9426f46207c40',1,'RFAcli::get_response_id()'],['../RFAsrv_8cpp.html#a357c5ac4222ed06f40ef6a46a5a65fa2',1,'get_response_id(cJSON *jobjReceived):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#a357c5ac4222ed06f40ef6a46a5a65fa2',1,'get_response_id(cJSON *jobjReceived):&#160;RFAsrv.cpp']]],
-  ['global_2eh',['Global.h',['../Global_8h.html',1,'']]]
+  ['fetch_5flast_5fmodified_5ftime',['fetch_last_modified_time',['../classRFAcli.html#af1d22f51105804163144c7711d7c3add',1,'RFAcli']]],
+  ['fetchfile',['fetchFile',['../classFileCLI.html#a51274eb0299d4b7a440462521acb4f31',1,'FileCLI']]],
+  ['fh_5fread_5fstatus',['fh_read_status',['../RFAsrv_8cpp.html#a5e98a11fdbda3fa9a0c51084cf8a7ecc',1,'fh_read_status(int result):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#a5e98a11fdbda3fa9a0c51084cf8a7ecc',1,'fh_read_status(int result):&#160;RFAsrv.cpp']]],
+  ['fh_5fwrite_5fstatus',['fh_write_status',['../RFAsrv_8cpp.html#a35e098d17f87c380769e770f69173ebb',1,'fh_write_status(int result):&#160;RFAsrv.cpp'],['../RFAsrv_8h.html#a35e098d17f87c380769e770f69173ebb',1,'fh_write_status(int result):&#160;RFAsrv.cpp']]],
+  ['file',['File',['../classFile.html',1,'File'],['../classFile.html#ae624a7eb0478928dc64f7bd7eb11fff4',1,'File::File()']]],
+  ['file_2ecpp',['File.cpp',['../File_8cpp.html',1,'']]],
+  ['file_2eh',['File.h',['../File_8h.html',1,'']]],
+  ['filecli',['FileCLI',['../classFileCLI.html',1,'FileCLI'],['../classFileCLI.html#a71fef9d616ad0e00aa2d8d9c57e9c94c',1,'FileCLI::FileCLI()']]],
+  ['filecli_2ecpp',['FileCLI.cpp',['../FileCLI_8cpp.html',1,'']]],
+  ['filecli_2eh',['FileCLI.h',['../FileCLI_8h.html',1,'']]],
+  ['filehandler',['FileHandler',['../classFileHandler.html',1,'']]],
+  ['filehandler_2ecpp',['FileHandler.cpp',['../FileHandler_8cpp.html',1,'']]],
+  ['filehandler_2eh',['FileHandler.h',['../FileHandler_8h.html',1,'']]]
 ];
