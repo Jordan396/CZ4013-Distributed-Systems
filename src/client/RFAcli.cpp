@@ -308,6 +308,7 @@ time_t RFAcli::fetch_last_modified_time(string remote_filepath)
   }
   cJSON_Delete(jobjReceived);
   Debug::msg("Unable to retrieve last modified time.");
+  last_modified_time = 0;
   return last_modified_time;
 }
 
