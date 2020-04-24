@@ -46,44 +46,29 @@ After compilation, two executables `ConsoleApp` and `RFAsrv` will be produced, a
 
 #### Client-side
 The client program requires several flags:
-- f: Freshness interval in seconds
+- f: Freshness interval in milliseconds
 - s: IPv4 address of server to send requests to
 - sp: Port of server to send requests to
 - cp: Port of client to receive responses from
-- l: Packet loss rate
 
 To run the program:
 ```
-./bin/ConsoleApp -f xxx -s xxx.xxx.xxx.xxx -sp xxxx -cp xxxx -l x.x
+./bin/ConsoleApp -f xxx -s xxx.xxx.xxx.xxx -sp xxxx -cp xxxx
 ```
 
 #### Server-side
 The server program requires several flags:
 - rmi: Remote method invocation scheme (0 for at least once, 1 for at most once)
 - sp: Port of server to receive requests from
-- l: Packet loss rate
+- slr: Packet loss rate at sending end (out of 100)
+- rlr: Packet loss rate at receiving end (out of 100)
 
 To run the program:
 ```
-./bin/RFAsrv -rmi x -lr x -sp xxxx
+./bin/RFAsrv -rmi x -slr x -rlr x -sp xxxx
 ```
 
 ## Authors
 - Tan Chye Hong, Jordan (U1722016G)
 - Er Jia Chin (U1722575L) 
 - Lee Chong Yan (U1721687G) 
-
----
-
-## SECTION BELOW IS FOR INTERNAL REFERENCE ONLY - TO BE DELETED BEFORE SUBMISSION!
-Please update the Gantt chart [here](https://entuedu-my.sharepoint.com/:x:/g/personal/jtan396_e_ntu_edu_sg/EYqmrwXfK7NOitmOkLr2iU4BdR_3Xr_MVr1pC5doaXm1Pg?e=htumpf) after assigning yourself a task and upon completion of the task.
-
-https://entuedu-my.sharepoint.com/personal/jtan396_e_ntu_edu_sg/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fjtan396%5Fe%5Fntu%5Fedu%5Fsg%2FDocuments%2FCZ4013%2DDistributed%2DSystems
-
-Commands
-- ./bin/ConsoleApp -f 300 -s 172.21.148.168 -sp 2222 -cp 2221 -l 0.5
-- ./bin/RFAsrv -rmi 0 -lr 0 -sp 2222
-- scp -r ./bin/* VMuser@172.21.148.168:/home/VMuser/CZ4013-Distributed-Systems/bin/
-- scp -r ./bin/* VMuser@172.21.146.188:/home/VMuser/CZ4013-Distributed-Systems/bin/
-
-
