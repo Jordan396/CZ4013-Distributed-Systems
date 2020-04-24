@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
 
     cout << "Received packet from " << sourceAddress << endl;
     request = serverBuffer;
+    cout << "Request: \n" + request << endl;
 
     // Process only if true
     if (utils::loss(receivingLossRate)) {
@@ -135,6 +136,7 @@ void init_sockets() {
 }
 
 void send_message(string destAddress, string destPort, string message) {
+  cout << "Response: \n" + message << endl;
   if (RMI_SCHEME == 1) {
     store_response(destAddress, destPort, message);
   }
